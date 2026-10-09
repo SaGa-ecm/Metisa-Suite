@@ -1,0 +1,50 @@
+name: Bug report
+description: Report a reproducible firmware or build problem
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Do not include API keys, private data, or credentials. Do not test suspected unsafe behavior with a connected motor.
+  - type: input
+    id: environment
+    attributes:
+      label: Board and hardware revision
+      description: Include MCU board, FC revision, and external controller if known.
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware version or source revision
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps and logs
+      description: Include exact commands and sanitized output. Do not attach secrets.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety checks
+      options:
+        - label: Motor power was disconnected during software-only reproduction.
+          required: false
+        - label: I have not posted credentials or private personal information.
+          required: true

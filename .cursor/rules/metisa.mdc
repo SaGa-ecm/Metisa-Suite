@@ -1,0 +1,8 @@
+---
+description: Canonical metisa firmware project context and safety rules
+alwaysApply: true
+---
+
+Read `/AGENTS.md`, `/project-rules/INDEX.md`, and `/docs/AI_WORKING_GUIDE.md` before changing code. Inspect `/skills/INDEX.md` and use relevant skills. Follow the workbook at `/docs/mcu-port-project-workbook.md`. Preserve upstream license notices; do not add secrets or local absolute paths. AVR builds do not qualify hardware safety. STM32/ESP32 profiles are exploratory only.
+
+Any agent may freely create and use repository skills under `/skills/<lowercase-kebab-name>/SKILL.md`; update the index in the same change. Skills supplement, but never override, project rules.

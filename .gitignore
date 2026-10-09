@@ -1,0 +1,30 @@
+# Backup files and stuff from patches
+*.orig
+*.rej
+*~
+.*.swp
+
+# PlatformIO build output and packages
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Machine-specific editor state
+.vscode/
+.idea/
+
+# Local test/build output
+compile_*/
+__pycache__/
+*.py[cod]
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+
+# CMake
+build/
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
+Arduino_Pedelec_Controller/Arduino_Pedelec_Controller.pde

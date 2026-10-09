@@ -1,0 +1,46 @@
+METISA PROPRIETARY LICENSE NOTICE
+Draft for review by qualified intellectual-property counsel
+
+IMPORTANT: This notice is not a certification that SaGaLabs owns all rights
+in this repository, is not a worldwide-enforceability opinion, and does not
+replace any license or permission granted by an upstream rights holder.
+
+1. Scope
+
+This proposed restriction can apply only to material for which SaGaLabs has
+verified ownership or written authority to license. The repository includes
+inherited firmware and third-party components. Existing copyright notices and
+component-specific licenses remain in force for those materials and are not
+revoked or replaced by this notice. See THIRD_PARTY_NOTICES.md.
+
+2. Proposed permission model for SaGaLabs-owned material
+
+No general license is granted by making a copy of this repository available.
+Private, non-commercial use may be permitted only with prior written
+authorization from the verified rights holder. Any other use, including
+copying, modification, publication, redistribution, manufacture, commercial
+use, or sublicensing, requires a separate written agreement signed by the
+verified rights holder.
+
+3. Conditions and reservations
+
+Nothing in this notice transfers ownership, grants patent rights, overrides
+mandatory rights under applicable law, or limits permissions already granted
+under an applicable third-party license. SaGaLabs branding does not imply
+ownership of upstream contributions. Rights in product names, trademarks,
+hardware designs, and any registered or pending utility-model protection are
+separate and are not granted here.
+
+4. Publication hold
+
+This file is a draft, not an operative final license. The licensing status of
+the combined firmware must be reviewed before public source or binary
+distribution. In particular, the repository contains a GPL version 2 license
+text for HX711-related code and contradictory public-domain/LGPL notices for
+MenuSystem. A qualified lawyer and the relevant upstream rights holders must
+resolve the rights chain and compatibility before release.
+
+For the upstream GPL-3.0-or-later notice present in inherited firmware, the
+license text is available at https://www.gnu.org/licenses/gpl-3.0.txt. That
+upstream grant applies only to the material covered by its notice; it is not a
+blanket license for every file in this repository.
