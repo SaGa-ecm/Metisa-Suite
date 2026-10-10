@@ -666,6 +666,9 @@ void update_lights_and_signals()
 //Setup---------------------------------------------------------------------------------------------------------------------
 void setup()
 {
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_STM32) || defined(ARDUINO_ARCH_RP2040)
+    analogReadResolution(10); // Standardize on 10-bit ADC resolution (0..1023) for APC sensor pipeline compatibility
+#endif
     pinMode(throttle_out,OUTPUT);
     digitalWrite(throttle_out,0); //turn motor off for security reasons during startup
 #if HARDWARE_REV >= 2
