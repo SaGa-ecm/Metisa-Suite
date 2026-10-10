@@ -27,6 +27,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 // Global defines from the main program code
 extern float mah;
 extern bool display_force_text;
+extern float voltage;
+extern float current;
 extern float voltage_display;
 extern float current_display;
 extern byte battery_percent_fromvoltage;
