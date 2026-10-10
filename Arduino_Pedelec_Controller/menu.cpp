@@ -209,6 +209,7 @@ static void handle_lights_onoff(MenuItem* p_menu_item)
 }
 #endif
 
+#if (HARDWARE_REV >= 2) && ((SERIAL_MODE & SERIAL_MODE_MMC) || (SERIAL_MODE & SERIAL_MODE_ANDROID))
 static void handle_bluetooth_onoff(MenuItem* p_menu_item)
 {
     bool new_state = false;
@@ -221,6 +222,7 @@ static void handle_bluetooth_onoff(MenuItem* p_menu_item)
 
     show_new_state(new_state);
 }
+#endif
 
 static void handle_shutdown(MenuItem* p_menu_item)
 {

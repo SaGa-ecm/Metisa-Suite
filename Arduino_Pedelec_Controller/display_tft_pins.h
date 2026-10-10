@@ -178,10 +178,8 @@
 #ifndef TFT_DISP_WIDTH
 #define TFT_DISP_WIDTH   320
 #define TFT_DISP_HEIGHT  240
-#define TFT_CHAR_W       12
-#define TFT_CHAR_H       16
-#define TFT_MAX_COLS     (TFT_DISP_WIDTH / TFT_CHAR_W)   // 26 Spalten
-#define TFT_MAX_ROWS     (TFT_DISP_HEIGHT / TFT_CHAR_H)  // 15 Zeilen
+#define TFT_MAX_COLS     26   // 320 / (6 * 2) = 26 Spalten
+#define TFT_MAX_ROWS     15   // 240 / (8 * 2) = 15 Zeilen
 #endif
 
 #endif // DISPLAY_TFT_PINS_H

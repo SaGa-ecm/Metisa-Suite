@@ -351,7 +351,7 @@ float slope = 0.0;             //current slope
 volatile float km=0.0;         //trip-km
 volatile float spd=0.0;        //speed
 float range = 0.0;             //expected range
-unsigned long odo=0;           //overall kilometers in units of wheel roundtrips
+volatile unsigned long odo=0;           //overall kilometers in units of wheel roundtrips
 unsigned long last_writetime = millis();  //last time display has been refreshed
 #ifdef SUPPORT_THROTTLE_AUTO_CRUISE
 unsigned long last_writetime_short = millis(); //used for fast loop (auto-cruise)
@@ -1939,7 +1939,14 @@ void save_eeprom()
   variable_new.wh=wh;          //save watthours drawn from battery
   variable_new.kilometers=km;  //save trip kilometers
   variable_new.mah=mah;        //save milliamperehours drawn from battery
-  variable_new.odo=odo;        //save total kilometers
+#if defined(__AVR__)
+  uint8_t old_sreg = SREG;
+  cli();
+  variable_new.odo = odo;        //save total kilometers
+  SREG = old_sreg;
+#else
+  variable_new.odo = odo;        //save total kilometers
+#endif
 #ifdef SUPPORT_BATTERY_CHARGE_COUNTER
   variable_new.charge_count=charge_count; //save charge counter
 #endif
@@ -1972,8 +1979,22 @@ void read_eeprom()
 
 void save_shutdown()
 {
-  Serial.println("stop");
   digitalWrite(throttle_out,0); //turn motor off
+#if defined(SUPPORT_MOTOR_SERVO)
+  if (motorservo.attached()) {
+    motorservo.detach();
+  }
+#endif
+  // Turn off all lights and signaling outputs safely
+  lights_front_active = false;
+  lights_high_beam_active = false;
+  lights_rear_active = false;
+  lights_brake_active = false;
+  turn_left_active = false;
+  turn_right_active = false;
+  hazard_active = false;
+  horn_active = false;
+  update_lights_and_signals();
 #if defined(__AVR__)
   EIMSK=0; //disable interrupts
   cli(); //disable interrupts

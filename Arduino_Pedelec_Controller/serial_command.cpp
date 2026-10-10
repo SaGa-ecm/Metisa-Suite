@@ -173,39 +173,75 @@ static void handle_command()
     switch(active_serial->cmd_index)
     {
         case 0:              //poti_stat
-            poti_stat = min(atoi(active_serial->numberstring)*1023.0/power_poti_max,1023);
+            {
+                long val = atol(active_serial->numberstring);
+                if (val < 0) val = 0;
+                poti_stat = min((int)(val * 1023.0 / power_poti_max), 1023);
+            }
             break;
-        case 1:              //total kilometers
-            odo = atoi(active_serial->numberstring)*1000.0/wheel_circumference;
-            save_eeprom();
+        case 1:              //total kilometers (addresses finding B-20)
+            {
+                long km_input = atol(active_serial->numberstring);
+                if (km_input >= 0 && km_input <= 999999L && wheel_circumference > 0.0)
+                {
+                    odo = (unsigned long)((double)km_input * 1000.0 / wheel_circumference);
+                    save_eeprom();
+                }
+            }
             break;
         case 2:              //short button press
-            handle_switch(static_cast<switch_name>(atoi(active_serial->numberstring)), 0, PRESSED_SHORT);
+            {
+                int sw = atoi(active_serial->numberstring);
+                if (sw >= 0 && sw < _SWITCHES_COUNT)
+                    handle_switch(static_cast<switch_name>(sw), 0, PRESSED_SHORT);
+            }
             break;
         case 3:              //long button press
-            handle_switch(static_cast<switch_name>(atoi(active_serial->numberstring)), 0, PRESSED_LONG);
+            {
+                int sw = atoi(active_serial->numberstring);
+                if (sw >= 0 && sw < _SWITCHES_COUNT)
+                    handle_switch(static_cast<switch_name>(sw), 0, PRESSED_LONG);
+            }
             break;
         case 4:              //hours write
 #ifdef SUPPORT_RTC
-            rtc.adjust_time(atoi(active_serial->numberstring),now.mm,now.ss);
+            {
+                int val = atoi(active_serial->numberstring);
+                if (val >= 0 && val <= 23)
+                    rtc.adjust_time(val, now.mm, now.ss);
+            }
 #endif
             break;
         case 5:              //minutes write
 #ifdef SUPPORT_RTC
-            rtc.adjust_time(now.hh,atoi(active_serial->numberstring),now.ss);
+            {
+                int val = atoi(active_serial->numberstring);
+                if (val >= 0 && val <= 59)
+                    rtc.adjust_time(now.hh, val, now.ss);
+            }
 #endif
             break;
         case 6:              //seconds write
 #ifdef SUPPORT_RTC
-            rtc.adjust_time(now.hh,now.mm,atoi(active_serial->numberstring));
+            {
+                int val = atoi(active_serial->numberstring);
+                if (val >= 0 && val <= 59)
+                    rtc.adjust_time(now.hh, now.mm, val);
+            }
 #endif
             break;
         case 7:              //charge count write
 #ifdef SUPPORT_BATTERY_CHARGE_COUNTER
-                charge_count=atoi(active_serial->numberstring);
-                save_eeprom();
+            {
+                long val = atol(active_serial->numberstring);
+                if (val >= 0 && val <= 65535L)
+                {
+                    charge_count = (unsigned int)val;
+                    save_eeprom();
+                }
+            }
 #endif
-                break;
+            break;
         case 8:              //PIN code write/unlock
             {
                 unsigned long pin = strtoul(active_serial->numberstring, NULL, 10);

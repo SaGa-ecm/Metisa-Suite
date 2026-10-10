@@ -41,7 +41,7 @@ extern volatile float spd;
 extern volatile int cad;
 extern volatile float km;
 extern float range;
-extern unsigned long odo;
+extern volatile unsigned long odo;
 extern float temperature;
 extern float altitude;
 extern float altitude_start;
