@@ -23,7 +23,7 @@
  */
 
 
-#include <avr/pgmspace.h>
+#include "hal.h"
 
 
 // The 7-bit ASCII character set...

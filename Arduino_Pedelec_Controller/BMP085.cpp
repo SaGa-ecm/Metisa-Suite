@@ -4,7 +4,12 @@
 // (c) adafruit - MIT license - https://github.com/adafruit/BMP085-Library
 
 #include "BMP085.h"
+#if defined(__AVR__)
 #include <util/delay.h>
+#else
+#define _delay_ms(ms) delay(ms)
+#define _delay_us(us) delayMicroseconds(us)
+#endif
 
 BMP085::BMP085()
 {

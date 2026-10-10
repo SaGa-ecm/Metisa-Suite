@@ -20,7 +20,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 #include <Wire.h>
 #include "ds1307.h"
-#include <avr/pgmspace.h>
+#include "hal.h"
 #define WIRE Wire
 #define DS1307_ADDRESS 0x68
 

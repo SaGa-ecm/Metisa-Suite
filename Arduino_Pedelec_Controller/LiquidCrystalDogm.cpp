@@ -74,10 +74,10 @@ void LiquidCrystal::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t en
     {
         pinMode(_rw_pin, OUTPUT);
     }
-    #if HARDWARE_REV < 20
-    pinMode(_enable_pin, OUTPUT);
-    #else
+    #if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     DDRH = DDRH | B00000100;
+    #else
+    pinMode(_enable_pin, OUTPUT);
     #endif
 
     if (fourbitmode)
@@ -109,10 +109,10 @@ void LiquidCrystal::begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
     delayMicroseconds(50000);
     // Now we pull both RS and R/W low to begin commands
     digitalWrite(_rs_pin, LOW);
-    #if HARDWARE_REV < 20
-    digitalWrite(_enable_pin, LOW);
-    #else
+    #if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     PORTH = PORTH & B11011011;
+    #else
+    digitalWrite(_enable_pin, LOW);
     #endif
 
     if (_rw_pin != 255)
@@ -324,22 +324,22 @@ void LiquidCrystal::send(uint8_t value, uint8_t mode)
 
 void LiquidCrystal::pulseEnable(void)
 {
-    #if HARDWARE_REV < 20
-    digitalWrite(_enable_pin, LOW);
-    #else
+    #if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     PORTH = PORTH & B11011011;
+    #else
+    digitalWrite(_enable_pin, LOW);
     #endif
     delayMicroseconds(1);
-    #if HARDWARE_REV < 20
-    digitalWrite(_enable_pin, HIGH);
-    #else
+    #if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     PORTH = PORTH | B00000100;
+    #else
+    digitalWrite(_enable_pin, HIGH);
     #endif
     delayMicroseconds(1);    // enable pulse must be >450ns
-    #if HARDWARE_REV < 20
-    digitalWrite(_enable_pin, LOW);
-    #else
+    #if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     PORTH = PORTH & B11011011;
+    #else
+    digitalWrite(_enable_pin, LOW);
     #endif
     delayMicroseconds(100);   // commands need > 37us to settle
 }

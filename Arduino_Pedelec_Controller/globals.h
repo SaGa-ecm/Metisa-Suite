@@ -20,6 +20,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include "hal.h"
 #include "elapsed_time.h"
 #include "ds1307.h"
 
@@ -56,6 +57,37 @@ extern boolean variables_saved;
 extern const int bluetooth_pin;
 extern const int fet_out;
 extern const int lights_pin;
+extern const int lights_front_pin;
+extern const int lights_high_beam_pin;
+extern const int lights_rear_pin;
+extern const int lights_brake_pin;
+extern const int turn_signal_left_pin;
+extern const int turn_signal_right_pin;
+extern const int horn_pin;
+
+extern bool lights_front_active;
+extern bool lights_high_beam_active;
+extern bool lights_rear_active;
+extern bool lights_brake_active;
+extern bool turn_left_active;
+extern bool turn_right_active;
+extern bool hazard_active;
+extern bool horn_active;
+
+extern void set_lights_front(bool on, bool high_beam = false);
+extern void set_lights_rear(bool on);
+extern void set_brake_light(bool on);
+extern void set_turn_signal_left(bool on);
+extern void set_turn_signal_right(bool on);
+extern void set_hazard_lights(bool on);
+extern void set_horn(bool on);
+extern void toggle_lights_front();
+extern void toggle_lights_high_beam();
+extern void toggle_lights_rear();
+extern void toggle_turn_signal_left();
+extern void toggle_turn_signal_right();
+extern void toggle_hazard_lights();
+extern void update_lights_and_signals();
 
 extern int curr_startingaid_speed;
 extern int curr_spd_max1;
@@ -78,8 +110,8 @@ extern void activate_new_profile();
 
 // PIN Security System (0 = StVZO, 1 = Sport/Trail, 2 = Race/Privatgelände via Master-PIN 210286)
 extern byte pin_security_level;
-extern boolean pure_throttle_allowed;
-extern boolean pin_check_and_apply(unsigned long entered_pin);
+extern bool pure_throttle_allowed;
+extern bool pin_check_and_apply(unsigned long entered_pin);
 extern void pin_set_level(byte new_level);
 
 extern RTC_DS1307 rtc;

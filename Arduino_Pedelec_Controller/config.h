@@ -7,13 +7,16 @@
 #else
 #include <Arduino.h>
 #endif
+#include "hal.h"
 #include "switches_action.h"
 
 #ifndef HARDWARE_REV
 #if defined(__AVR_ATmega2560__)
 #define HARDWARE_REV 20      // Mega 2560 defaults to FC 2.x
-#else
+#elif defined(__AVR__)
 #define HARDWARE_REV 5       // Nano / 328P defaults to FC 1.x
+#else
+#define HARDWARE_REV 30      // 32-bit MCU platforms default to generic 32-bit (STM32, RP2040, ESP32)
 #endif
 #endif
 
@@ -177,10 +180,18 @@ const int fixed_throttle_in_watts = 250;         //number of watts to set as thr
 #define SUPPORT_PROFILE_SWITCH_MENU           //uncomment to disable support for profile switching in the menu
 #define SUPPORT_FIRST_AID_MENU                //uncomment if you want a on-the-go workaround menu ("Pannenhilfe")
 
-// Software controlled lights switch. Needs FC 1.3 or newer. Only possible if X-CELL RT is not in use as they share the A3 pin
-// #define SUPPORT_LIGHTS_SWITCH                   //uncomment if you want software switchable lights on pin A3 (lights_pin)
-// #define SUPPORT_LIGHTS_ENABLE_ON_STARTUP   //uncomment if you want the lights turned on when the system turns on
-// #define SUPPORT_LIGHTS_SWITCH_MENU       //uncomment if you want a "Toggle lights" menu entry
+// Software controlled lights and signaling subsystem
+#define SUPPORT_LIGHTS_SWITCH                   // Software switchable lights subsystem
+// #define SUPPORT_LIGHTS_ENABLE_ON_STARTUP     // Uncomment if you want lights on at boot
+#define SUPPORT_LIGHTS_SWITCH_MENU              // "Licht & Signale" menu entries
+#define SUPPORT_LIGHTS_FRONT                    // Switchable front light (Abblendlicht)
+#define SUPPORT_LIGHTS_HIGH_BEAM                // Switchable high beam (Fernlicht)
+#define SUPPORT_LIGHTS_REAR                     // Switchable rear light (Rücklicht)
+#define SUPPORT_BRAKE_LIGHT                     // Dynamic brake light on brake actuation
+#define SUPPORT_TURN_SIGNALS                    // Turn signals left/right (Blinker 1.5 Hz ECE R50)
+#define SUPPORT_HAZARD_LIGHTS                   // Hazard flasher (Warnblinker)
+#define SUPPORT_HORN                            // Horn / buzzer with thermal protection (max 3s)
+#define SUPPORT_EMERGENCY_BRAKE_FLASH           // ESS: Rapid brake flash (3.5 Hz) when braking at > 15 km/h
 
 #define CONTROL_MODE_NORMAL 0            //Normal mode: poti and throttle control motor power
 #define CONTROL_MODE_LIMIT_WH_PER_KM 1   //Limit wh/km consumption: poti controls wh/km, throttle controls power to override poti
@@ -300,8 +311,16 @@ const float external_voltage_offset = 0.0;
 const float external_voltage_amplitude = 0.00488758553; //default of 0.00488758553 gives Voltage = Voltage at Pin            
 const float external_current_offset = 0.0;    
 const float external_current_amplitude = 0.00488758553; //default of 0.00488758553 gives Current = Voltage at Pin 
-const int external_current_in = A6;            //For HW Rev. 2.1: use Pin  A6
-const int external_voltage_in = A7;            //For HW Rev. 2.1: use Pin  A7
+#ifdef A6
+const int external_current_in = A6;            //For HW Rev. 2.1: use Pin A6
+#else
+const int external_current_in = A2;
+#endif
+#ifdef A7
+const int external_voltage_in = A7;            //For HW Rev. 2.1: use Pin A7
+#else
+const int external_voltage_in = A3;
+#endif
 
 const char msg_welcome[] PROGMEM = "Welcome";
 const char msg_shutdown[] PROGMEM = "Live long and prosper.";
@@ -327,5 +346,13 @@ const char msg_gear_shift_low_gear[] PROGMEM = "Low gear active";
 const char msg_gear_shift_high_gear[] PROGMEM = "High gear active";
 const char msg_gear_shift_auto_selection[] PROGMEM = "Auto gear shift";
 #endif
+
+const char msg_light_front[] PROGMEM = "Front light";
+const char msg_high_beam[] PROGMEM = "High beam";
+const char msg_light_rear[] PROGMEM = "Rear light";
+const char msg_hazard[] PROGMEM = "Warnblinker";
+const char msg_blinker_left[] PROGMEM = "Blinker links";
+const char msg_blinker_right[] PROGMEM = "Blinker rechts";
+const char msg_horn[] PROGMEM = "Hupe / Buzzer";
 
 #endif

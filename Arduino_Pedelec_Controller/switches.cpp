@@ -37,7 +37,7 @@ struct switch_state
 enum button_state { BUTTON_ON=0, BUTTON_OFF=1 };
 
 // Forward declarations
-static enum switch_result _read_switch(switch_state *state, boolean switch_current);
+static enum switch_result _read_switch(switch_state *state, bool switch_current);
 static void _handle_menu_switch(const enum switch_name sw, const enum switch_result res);
 
 void init_switches()
@@ -203,7 +203,7 @@ static void action_enter_menu()
     while (menu_system.back());
 }
 
-static void action_set_profile(const boolean new_profile)
+static void action_set_profile(const bool new_profile)
 {
     current_profile = new_profile;
 
@@ -305,6 +305,34 @@ static void execute_action(const sw_action action)
         case ACTION_TOGGLE_LIGHTS:
             action_toggle_lights();
             break;
+        case ACTION_TOGGLE_LIGHTS_FRONT:
+            toggle_lights_front();
+            display_show_important_info(FROM_FLASH(msg_light_front), 1);
+            break;
+        case ACTION_TOGGLE_LIGHTS_HIGH_BEAM:
+            toggle_lights_high_beam();
+            display_show_important_info(FROM_FLASH(msg_high_beam), 1);
+            break;
+        case ACTION_TOGGLE_LIGHTS_REAR:
+            toggle_lights_rear();
+            display_show_important_info(FROM_FLASH(msg_light_rear), 1);
+            break;
+        case ACTION_BLINK_LEFT:
+            toggle_turn_signal_left();
+            display_show_important_info(FROM_FLASH(msg_blinker_left), 1);
+            break;
+        case ACTION_BLINK_RIGHT:
+            toggle_turn_signal_right();
+            display_show_important_info(FROM_FLASH(msg_blinker_right), 1);
+            break;
+        case ACTION_HAZARD_LIGHTS:
+            toggle_hazard_lights();
+            display_show_important_info(FROM_FLASH(msg_hazard), 1);
+            break;
+        case ACTION_HORN:
+            set_horn(!horn_active);
+            display_show_important_info(FROM_FLASH(msg_horn), 1);
+            break;
 #endif
 #ifdef SUPPORT_POTI_SWITCHES
         case ACTION_INCREASE_POTI:
@@ -350,7 +378,7 @@ static void execute_action(const sw_action action)
 }
 
 // Switch handling code starts here
-void handle_switch(const switch_name sw_name, boolean current_state, const switch_result &force_press)
+void handle_switch(const switch_name sw_name, bool current_state, const switch_result &force_press)
 {
     if (sw_name >= _SWITCHES_COUNT)
         return;
@@ -388,7 +416,7 @@ void handle_switch(const switch_name sw_name, boolean current_state, const switc
 
 // Workhorse of switch handling: Detect short
 // or long presses, also debounces the switches.
-static enum switch_result _read_switch(switch_state *state, boolean switch_current)
+static enum switch_result _read_switch(switch_state *state, bool switch_current)
 {
     enum switch_result res = PRESSED_NONE;
     const unsigned long now = millis();

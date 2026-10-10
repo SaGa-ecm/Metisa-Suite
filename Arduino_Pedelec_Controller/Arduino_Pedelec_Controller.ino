@@ -30,10 +30,9 @@ Features:
 
 #include "config.h"          //place all your personal configurations there and keep that file when updating!   
 #include "globals.h"
-#include <avr/wdt.h>
+#include "hal.h"
 #include "display.h"         //display output functions
 #include "display_backlight.h"  // LCD display backlight support
-#include "EEPROM.h"
 #include "PID_v1_nano.h"
 #include "switches.h"        //contains switch handling functions
 #include "menu.h"            //on the go menu
@@ -161,8 +160,13 @@ const int option_pin = A3;           //Analog option
 const int lights_pin = A3;           //Software controlled lights switch
 #endif
 #if HARDWARE_REV <= 5
+#if defined(A6) && defined(A7)
 const int poti_in = A6;              //PAS Speed-Poti-Pin
 const int throttle_in = A7;          //Throttle read-Pin
+#else
+const int poti_in = A0;              //PAS Speed-Poti-Pin fallback
+const int throttle_in = A1;          //Throttle read-Pin fallback
+#endif
 const int pas_in = 2;                //PAS Sensor read-Pin
 const int wheel_in = 3;              //Speed read-Pin
 const int brake_in = 4;              //Brake-In-Pin
@@ -173,8 +177,15 @@ const int switch_disp = 8;           //Display switch
 #if (DISPLAY_TYPE & (DISPLAY_TYPE_NOKIA_4PIN|DISPLAY_TYPE_16X2_SERIAL))
 const int switch_disp_2 = 12;        //second Display switch with Nokia-Display in 4-pin-mode
 #endif
+const int lights_front_pin = lights_pin;
+const int lights_high_beam_pin = -1;
+const int lights_rear_pin = -1;
+const int lights_brake_pin = -1;
+const int turn_signal_left_pin = -1;
+const int turn_signal_right_pin = -1;
+const int horn_pin = -1;
 #endif
-#if HARDWARE_REV >= 20
+#if ((HARDWARE_REV >= 20)&&(HARDWARE_REV < 30))
 const int voltage_in = A14;           //Voltage read-Pin
 const int fet_out = 38;              //FET: Pull high to switch off
 const int current_in = A15;           //Current read-Pin
@@ -192,8 +203,106 @@ const int switch_disp = 37;           //Display switch
 // Currently not in use as it's hardwired to PORTH, pin 2
 // const int switch_disp_2 = 48;        //second Display switch with Nokia-Display in 4-pin-mode
 const int buzzer=11;
+const int lights_front_pin = 44;
+const int lights_high_beam_pin = 45;
+const int lights_rear_pin = 46;
+const int lights_brake_pin = 47;
+const int turn_signal_left_pin = 42;
+const int turn_signal_right_pin = 43;
+const int horn_pin = buzzer;
 #endif
-#if HARDWARE_REV >= 22
+#if HARDWARE_REV == 30
+#if defined(ARDUINO_ARCH_STM32)
+const int option_pin = PA0;
+const int voltage_in = PA1;
+const int current_in = PA2;
+const int fet_out = PA3;
+const int poti_in = PA4;
+const int throttle_in = PA5;
+const int pas_in = PB0;
+const int wheel_in = PB1;
+const int brake_in = PB10;
+const int switch_thr = PB9;
+const int throttle_out = PB6;
+const int bluetooth_pin = PB12;
+const int switch_disp = PB13;
+const int lights_pin = PB14;
+const int lights_front_pin = PB14;
+const int lights_high_beam_pin = PB15;
+const int lights_rear_pin = PA8;
+const int lights_brake_pin = PA9;
+const int turn_signal_left_pin = PA10;
+const int turn_signal_right_pin = PA11;
+const int horn_pin = PB8;
+#elif defined(ARDUINO_ARCH_RP2040)
+const int option_pin = 26;
+const int voltage_in = 27;
+const int current_in = 28;
+const int fet_out = 22;
+const int poti_in = 26;
+const int throttle_in = 27;
+const int pas_in = 2;
+const int wheel_in = 3;
+const int brake_in = 4;
+const int switch_thr = 5;
+const int throttle_out = 6;
+const int bluetooth_pin = 7;
+const int switch_disp = 8;
+const int lights_pin = 9;
+const int lights_front_pin = 9;
+const int lights_high_beam_pin = 10;
+const int lights_rear_pin = 11;
+const int lights_brake_pin = 12;
+const int turn_signal_left_pin = 13;
+const int turn_signal_right_pin = 14;
+const int horn_pin = 15;
+#elif defined(ARDUINO_ARCH_ESP32)
+const int option_pin = 34;
+const int voltage_in = 35;
+const int current_in = 32;
+const int fet_out = 23;
+const int poti_in = 33;
+const int throttle_in = 36;
+const int pas_in = 18;
+const int wheel_in = 19;
+const int brake_in = 21;
+const int switch_thr = 22;
+const int throttle_out = 25;
+const int bluetooth_pin = 5;
+const int switch_disp = 17;
+const int lights_pin = 16;
+const int lights_front_pin = 16;
+const int lights_high_beam_pin = 4;
+const int lights_rear_pin = 2;
+const int lights_brake_pin = 15;
+const int turn_signal_left_pin = 13;
+const int turn_signal_right_pin = 14;
+const int horn_pin = 27;
+#else
+const int option_pin = A0;
+const int voltage_in = A1;
+const int current_in = A2;
+const int fet_out = A3;
+const int poti_in = A4;
+const int throttle_in = A5;
+const int pas_in = 2;
+const int wheel_in = 3;
+const int brake_in = 4;
+const int switch_thr = 5;
+const int throttle_out = 6;
+const int bluetooth_pin = 7;
+const int switch_disp = 8;
+const int lights_pin = 9;
+const int lights_front_pin = 9;
+const int lights_high_beam_pin = 10;
+const int lights_rear_pin = 11;
+const int lights_brake_pin = 12;
+const int turn_signal_left_pin = 13;
+const int turn_signal_right_pin = 14;
+const int horn_pin = 15;
+#endif
+#endif
+#if (HARDWARE_REV >= 22) && (HARDWARE_REV < 30)
 const int current_in_neg = A13;           //Negative Current read-Pin
 #endif
 
@@ -349,6 +458,211 @@ int memFree()
 }
 #endif
 
+// Lighting & Signaling State
+bool lights_front_active = false;
+bool lights_high_beam_active = false;
+bool lights_rear_active = false;
+bool lights_brake_active = false;
+bool turn_left_active = false;
+bool turn_right_active = false;
+bool hazard_active = false;
+bool horn_active = false;
+
+static unsigned long blink_phase_start = 0;
+static bool blink_state = false;
+static unsigned long turn_auto_cancel_time = 0;
+static unsigned long horn_start_time = 0;
+
+void set_lights_front(bool on, bool high_beam)
+{
+    lights_front_active = on;
+    lights_high_beam_active = on && high_beam;
+    if (lights_front_pin >= 0)
+        digitalWrite(lights_front_pin, lights_front_active ? HIGH : LOW);
+    if (lights_high_beam_pin >= 0)
+        digitalWrite(lights_high_beam_pin, lights_high_beam_active ? HIGH : LOW);
+#ifdef SUPPORT_LIGHTS_SWITCH
+    digitalWrite(lights_pin, lights_front_active ? HIGH : LOW);
+#endif
+}
+
+void toggle_lights_front()
+{
+    set_lights_front(!lights_front_active, false);
+}
+
+void toggle_lights_high_beam()
+{
+    if (!lights_front_active) {
+        set_lights_front(true, true);
+    } else {
+        set_lights_front(true, !lights_high_beam_active);
+    }
+}
+
+void set_lights_rear(bool on)
+{
+    lights_rear_active = on;
+    if (lights_rear_pin >= 0)
+        digitalWrite(lights_rear_pin, lights_rear_active ? HIGH : LOW);
+}
+
+void toggle_lights_rear()
+{
+    set_lights_rear(!lights_rear_active);
+}
+
+void set_brake_light(bool on)
+{
+    lights_brake_active = on;
+    if (lights_brake_pin >= 0)
+        digitalWrite(lights_brake_pin, lights_brake_active ? HIGH : LOW);
+}
+
+void set_turn_signal_left(bool on)
+{
+    if (on) {
+        turn_left_active = true;
+        turn_right_active = false;
+        hazard_active = false;
+        blink_phase_start = millis();
+        blink_state = true;
+        turn_auto_cancel_time = millis() + 20000UL;
+    } else {
+        turn_left_active = false;
+        if (turn_signal_left_pin >= 0)
+            digitalWrite(turn_signal_left_pin, LOW);
+    }
+}
+
+void toggle_turn_signal_left()
+{
+    set_turn_signal_left(!turn_left_active);
+}
+
+void set_turn_signal_right(bool on)
+{
+    if (on) {
+        turn_right_active = true;
+        turn_left_active = false;
+        hazard_active = false;
+        blink_phase_start = millis();
+        blink_state = true;
+        turn_auto_cancel_time = millis() + 20000UL;
+    } else {
+        turn_right_active = false;
+        if (turn_signal_right_pin >= 0)
+            digitalWrite(turn_signal_right_pin, LOW);
+    }
+}
+
+void toggle_turn_signal_right()
+{
+    set_turn_signal_right(!turn_right_active);
+}
+
+void set_hazard_lights(bool on)
+{
+    hazard_active = on;
+    if (hazard_active) {
+        turn_left_active = false;
+        turn_right_active = false;
+        blink_phase_start = millis();
+        blink_state = true;
+    } else {
+        if (turn_signal_left_pin >= 0)
+            digitalWrite(turn_signal_left_pin, LOW);
+        if (turn_signal_right_pin >= 0)
+            digitalWrite(turn_signal_right_pin, LOW);
+    }
+}
+
+void toggle_hazard_lights()
+{
+    set_hazard_lights(!hazard_active);
+}
+
+void set_horn(bool on)
+{
+    if (on) {
+        horn_active = true;
+        horn_start_time = millis();
+        if (horn_pin >= 0)
+            digitalWrite(horn_pin, HIGH);
+    } else {
+        horn_active = false;
+        if (horn_pin >= 0)
+            digitalWrite(horn_pin, LOW);
+    }
+}
+
+void update_lights_and_signals()
+{
+    const unsigned long now = millis();
+
+    // 1. Horn Thermal Protection (Max 3.0s continuous on)
+    if (horn_active) {
+        if (now - horn_start_time >= 3000UL) {
+            set_horn(false);
+        }
+    }
+
+    // 2. Dynamic Brake Light
+    bool braking_now = (brake_stat == 0);
+#ifdef INVERT_BRAKE
+    braking_now = (brake_stat != 0);
+#endif
+    if (first_aid_ignore_break) {
+        braking_now = false;
+    }
+
+#ifdef SUPPORT_BRAKE_LIGHT
+    if (braking_now) {
+#ifdef SUPPORT_EMERGENCY_BRAKE_FLASH
+        if (spd > 15.0) {
+            bool ess_phase = ((now / 143) % 2) == 0;
+            if (lights_brake_pin >= 0)
+                digitalWrite(lights_brake_pin, ess_phase ? HIGH : LOW);
+        } else {
+            if (lights_brake_pin >= 0)
+                digitalWrite(lights_brake_pin, HIGH);
+        }
+#else
+        if (lights_brake_pin >= 0)
+            digitalWrite(lights_brake_pin, HIGH);
+#endif
+    } else {
+        if (lights_brake_pin >= 0)
+            digitalWrite(lights_brake_pin, LOW);
+    }
+#endif
+
+    // 3. Turn Signals and Hazard Flasher Generator
+    // 1.5 Hz (333 ms on, 333 ms off)
+    const unsigned long BLINK_HALF_CYCLE = 333UL;
+
+    if (turn_left_active || turn_right_active || hazard_active) {
+        if (!hazard_active && deadline_reached(now, turn_auto_cancel_time)) {
+            set_turn_signal_left(false);
+            set_turn_signal_right(false);
+            return;
+        }
+
+        if (now - blink_phase_start >= BLINK_HALF_CYCLE) {
+            blink_phase_start = now;
+            blink_state = !blink_state;
+        }
+
+        bool left_pin_state = (hazard_active || turn_left_active) && blink_state;
+        bool right_pin_state = (hazard_active || turn_right_active) && blink_state;
+
+        if (turn_signal_left_pin >= 0)
+            digitalWrite(turn_signal_left_pin, left_pin_state ? HIGH : LOW);
+        if (turn_signal_right_pin >= 0)
+            digitalWrite(turn_signal_right_pin, right_pin_state ? HIGH : LOW);
+    }
+}
+
 //Setup---------------------------------------------------------------------------------------------------------------------
 void setup()
 {
@@ -358,7 +672,7 @@ void setup()
     pinMode(fet_out,OUTPUT);
     digitalWrite(fet_out, FET_ON);           // turn on whole system on
 #endif
-#if HARDWARE_REV >= 20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30)
     pinMode(buzzer, OUTPUT);
     tone(buzzer, 261, 50);
     delay(50);
@@ -408,13 +722,15 @@ void setup()
     display_init();
 
 #if (DISPLAY_TYPE & (DISPLAY_TYPE_NOKIA_4PIN|DISPLAY_TYPE_16X2_SERIAL))
-#if HARDWARE_REV >= 20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     // set to INPUT
     bitClear(DDRH, 2);
     // turn on pullup resistors
     bitSet(PORTH, 2);
 #else
+#if defined(switch_disp_2)
     digitalWrite(switch_disp_2, HIGH);    // turn on pullup resistors on display-switch 2
+#endif
 #endif
 #endif
 #ifdef SUPPORT_SWITCH_ON_POTI_PIN
@@ -423,10 +739,19 @@ void setup()
 
 #ifdef SUPPORT_LIGHTS_SWITCH
     pinMode(lights_pin,OUTPUT);
+    if (lights_front_pin >= 0) pinMode(lights_front_pin, OUTPUT);
+    if (lights_high_beam_pin >= 0) pinMode(lights_high_beam_pin, OUTPUT);
+    if (lights_rear_pin >= 0) pinMode(lights_rear_pin, OUTPUT);
+    if (lights_brake_pin >= 0) pinMode(lights_brake_pin, OUTPUT);
+    if (turn_signal_left_pin >= 0) pinMode(turn_signal_left_pin, OUTPUT);
+    if (turn_signal_right_pin >= 0) pinMode(turn_signal_right_pin, OUTPUT);
+    if (horn_pin >= 0) pinMode(horn_pin, OUTPUT);
 #ifdef SUPPORT_LIGHTS_ENABLE_ON_STARTUP
-    digitalWrite(lights_pin, HIGH);     // turn lights on during startup
+    set_lights_front(true);
+    set_lights_rear(true);
 #else
-    digitalWrite(lights_pin, LOW);
+    set_lights_front(false);
+    set_lights_rear(false);
 #endif
 #endif
 
@@ -449,7 +774,7 @@ void setup()
     digitalWrite(pas_in, HIGH);           // turn on pullup resistors on pas-sensor
 
 #if defined(SUPPORT_DISPLAY_BACKLIGHT) && !(DISPLAY_TYPE & DISPLAY_TYPE_16X2_SERIAL)
-#if HARDWARE_REV >= 20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     bitSet(DDRH, 2);
     bitClear(PORTH, 2);
 #else
@@ -478,12 +803,7 @@ digitalWrite(option_pin,HIGH);
     display_show_welcome_msg();
 
 //setup interrupt handling
-#if HARDWARE_REV < 20
-#ifdef SUPPORT_PAS
-    attachInterrupt(0, pas_change, CHANGE); //attach interrupt for PAS-Sensor
-#endif
-    attachInterrupt(1, speed_change, RISING); //attach interrupt for Wheel-Sensor
-#else //HARDWARE_REV>=20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     bitClear(DDRE,7);      //configure PE7 as input
     bitSet(PORTE,7);       //enable pull-up on wheel sensor
     bitSet(EICRB,6);      //trigger on rising edge INT7 for wheel sensor
@@ -506,6 +826,11 @@ digitalWrite(option_pin,HIGH);
     EIMSK  |= (1<<INT6);  //turn on interrupt for Thun sensor/BBS/Sempu
 #endif
 #endif
+#else
+#ifdef SUPPORT_PAS
+    attachInterrupt(digitalPinToInterrupt(pas_in), pas_change, CHANGE); //attach interrupt for PAS-Sensor
+#endif
+    attachInterrupt(digitalPinToInterrupt(wheel_in), speed_change, RISING); //attach interrupt for Wheel-Sensor
 #endif
 
     myPID.SetMode(AUTOMATIC);             //initialize pid
@@ -555,7 +880,7 @@ motorservo.attach(throttle_out);
 #endif
 
 //increase PWM frequency
-#if HARDWARE_REV >= 20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
   int myEraser = 7;
   TCCR4B &= ~myEraser;  //reset timer 4 prescaler
   int myPrescaler = 1;
@@ -588,6 +913,7 @@ void loop()
 {
   wdt_reset(); // Service hardware watchdog timer
   looptime=millis();
+  update_lights_and_signals(); // Service lights, turn signals, brake light, and horn
 //Readings-----------------------------------------------------------------------------------------------------------------
 #ifdef SUPPORT_DSPC01
     handle_dspc();
@@ -675,10 +1001,10 @@ if (loadcell.is_ready())     //new conversion result from load cell available
           lowest_raw_current = raw_current;
       current = (raw_current-lowest_raw_current)*current_amplitude_R11; //check with multimeter, change in config.h if needed!
       current = constrain(current,0,30);
-  #elif HARDWARE_REV >= 3 && HARDWARE_REV <= 21
+  #elif (HARDWARE_REV >= 3 && HARDWARE_REV <= 21) || (HARDWARE_REV >= 30)
       current = (analogRead_noISR(current_in)-512)*current_amplitude_R13+current_offset;    //check with multimeter, change in config.h if needed!
       current = constrain(current,-30,30);
-  #elif HARDWARE_REV >= 22
+  #elif (HARDWARE_REV >= 22) && (HARDWARE_REV < 30)
       current = (analogRead_noISR(current_in)-analogRead_noISR(current_in_neg))*current_amplitude_R22+current_offset;    //check with multimeter, change in config.h if needed!
       current = constrain(current,-30,30);
   #endif
@@ -730,9 +1056,9 @@ if (loadcell.is_ready())     //new conversion result from load cell available
     handle_switch(SWITCH_THROTTLE, digitalRead(switch_thr));
     handle_switch(SWITCH_DISPLAY1, digitalRead(switch_disp));
 #if (DISPLAY_TYPE & (DISPLAY_TYPE_NOKIA_4PIN|DISPLAY_TYPE_16X2_SERIAL))
-#if HARDWARE_REV >= 20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
     handle_switch(SWITCH_DISPLAY2, bitRead(PINH, 2));
-#else
+#elif defined(switch_disp_2)
     handle_switch(SWITCH_DISPLAY2, digitalRead(switch_disp_2));
 #endif
 #endif
@@ -844,11 +1170,11 @@ if (loadcell.is_ready())     //new conversion result from load cell available
 #ifdef SUPPORT_HRMI                                          //limit heart rate to specified range if possible
     if (pulse_human>0)
     {
-        power_poti=min(power_poti+curr_power_max*constrain((pulse_human-pulse_min)/pulse_range,0.0,1.0),curr_power_max);
+        power_poti=min(power_poti+curr_power_max*constrain((pulse_human-pulse_min)/pulse_range,0.0,1.0),(double)curr_power_max);
     }
 #endif
 
-    power_poti = min(power_poti,thermal_limit+(curr_power_max-thermal_limit)*constrain(spd/thermal_safe_speed,0,1)); //thermal limiting
+    power_poti = min(power_poti,(double)(thermal_limit+(curr_power_max-thermal_limit)*constrain(spd/thermal_safe_speed,0,1))); //thermal limiting
 
     if ((power_throttle) > (power_poti))                     //IF power set by throttle IS GREATER THAN power set by poti (throttle override)
     {
@@ -1065,7 +1391,7 @@ if (loadcell.is_ready())     //new conversion result from load cell available
 #endif
 
         send_serial_data();                                        //sends data over serial port depending on SERIAL_MODE
-#if HARDWARE_REV >= 20        
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30)        
         send_bluetooth_data();
 #endif
 
@@ -1104,7 +1430,7 @@ if (loadcell.is_ready())     //new conversion result from load cell available
     }
 }
 
-#if HARDWARE_REV >= 20 //attach interrupts manually
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__) //attach interrupts manually
 ISR(INT7_vect)
 {
     speed_change();
@@ -1128,7 +1454,7 @@ ISR(INT5_vect)
 #endif
 #endif
 
-#if HARDWARE_REV >= 20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
 #if defined(SUPPORT_XCELL_RT) || defined(SUPPORT_BBS) || defined(SUPPORT_SEMPU)
 void pas_change_dual(boolean signal)
 {
@@ -1363,7 +1689,7 @@ void serial_debug(HardwareSerial* localSerial)
     localSerial->print(analogRead_noISR(external_voltage_in)); Serial.print(MY_F(";"));
 #endif
 #ifndef USE_EXTERNAL_CURRENT_SENSOR
-#if HARDWARE_REV <=21
+#if (HARDWARE_REV <= 21) || (HARDWARE_REV >= 30)
     localSerial->print(analogRead_noISR(current_in)); Serial.print(MY_F(";"));
 #else
     localSerial->print(analogRead_noISR(current_in)-analogRead_noISR(current_in_neg)); Serial.print(MY_F(";"));
@@ -1437,7 +1763,7 @@ void serial_ios(HardwareSerial* localSerial)
 
 void send_bluetooth_data() //send bluetooth data
 {
-#if HARDWARE_REV >=20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30)
 #if (BLUETOOTH_MODE & BLUETOOTH_MODE_ANDROID)
     serial_android(&Serial1);
 #endif     
@@ -1528,7 +1854,7 @@ void pin_set_level(byte new_level)
     }
 }
 
-boolean pin_check_and_apply(unsigned long entered_pin)
+bool pin_check_and_apply(unsigned long entered_pin)
 {
     if (entered_pin == PIN_MASTER_RACE) // 210286: Master-PIN
     {
@@ -1648,7 +1974,7 @@ void save_shutdown()
 {
   Serial.println("stop");
   digitalWrite(throttle_out,0); //turn motor off
-  //power saving stuff. This is critical if battery is disconnected.
+#if defined(__AVR__)
   EIMSK=0; //disable interrupts
   cli(); //disable interrupts
   ADCSRA = 0; //disable ADC 
@@ -1657,6 +1983,9 @@ void save_shutdown()
   PRR1=B00111111; //shut down I2C, Timers, ADCs, UARTS   
 #elif defined(PRR)
   PRR=B11101111;
+#endif  
+#else
+  cli();
 #endif  
   
   save_eeprom(); //save variables now
@@ -1671,7 +2000,7 @@ void save_shutdown()
 
 void handle_unused_pins()
 {
-#if HARDWARE_REV >= 20
+#if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
   //this saves 10-20 mA!
   DDRA=0; //set all Ports to input
   PORTA = B11111111;

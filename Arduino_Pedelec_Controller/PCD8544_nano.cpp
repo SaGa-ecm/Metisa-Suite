@@ -34,7 +34,7 @@
 #include <Arduino.h>
 #endif
 
-#include <avr/pgmspace.h>
+#include "hal.h"
 
 
 #define PCD8544_CMD  LOW
@@ -47,6 +47,11 @@
  */
 #include "PCD8544_charset.cpp"
 
+
+#if !defined(__AVR__)
+uint8_t dummy_display_port = 0;
+uint8_t dummy_display_dir = 0;
+#endif
 
 PCD8544::PCD8544(unsigned char sclk, unsigned char sdin,
                  unsigned char dc, unsigned char reset,

@@ -38,6 +38,14 @@ serial_command serial_commands[] =
     {{"ss"}},     //6: set/get seconds
     {{"cc"}},     //7: set/get charge count
     {{"pn"}},     //8: set/get PIN unlock (0=StVZO, 1=Sport, 2=Race via 210286)
+    {{"lf"}},     //9: Front light (0=off, 1=on low, 2=high beam)
+    {{"lh"}},     //10: High beam (0=off, 1=on)
+    {{"lr"}},     //11: Rear light (0=off, 1=on)
+    {{"lb"}},     //12: Brake light (0=off, 1=on)
+    {{"bl"}},     //13: Blinker links (0=off, 1=on)
+    {{"br"}},     //14: Blinker rechts (0=off, 1=on)
+    {{"hz"}},     //15: Warnblinker (0=off, 1=on)
+    {{"hn"}},     //16: Hupe (0=off, 1=on)
 
 };
 const byte n_commands = sizeof(serial_commands)/sizeof(serial_command); //number of commands that we have
@@ -91,7 +99,7 @@ static bool find_commands()
 static void handle_command()
 {
     // sanity check
-    if (active_serial->number_pos == 0 || active_serial->cmd_index == -1)
+    if (active_serial->number_pos == 0 || active_serial->cmd_index >= n_commands)
     {
         active_serial_port->println(MY_F("ERROR"));
         return;
@@ -131,6 +139,30 @@ static void handle_command()
                 break;
             case 8:              //PIN level query
                 active_serial_port->println(pin_security_level);
+                break;
+            case 9:              //Front light query
+                active_serial_port->println(lights_front_active ? (lights_high_beam_active ? 2 : 1) : 0);
+                break;
+            case 10:             //High beam query
+                active_serial_port->println(lights_high_beam_active ? 1 : 0);
+                break;
+            case 11:             //Rear light query
+                active_serial_port->println(lights_rear_active ? 1 : 0);
+                break;
+            case 12:             //Brake light query
+                active_serial_port->println(lights_brake_active ? 1 : 0);
+                break;
+            case 13:             //Blinker links query
+                active_serial_port->println(turn_left_active ? 1 : 0);
+                break;
+            case 14:             //Blinker rechts query
+                active_serial_port->println(turn_right_active ? 1 : 0);
+                break;
+            case 15:             //Warnblinker query
+                active_serial_port->println(hazard_active ? 1 : 0);
+                break;
+            case 16:             //Hupe query
+                active_serial_port->println(horn_active ? 1 : 0);
                 break;
         }
 
@@ -188,6 +220,35 @@ static void handle_command()
                 }
                 return;
             }
+        case 9: // Front light (0=off, 1=low beam, 2=high beam)
+            {
+                int val = atoi(active_serial->numberstring);
+                if (val == 2) set_lights_front(true, true);
+                else if (val == 1) set_lights_front(true, false);
+                else set_lights_front(false, false);
+                break;
+            }
+        case 10: // High beam (0=off, 1=on)
+            set_lights_front(true, atoi(active_serial->numberstring) > 0);
+            break;
+        case 11: // Rear light
+            set_lights_rear(atoi(active_serial->numberstring) > 0);
+            break;
+        case 12: // Brake light test
+            set_brake_light(atoi(active_serial->numberstring) > 0);
+            break;
+        case 13: // Blinker links
+            set_turn_signal_left(atoi(active_serial->numberstring) > 0);
+            break;
+        case 14: // Blinker rechts
+            set_turn_signal_right(atoi(active_serial->numberstring) > 0);
+            break;
+        case 15: // Warnblinker
+            set_hazard_lights(atoi(active_serial->numberstring) > 0);
+            break;
+        case 16: // Hupe
+            set_horn(atoi(active_serial->numberstring) > 0);
+            break;
     }
     active_serial_port->println(MY_F("OK"));
 }
@@ -212,11 +273,11 @@ void parse_serial(const char &read_c, const byte port)
         case Reset:
             memset(active_serial->cmdbuf, 0, sizeof(active_serial->cmdbuf));
             memset(active_serial->numberstring, 0, sizeof(active_serial->numberstring));
-            active_serial->cmd_index = -1;
+            active_serial->cmd_index = 255;
             active_serial->number_pos = 0;
 
             active_serial->parse_state = SearchCommand;
-            // fall through to "search command"
+            /* fallthrough */
 
         case SearchCommand:
             // skip return chars

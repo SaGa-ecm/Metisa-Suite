@@ -48,7 +48,7 @@ class PCD8544: public Print
 
 public:
 // All the pins can be changed from the default values...
-#if HARDWARE_REV <= 5
+#if defined(__AVR__) && HARDWARE_REV <= 5
 #define DISPLAYPORT PORTB
 #define DISPLAYPORT_DIR DDRB
     PCD8544(unsigned char sclk  = 1,   /* clock       (display pin 2) */
@@ -62,9 +62,7 @@ public:
             unsigned char reset = 4,   /* reset       (display pin 8) */
             unsigned char sce   = 5);  /* enable      (display pin 5) */
 #endif
-#endif
-
-#if HARDWARE_REV >= 20
+#elif defined(__AVR__) && HARDWARE_REV >= 20
 #define DISPLAYPORT PORTH
 #define DISPLAYPORT_DIR DDRH
     PCD8544(unsigned char sclk  = 4,   /* clock       (display pin 2) */
@@ -78,6 +76,14 @@ public:
             unsigned char reset = 2,   /* reset       (display pin 8) */
             unsigned char sce   = 3);  /* enable      (display pin 5) */
 #endif
+#else
+#define DISPLAYPORT dummy_display_port
+#define DISPLAYPORT_DIR dummy_display_dir
+    PCD8544(unsigned char sclk  = 1,
+            unsigned char sdin  = 2,
+            unsigned char dc    = 3,
+            unsigned char reset = 5,
+            unsigned char sce   = 4);
 #endif
 
 

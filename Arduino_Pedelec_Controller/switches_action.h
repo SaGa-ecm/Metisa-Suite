@@ -48,8 +48,14 @@ enum sw_action { ACTION_NONE=0,                // do nothing
                  ACTION_GEAR_SHIFT_HIGH,                  // gear shift: shift to high gear
                  ACTION_GEAR_SHIFT_AUTO,                  // gear shift: shift motor controller to "auto" mode
                  ACTION_GEAR_SHIFT_TOGGLE_LOW_HIGH,       // gear shift: toggle between low and high
-                 ACTION_GEAR_SHIFT_TOGGLE_LOW_HIGH_AUTO,   // gear shift: toggle between low, high and auto
-                 ACTION_TORQUE_ZERO            // Re-zero torque sensor
+                 ACTION_TORQUE_ZERO,           // Re-zero torque sensor
+                 ACTION_TOGGLE_LIGHTS_FRONT,   // Toggle front light (Abblendlicht)
+                 ACTION_TOGGLE_LIGHTS_HIGH_BEAM, // Toggle high beam (Fernlicht)
+                 ACTION_TOGGLE_LIGHTS_REAR,    // Toggle rear light (Rücklicht)
+                 ACTION_BLINK_LEFT,            // Toggle left turn signal (Blinker links)
+                 ACTION_BLINK_RIGHT,           // Toggle right turn signal (Blinker rechts)
+                 ACTION_HAZARD_LIGHTS,         // Toggle hazard flasher (Warnblinker)
+                 ACTION_HORN                   // Trigger horn / buzzer (Hupe)
                };
 
 #endif
