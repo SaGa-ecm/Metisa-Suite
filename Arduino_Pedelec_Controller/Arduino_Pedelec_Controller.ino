@@ -37,6 +37,7 @@ Features:
 #include "switches.h"        //contains switch handling functions
 #include "menu.h"            //on the go menu
 #include "serial_command.h"       //serial (bluetooth) communication stuff
+#include "wireless_manager.h"     //onboard bluetooth & wifi telemetry manager
 
 #ifdef SUPPORT_MOTOR_SERVO   //RC motor controller connected to motor output
 #include <Servo.h>
@@ -694,6 +695,7 @@ void setup()
 #else
     Serial.begin(115200);
 #endif
+    wireless_init();
 
 #ifdef DEBUG_MEMORY_USAGE
     Serial.print(MY_F("memFree before setup:"));
@@ -942,12 +944,13 @@ if (loadcell.is_ready())     //new conversion result from load cell available
     {
         parse_serial(Serial.read(),0);
     }
-#if HARDWARE_REV>=20    
+#if (HARDWARE_REV >= 20) && defined(APC_HAVE_SERIAL1)
     if (Serial1.available() > 0)
     {
         parse_serial(Serial1.read(),1);
     }
 #endif
+    wireless_poll();
 
 #ifdef SUPPORT_THROTTLE
     int raw_throttle = analogRead_noISR(throttle_in);
@@ -1397,6 +1400,7 @@ if (loadcell.is_ready())     //new conversion result from load cell available
 #if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30)        
         send_bluetooth_data();
 #endif
+        wireless_send_telemetry();
 
 // Idle shutdown
             if (last_wheel_time != idle_shutdown_last_wheel_time)
@@ -1569,9 +1573,10 @@ void speed_change()    //Wheel Sensor Change------------------------------------
 }
 
 
-void serial_android(HardwareSerial* localSerial)
+void serial_android(Print* localSerial)
 { 
-#if (SERIAL_MODE & SERIAL_MODE_ANDROID)||(BLUETOOTH_MODE & BLUETOOTH_MODE_ANDROID)
+#if (SERIAL_MODE & SERIAL_MODE_ANDROID)||(BLUETOOTH_MODE & BLUETOOTH_MODE_ANDROID) || defined(SUPPORT_ESP32_BLUETOOTH) || defined(SUPPORT_WIFI_TELEMETRY)
+    if (!localSerial) return;
     localSerial->print(voltage,1);
     localSerial->print(MY_F(";"));
     localSerial->print(current,1);
@@ -1596,9 +1601,10 @@ void serial_android(HardwareSerial* localSerial)
 #endif
 }
 
-void serial_logview(HardwareSerial* localSerial)
+void serial_logview(Print* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_LOGVIEW)||(BLUETOOTH_MODE & BLUETOOTH_MODE_LOGVIEW)
+    if (!localSerial) return;
     localSerial->print(MY_F("$1;1;0;"));
     localSerial->print(voltage,2);
     localSerial->print(MY_F(";"));
@@ -1628,9 +1634,10 @@ void serial_logview(HardwareSerial* localSerial)
 #endif
 }
 
-void serial_debug(HardwareSerial* localSerial)
+void serial_debug(Print* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_DEBUG)||(BLUETOOTH_MODE & BLUETOOTH_MODE_DEBUG)
+    if (!localSerial) return;
 #ifdef DEBUG_MEMORY_USAGE
     localSerial->print(MY_F("memFree"));
     localSerial->print(memFree());
@@ -1693,28 +1700,29 @@ void serial_debug(HardwareSerial* localSerial)
 #endif
 #ifndef USE_EXTERNAL_CURRENT_SENSOR
 #if (HARDWARE_REV <= 21) || (HARDWARE_REV >= 30)
-    localSerial->print(analogRead_noISR(current_in)); Serial.print(MY_F(";"));
+    localSerial->print(analogRead_noISR(current_in)); localSerial->print(MY_F(";"));
 #else
-    localSerial->print(analogRead_noISR(current_in)-analogRead_noISR(current_in_neg)); Serial.print(MY_F(";"));
+    localSerial->print(analogRead_noISR(current_in)-analogRead_noISR(current_in_neg)); localSerial->print(MY_F(";"));
 #endif
 #else
-    localSerial->print(analogRead_noISR(external_current_in)); Serial.print(MY_F(";"));
+    localSerial->print(analogRead_noISR(external_current_in)); localSerial->print(MY_F(";"));
 #endif
 #if defined(SUPPORT_XCELL_RT) || defined(SUPPORT_SEMPU)
-    localSerial->print(pedaling); Serial.print(MY_F(";"));
+    localSerial->print(pedaling); localSerial->print(MY_F(";"));
 #else
-    localSerial->print(((int)(100*(double)pas_on_time/(double)pas_off_time))); Serial.print(MY_F(";"));
+    localSerial->print(((int)(100*(double)pas_on_time/(double)pas_off_time))); localSerial->print(MY_F(";"));
 #endif
-    localSerial->print(analogRead_noISR(option_pin)); Serial.print(MY_F(";"));
-    localSerial->print(analogRead_noISR(poti_in)); Serial.print(MY_F(";"));
-    localSerial->print(analogRead_noISR(throttle_in)); Serial.print(MY_F(";"));
+    localSerial->print(analogRead_noISR(option_pin)); localSerial->print(MY_F(";"));
+    localSerial->print(analogRead_noISR(poti_in)); localSerial->print(MY_F(";"));
+    localSerial->print(analogRead_noISR(throttle_in)); localSerial->print(MY_F(";"));
     localSerial->println(digitalRead(brake_in));
 #endif
 }
 
-void serial_mmc(HardwareSerial* localSerial)
+void serial_mmc(Print* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_MMC)||(BLUETOOTH_MODE & BLUETOOTH_MODE_MMC)
+    if (!localSerial) return;
     localSerial->print((int)(voltage_display*10));
     localSerial->print(MY_F("\t"));
     localSerial->print((int)(current*1000));
@@ -1731,9 +1739,10 @@ void serial_mmc(HardwareSerial* localSerial)
 #endif
 }
 
-void serial_ios(HardwareSerial* localSerial)
+void serial_ios(Print* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_IOS)||(BLUETOOTH_MODE & BLUETOOTH_MODE_IOS)
+    if (!localSerial) return;
     localSerial->print(voltage,1);
     localSerial->print(MY_F(";"));
     localSerial->print(current,1);

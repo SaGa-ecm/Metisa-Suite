@@ -87,6 +87,13 @@ const int serial_display_16x2_second_unused_pin = 16;       // SoftSerial always
 
 #define BLUETOOTH_MODE BLUETOOTH_MODE_NONE                  // Set your bluetooth mode here. CHANGES ONLY HERE!<-----------------------------
 
+// --- Onboard Wireless (ESP32 Classic Bluetooth SPP & ESP32 / Pico W WiFi Telemetry) ---
+// #define SUPPORT_ESP32_BLUETOOTH                 // Enable onboard Classic Bluetooth SPP for ESP32 (connects directly to Android HMI App via RFCOMM)
+// #define SUPPORT_WIFI_TELEMETRY                  // Enable onboard WiFi SoftAP & TCP-Socket telemetry server for ESP32 & Pico W
+#define WIFI_AP_SSID            "APC-Pedelec-WiFi"  // SoftAP SSID
+#define WIFI_AP_PASSWORD        "21028600"          // Min. 8 chars WPA2 passphrase (default using Master-PIN)
+#define WIFI_SERVER_PORT        23                  // Raw TCP socket / Telnet port (Port 23 or 8080)
+#define BT_DEVICE_NAME          "APC-Pedelec"       // Bluetooth device name visible in pairing scan
 
 // #define SUPPORT_BLUETOOTH_ENABLE_ON_STARTUP              // Uncomment to enable bluetooth during startup
 

@@ -1325,7 +1325,7 @@ void display_update()
 
 
 
-void display_debug(HardwareSerial* localSerial)
+void display_debug(Print* localSerial)
 {
 #if (SERIAL_MODE & SERIAL_MODE_DISPLAYDEBUG)
 

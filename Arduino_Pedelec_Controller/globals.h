@@ -142,4 +142,10 @@ extern float temperature_thermistor;
 #define FET_OFF LOW
 #endif
 
+extern void serial_android(Print* localSerial);
+extern void serial_logview(Print* localSerial);
+extern void serial_debug(Print* localSerial);
+extern void serial_mmc(Print* localSerial);
+extern void serial_ios(Print* localSerial);
+
 #endif

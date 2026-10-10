@@ -19,6 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 #include "config.h"
 #include "serial_command.h"
+#include "wireless_manager.h"
 #include "globals.h"
 #include "switches.h"
 #ifdef SUPPORT_RTC
@@ -72,9 +73,10 @@ serial_struct serial_port1={Reset,{0},0,{0},0};
 #if HARDWARE_REV>=20
 serial_struct serial_port2={Reset,{0},0,{0},0};
 #endif
+serial_struct serial_port_wireless={Reset,{0},0,{0},0};
 
 serial_struct* active_serial = &serial_port1;
-HardwareSerial* active_serial_port = &Serial;
+Print* active_serial_port = &Serial;
 
 /**
  * @brief Look for valid commands in command input buffer
@@ -296,13 +298,19 @@ void parse_serial(const char &read_c, const byte port)
       active_serial=&serial_port1;
       active_serial_port=&Serial;
     }
-#if HARDWARE_REV>=20
-    else
+#if (HARDWARE_REV >= 20) && defined(APC_HAVE_SERIAL1)
+    else if (port==1)
     {
       active_serial=&serial_port2;
       active_serial_port=&Serial1;
     }
 #endif
+    else if (port==2)
+    {
+      active_serial=&serial_port_wireless;
+      Print* p = wireless_get_stream();
+      active_serial_port = p ? p : &Serial;
+    }
 
     switch(active_serial->parse_state)
     {

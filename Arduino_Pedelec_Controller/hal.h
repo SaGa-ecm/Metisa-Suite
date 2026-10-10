@@ -9,6 +9,11 @@ Supports AVR (ATmega328P, ATmega2560), STM32 (Cortex-M), RP2040/RP2350 (ARM/RISC
 
 #include <Arduino.h>
 
+// Serial1 availability detection across architectures
+#if defined(HAVE_HWSERIAL1) || (defined(__AVR__) && defined(UBRR1H)) || defined(ARDUINO_ARCH_ESP32) || (defined(ARDUINO_ARCH_MBED) && defined(Serial1)) || defined(ARDUINO_ARCH_RP2040)
+#define APC_HAVE_SERIAL1 1
+#endif
+
 #if defined(__AVR__)
 #include <avr/io.h>
 #include <avr/interrupt.h>
