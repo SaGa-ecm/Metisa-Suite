@@ -41,7 +41,7 @@ Menu::Menu(const char* name)
 {
 }
 
-boolean Menu::next(boolean loop)
+bool Menu::next(bool loop)
 {
     if (_cur_menu_component_num != _num_menu_components - 1)
     {
@@ -60,7 +60,7 @@ boolean Menu::next(boolean loop)
     return false;
 }
 
-boolean Menu::prev(boolean loop)
+bool Menu::prev(bool loop)
 {
     if (_cur_menu_component_num != 0)
     {
@@ -187,12 +187,12 @@ MenuSystem::MenuSystem()
 {
 }
 
-boolean MenuSystem::next(boolean loop)
+bool MenuSystem::next(bool loop)
 {
     return _p_curr_menu->next(loop);
 }
 
-boolean MenuSystem::prev(boolean loop)
+bool MenuSystem::prev(bool loop)
 {
     return _p_curr_menu->prev(loop);
 }
@@ -213,7 +213,7 @@ void MenuSystem::select()
     }
 }
 
-boolean MenuSystem::back()
+bool MenuSystem::back()
 {
     if (_p_curr_menu != _p_root_menu)
     {

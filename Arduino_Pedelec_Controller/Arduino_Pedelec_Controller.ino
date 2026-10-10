@@ -53,7 +53,7 @@ BMP085 bmp;
 #include "DSPC01_nano.h"
 DSPC01 dspc;
 unsigned long dspc_timer = 0;
-boolean dspc_mode=0;  //is false if temperature, true if altitude
+bool dspc_mode=false;  //is false if temperature, true if altitude
 #endif
 
 #ifdef SUPPORT_RTC
@@ -118,7 +118,7 @@ DallasTemperature sensors(&tempWire);
 #include "HX711.h"
 HX711 loadcell(hx711_data, hx711_sck);
 double load=0; //this is the current load
-boolean load_updated=false; //new measurement flag, becomes true if measurement is updated
+bool load_updated=false; //new measurement flag, becomes true if measurement is updated
 #endif
 
 // #define DEBUG_MEMORY_USAGE               // enable this define to print memory usage in SERIAL_MODE_DEBUG
@@ -370,10 +370,10 @@ volatile unsigned long last_pas_event = millis();  //last change-time of PAS sen
 #else
   #define pas_time 60000/pas_magnets //conversion factor for pas_time to rpm (cadence)
 #endif
-volatile boolean pedaling = false;  //pedaling? (in forward direction!)
-volatile boolean pedalingbackwards = false;  //pedalingn in backward direction
-boolean firstrun = true;  //first run of loop?
-boolean brake_stat = true; //brake activated?
+volatile bool pedaling = false;  //pedaling? (in forward direction!)
+volatile bool pedalingbackwards = false;  //pedalingn in backward direction
+bool firstrun = true;  //first run of loop?
+bool brake_stat = true; //brake activated?
 PID myPID(&power, &pid_out,&pid_set,pid_p,pid_i,0, DIRECT);
 unsigned int idle_shutdown_count = 0;
 unsigned long idle_shutdown_last_wheel_time = millis();
@@ -384,8 +384,8 @@ double power_human=0.0;      //cyclist's power
 double wh_human=0;
 #if defined(SUPPORT_XCELL_RT) || defined(SUPPORT_SEMPU_V1) || defined(SUPPORT_SEMPU) || defined(SUPPORT_T9)
 int torque_zero=TORQUE_ZERO; //Offset of torque sensor. Adjusted at startup if TORQUE_AUTOZERO option is set
-static volatile boolean analogRead_in_use = false; //read torque values in interrupt only if no analogRead in process
-static volatile boolean torque_want_calculation = false; //read torque values in interrupt only if no analogRead in process
+static volatile bool analogRead_in_use = false; //read torque values in interrupt only if no analogRead in process
+static volatile bool torque_want_calculation = false; //read torque values in interrupt only if no analogRead in process
 #if HARDWARE_REV<20 && defined(SUPPORT_XCELL_RT)
 const int torquevalues_count=8;
 volatile int torquevalues[torquevalues_count]= {0,0,0,0,0,0,0,0}; //stores the 8 torque values per pedal roundtrip
@@ -397,7 +397,7 @@ const int torquevalues_count=24;
 volatile int torquevalues[torquevalues_count]= {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; //stores the 24 torque values per pedal roundtrip (Sempu new version)
 #endif
 volatile byte torqueindex=0;        //index to write next torque value
-volatile boolean readtorque=false;  //true if torque array has been updated -> recalculate in main loop
+volatile bool readtorque=false;  //true if torque array has been updated -> recalculate in main loop
 #endif
 #ifdef SUPPORT_BBS
 unsigned long bbs_pausestart=0; //start time of power pause for gear change
@@ -410,7 +410,7 @@ float temperature_thermistor=0; //thermistor temperature
 #if (SERIAL_MODE & SERIAL_MODE_MMC)           //communicate with mmc-app
 String mmc_command="";
 byte mmc_value=0;
-boolean mmc_nextisvalue=false;
+bool mmc_nextisvalue=false;
 #endif
 
 //declarations for profile switching
@@ -420,23 +420,23 @@ int curr_spd_max2=spd_max2;
 int curr_power_max=power_max;
 int curr_power_poti_max=power_poti_max;
 double curr_capacity=capacity;
-boolean current_profile=0; //0: blue profile, 1: red profile
+bool current_profile=0; //0: blue profile, 1: red profile
 
 // PIN Security System (0 = StVZO legal, 1 = Sport/Trail, 2 = Race/Privatgelände via Master-PIN 210286)
 byte pin_security_level = 0;
-boolean pure_throttle_allowed = false;
+bool pure_throttle_allowed = false;
 
 // On-the-go duct tape to get you home with broken wiring.
-boolean first_aid_ignore_break = false;
-boolean first_aid_ignore_pas = false;
-boolean first_aid_ignore_speed = false;
-boolean first_aid_ignore_poti = false;
-boolean first_aid_ignore_throttle = false;
-boolean first_aid_ignore_temp_sensor = false;
+bool first_aid_ignore_break = false;
+bool first_aid_ignore_pas = false;
+bool first_aid_ignore_speed = false;
+bool first_aid_ignore_poti = false;
+bool first_aid_ignore_throttle = false;
+bool first_aid_ignore_temp_sensor = false;
 
 // Forward declarations for compatibility with new gcc versions
 void pas_change();
-void pas_change_dual(boolean signal);
+void pas_change_dual(bool signal);
 void speed_change();
 void send_serial_data();
 void handle_dspc();
@@ -1456,7 +1456,7 @@ ISR(INT5_vect)
 
 #if (HARDWARE_REV >= 20) && (HARDWARE_REV < 30) && defined(__AVR__)
 #if defined(SUPPORT_XCELL_RT) || defined(SUPPORT_BBS) || defined(SUPPORT_SEMPU)
-void pas_change_dual(boolean signal)
+void pas_change_dual(bool signal)
 {
     if (signal)
         pedaling=bitRead(PINE,5);
@@ -1503,7 +1503,7 @@ void torque_rezero() //resets torque sensor
 void pas_change()       //Are we pedaling? PAS Sensor Change------------------------------------------------------------------------------------------------------------------
 {
     if (elapsed_less(millis(), last_pas_event, 10U)) return;
-    boolean pas_stat=digitalRead(pas_in);
+    bool pas_stat=digitalRead(pas_in);
     if (pas_stat)
     {
         pas_off_time=millis()-last_pas_event;

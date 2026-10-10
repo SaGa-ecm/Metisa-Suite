@@ -78,6 +78,6 @@ typedef enum {DISPLAY_VIEW_MAIN=0,
 extern display_view_type display_view;
 
 extern display_mode_type display_mode; //currently display mode
-extern boolean display_force_text;         //only valid for Nokia displays
+extern bool display_force_text;         //only valid for Nokia displays
 
 #endif

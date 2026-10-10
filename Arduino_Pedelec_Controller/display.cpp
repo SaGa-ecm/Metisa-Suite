@@ -35,7 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 display_mode_type display_mode = DISPLAY_MODE_GRAPHIC; //startup screen
 display_mode_type display_mode_last = DISPLAY_MODE_TEXT; //last screen type
-boolean display_force_text = false;
+bool display_force_text = false;
 
 // Graphic displays: Default to graphic view on startup if compiled in
 #if defined(DISPLAY_IS_GRAPHIC_LCD) && defined(DV_GRAPHIC)
@@ -103,7 +103,7 @@ byte slcd_received[]= {0,0,0,0,0,0};
 byte slcd_received[]= {0,0,0,0,0,0,0,0,0,0,0,0,0};
 #endif
 byte slcd_receivecounter=0;
-boolean slcd_lighton=false;                //backlight switched on?
+bool slcd_lighton=false;                //backlight switched on?
 byte slcd_zerocounter=0;
 unsigned long slcd_last_transmission=millis(); //last time Slcd sent data--> still on?
 #endif

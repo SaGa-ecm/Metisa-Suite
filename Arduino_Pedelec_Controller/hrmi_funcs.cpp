@@ -8,7 +8,7 @@
 
 // Forward declarations
 static void writeRegister(int deviceAddress, byte address, byte val);
-static boolean hrmiGetData(byte addr, byte numBytes, byte* dataArray);
+static bool hrmiGetData(byte addr, byte numBytes, byte* dataArray);
 
 void hrmi_open()
 {
@@ -44,7 +44,7 @@ static void writeRegister(int deviceAddress, byte address, byte val)
     Wire.endTransmission();     // end transmission
 }
 
-static boolean hrmiGetData(byte addr, byte numBytes, byte* dataArray)
+static bool hrmiGetData(byte addr, byte numBytes, byte* dataArray)
 {
     //Get data from heart rate monitor and fill dataArray byte with responce
     //Returns true if it was able to get it, false if not

@@ -240,7 +240,7 @@ const int poti_max=1023;                 //Offset voltage of poti when in "MAX" 
 const int motor_offset=50;               //Offset for throttle output where Motor starts to spin (0..255 = 0..5V). Default: 50. In Servo mode this value is about 1000
 const int motor_max=200;                 //Maximum input value for motor driver (0..255 = 0..5V). Default: 200. In Servo mode this value is about 2000
 const int spd_idle=55;                   //idle speed of motor in km/h - may be much higher than real idle speed (depending on controller)
-const boolean startingaidenable = true;  //enable starting aid?
+const bool startingaidenable = true;  //enable starting aid?
 const int startingaid_speed = 6;         //starting aid up to this speed. 6km/h is the limit for legal operation of a Pedelec by EU-wide laws
 const float vmax=42.0;                   //Battery voltage when fully charged
 const float vcutoff=33.0;                //cutoff voltage in V;

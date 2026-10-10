@@ -26,7 +26,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 // Global defines from the main program code
 extern float mah;
-extern boolean display_force_text;
+extern bool display_force_text;
 extern float voltage_display;
 extern float current_display;
 extern byte battery_percent_fromvoltage;
@@ -48,11 +48,11 @@ extern float altitude_start;
 extern float slope;
 extern int poti_stat;
 extern int throttle_stat;
-extern boolean brake_stat;
+extern bool brake_stat;
 extern volatile unsigned long wheel_time;
 extern byte pulse_human;
 extern double power_human;
-extern boolean variables_saved;
+extern bool variables_saved;
 
 extern const int bluetooth_pin;
 extern const int fet_out;
@@ -95,14 +95,14 @@ extern int curr_spd_max2;
 extern int curr_power_max;
 extern int curr_power_poti_max;
 extern double curr_capacity;
-extern boolean current_profile;
+extern bool current_profile;
 
-extern boolean first_aid_ignore_break;
-extern boolean first_aid_ignore_pas;
-extern boolean first_aid_ignore_speed;
-extern boolean first_aid_ignore_poti;
-extern boolean first_aid_ignore_throttle;
-extern boolean first_aid_ignore_temp_sensor;
+extern bool first_aid_ignore_break;
+extern bool first_aid_ignore_pas;
+extern bool first_aid_ignore_speed;
+extern bool first_aid_ignore_poti;
+extern bool first_aid_ignore_throttle;
+extern bool first_aid_ignore_temp_sensor;
 
 extern void save_eeprom();
 extern void save_shutdown();

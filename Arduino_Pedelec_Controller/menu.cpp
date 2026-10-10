@@ -26,8 +26,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #include "switches.h"
 
 unsigned long menu_activity_expire=0;
-boolean menu_active=false;
-boolean menu_changed=false;
+bool menu_active=false;
+bool menu_changed=false;
 
 /*
 Layout:
@@ -155,7 +155,7 @@ static void handle_reset_km(MenuItem* p_menu_item)
     menu_active = false;
 }
 
-static void show_new_state(const boolean is_on)
+static void show_new_state(const bool is_on)
 {
     if (is_on)
         display_show_important_info(FROM_FLASH(msg_activated), 1);

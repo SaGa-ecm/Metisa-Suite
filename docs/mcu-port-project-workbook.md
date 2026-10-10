@@ -315,12 +315,16 @@ Status ist pro konkretem Board und Frameworkversion zu führen. `n/a` bedeutet n
 | --- | --- | --- | --- | --- | --- | --- |
 | AVR Nano | `nanoatmega328` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 1077 B RAM (52.6%), 25876 B Flash (84.2%) | OFFEN | OFFEN | bestehender Stand separat verifizieren |
 | AVR Mega | `megaatmega2560` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 1279 B RAM (15.6%), 29194 B Flash (11.5%) | OFFEN | OFFEN | bestehender Stand separat verifizieren |
-| STM32F4 Cortex-M4F | `stm32_blackpill_f401cc` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 10996 B RAM (16.8%), 49644 B Flash (18.9%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
-| STM32F1 Cortex-M3 | `stm32_bluepill_f103c8` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 3816 B RAM (18.6%), 51216 B Flash (78.1%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| STM32F4 Black Pill (M4F @ 84MHz) | `stm32_blackpill_f401cc` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 10996 B RAM (16.8%), 49644 B Flash (18.9%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| STM32F4 Nucleo (M4F @ 100MHz) | `stm32_nucleo_f411re` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 11292 B RAM (8.6%), 50424 B Flash (9.6%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| STM32F4 Nucleo (M4F @ 180MHz) | `stm32_nucleo_f446re` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 11340 B RAM (8.6%), 50856 B Flash (9.7%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| STM32G4 Motor-MCU (M4F @ 170MHz) | `stm32_g4` (G431RB) | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 5456 B RAM (16.7%), 62292 B Flash (47.5%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| STM32F1 Blue Pill (M3 @ 72MHz) | `stm32_bluepill_f103c8` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 3816 B RAM (18.6%), 51216 B Flash (78.1%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
 | RP2040 (Raspberry Pi Pico) | `pico` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 41724 B RAM (15.9%), 57760 B Flash (2.8%), UF2 generiert | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
-| ESP32 Classic Dual-Core | `esp32dev` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 23920 B RAM (7.3%), 313053 B Flash (23.9%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
-| ESP32-S3 Dual-Core | `esp32s3` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 21584 B RAM (6.6%), 319845 B Flash (9.6%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
-| ESP32-C3 RISC-V | `esp32c3` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 16084 B RAM (4.9%), 313912 B Flash (23.9%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| ESP32 Classic Dual-Core (240MHz) | `esp32dev` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 23920 B RAM (7.3%), 313053 B Flash (23.9%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| ESP32-S3 Dual-Core (240MHz) | `esp32s3` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 21584 B RAM (6.6%), 319845 B Flash (9.6%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| ESP32-S2 Single-Core (240MHz) | `esp32s2` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 17376 B RAM (5.3%), 292846 B Flash (22.3%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
+| ESP32-C3 RISC-V (160MHz) | `esp32c3` | BESTANDEN (Konfiguration) | CLEAN BUILD BESTANDEN; 16084 B RAM (4.9%), 313912 B Flash (23.9%) | OFFEN | OFFEN | Hardware-Inbetriebnahme offen |
 | ESP8266 | `esp8266_*` | BESTANDEN (Konfiguration) | NICHT UNTERSTÜTZT (Nicht echtzeitfähig / Wi-Fi ISR-Latenzen / 1 ADC) | OFFEN | OFFEN | NICHT UNTERSTÜTZT |
 
 ## 6. Befundvorlage

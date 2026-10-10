@@ -26,8 +26,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 void init_menu();
 
 extern unsigned long menu_activity_expire; // Timestamp when we kick the user ouf of the menu
-extern boolean menu_active;             //Flag to indicate menu is shown or not
-extern boolean menu_changed;            //Flag to indicate menu display needs update
+extern bool menu_active;             //Flag to indicate menu is shown or not
+extern bool menu_changed;            //Flag to indicate menu display needs update
 
 extern MenuSystem menu_system;
 
