@@ -34,6 +34,10 @@ class SourceContractTest(unittest.TestCase):
         cls.time_helpers = (FIRMWARE / "elapsed_time.h").read_text(encoding="utf-8")
         cls.display = (FIRMWARE / "display.cpp").read_text(encoding="utf-8")
         cls.backlight = (FIRMWARE / "display_backlight.cpp").read_text(encoding="utf-8")
+        cls.config = (FIRMWARE / "config.h").read_text(encoding="utf-8")
+        cls.hal = (FIRMWARE / "hal.h").read_text(encoding="utf-8")
+        cls.serial_cmd = (FIRMWARE / "serial_command.cpp").read_text(encoding="utf-8")
+        cls.wireless_h = (FIRMWARE / "wireless_manager.h").read_text(encoding="utf-8")
 
     def test_sensor_debounce_uses_rollover_safe_elapsed_time(self):
         self.assertIn("elapsed_less(millis(), last_pas_event, 10U)", self.main)
@@ -70,6 +74,30 @@ class SourceContractTest(unittest.TestCase):
             "float DallasTemperature::calculateTemperature(",
         )
         self.assertTrue(calculation.rstrip().endswith("return DEVICE_DISCONNECTED;"))
+
+    def test_serial1_guarded_by_apc_have_serial1(self):
+        self.assertIn("#define APC_HAVE_SERIAL1", self.hal)
+        self.assertIn("#if (HARDWARE_REV >= 20) && defined(APC_HAVE_SERIAL1)", self.main)
+        self.assertIn("#if (HARDWARE_REV >= 20) && defined(APC_HAVE_SERIAL1)", self.serial_cmd)
+
+    def test_pin_security_system_and_master_pin(self):
+        self.assertIn("PIN_MASTER_RACE = 210286UL;", self.config)
+        self.assertIn("void pin_set_level(byte new_level)", self.main)
+        self.assertIn("pin_security_level = new_level;", self.main)
+        self.assertIn("pin_set_level(0);", self.main)
+
+    def test_wireless_manager_integration(self):
+        self.assertIn("void wireless_init()", self.wireless_h)
+        self.assertIn("void wireless_poll()", self.wireless_h)
+        self.assertIn("void wireless_send_telemetry()", self.wireless_h)
+        self.assertIn("wireless_init();", self.main)
+        self.assertIn("wireless_poll();", self.main)
+        self.assertIn("wireless_send_telemetry();", self.main)
+
+    def test_lights_and_signals_failsafes(self):
+        self.assertIn("turn_auto_cancel_time = millis() + 20000UL;", self.main)
+        self.assertIn("now - horn_start_time >= 3000UL", self.main)
+        self.assertIn("void update_lights_and_signals()", self.main)
 
 
 if __name__ == "__main__":
