@@ -2,30 +2,22 @@
 #if (DISPLAY_TYPE & DISPLAY_TYPE_TFT_ST7789)
 
 #include "display_tft.h"
+
+#if defined(__AVR__)
 #include <ST7789_AVR.h>
-
-// Waveshare 2.8" TFT Shield – Pins configured in config.h
-#ifndef TFT_DC
-#define TFT_DC    7
-#endif
-#ifndef TFT_CS
-#define TFT_CS   10
-#endif
-#ifndef TFT_BL
-#define TFT_BL    9
-#endif
-#ifndef TFT_RST
-#define TFT_RST  -1
-#endif
-
-// Correct constructor argument order: ST7789_AVR(int8_t DC, int8_t RST, int8_t CS)
+// ST7789_AVR argument order: (int8_t DC, int8_t RST, int8_t CS)
 static ST7789_AVR tft(TFT_DC, TFT_RST, TFT_CS);
-
-#ifndef ST7789_BLACK
-#define ST7789_BLACK BLACK
+#else
+#include "st7789_portable.h"
+// ST7789_Portable argument order: (int8_t CS, int8_t DC, int8_t RST)
+static ST7789_Portable tft(TFT_CS, TFT_DC, TFT_RST);
 #endif
-#ifndef ST7789_WHITE
-#define ST7789_WHITE WHITE
+
+#ifndef TFT_COLOR_BLACK
+#define TFT_COLOR_BLACK 0x0000
+#endif
+#ifndef TFT_COLOR_WHITE
+#define TFT_COLOR_WHITE 0xFFFF
 #endif
 
 // Zeichenraster: 320/12 = 26 Spalten, 240/16 = 15 Zeilen
@@ -41,8 +33,8 @@ void TFTDisplay::begin(uint8_t width, uint8_t height, uint8_t model)
 {
     tft.init(240, 320);
     tft.setRotation(1);          // Querformat: 320×240
-    tft.fillScreen(BLACK);
-    tft.setTextColor(WHITE, BLACK);
+    tft.fillScreen(TFT_COLOR_BLACK);
+    tft.setTextColor(TFT_COLOR_WHITE, TFT_COLOR_BLACK);
     tft.setTextSize(2);          // 12×16 Pixel pro Zeichen
     tft.setCursor(0, 0);
 #if TFT_BL >= 0
@@ -55,7 +47,7 @@ void TFTDisplay::begin(uint8_t width, uint8_t height, uint8_t model)
 
 void TFTDisplay::clear()
 {
-    tft.fillScreen(BLACK);
+    tft.fillScreen(TFT_COLOR_BLACK);
     cur_col = 0;
     cur_row = 0;
     tft.setCursor(0, 0);
@@ -98,7 +90,7 @@ void TFTDisplay::drawBitmap(const uint8_t *data, uint8_t cols, uint8_t lines)
         {
             if (pgm_read_byte(data + (y / 8) * cols + x) & (1 << (y % 8)))
             {
-                tft.fillRect(start_x + x * 2, start_y + y * 2, 2, 2, WHITE);
+                tft.fillRect(start_x + x * 2, start_y + y * 2, 2, 2, TFT_COLOR_WHITE);
             }
         }
     }
@@ -112,12 +104,12 @@ void TFTDisplay::drawVerticalBar(word maxV, word limit, word value,
     int y0 = cur_row * TFT_CHAR_H * 2;
     int w  = width * 2;
     int h  = height * 16;
-    tft.drawRect(x0, y0, w, h, WHITE);
+    tft.drawRect(x0, y0, w, h, TFT_COLOR_WHITE);
     if (maxV > 0)
     {
         int fill = (int)((long)min(value, maxV) * (w - 2) / maxV);
         if (fill > 0)
-            tft.fillRect(x0 + 1, y0 + 1, fill, h - 2, WHITE);
+            tft.fillRect(x0 + 1, y0 + 1, fill, h - 2, TFT_COLOR_WHITE);
     }
 }
 

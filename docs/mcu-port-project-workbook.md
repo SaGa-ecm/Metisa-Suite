@@ -246,7 +246,7 @@ Dieser Entwurf beschreibt die Grenze zwischen Steuerlogik und Hardware. Er enth�
 
 ### WP-05: Host-/Unit- und statische Tests
 
-**Status:** OFFEN  
+**Status:** IN ARBEIT (Prüfplan und Oszilloskop-Messanweisung ausgearbeitet: [LABOR_PRUEFPLAN_OSZILLOSKOP_WP05_WP06.md](LABOR_PRUEFPLAN_OSZILLOSKOP_WP05_WP06.md))  
 **Ziel:** Steuerungslogik ohne Motorhardware deterministisch prüfen.
 
 - [ ] Reine Berechnungen vom Hardwarezugriff trennen und mit Grenzwerten testen.
@@ -255,22 +255,25 @@ Dieser Entwurf beschreibt die Grenze zwischen Steuerlogik und Hardware. Er enth�
 - [ ] Tests für Reglerstart, Sättigung, Überlauf, Zeitrücksprung und lange Loop-Blockade hinzufügen.
 - [ ] EEPROM/Flash: leere, alte, beschädigte, teilweise geschriebene und unbekannte Versionsdaten testen.
 - [x] Statische Host-Quellverträge für Sensor-/Deadline-Wrap, Snapshot-Reihenfolge, Disconnect-Fallback und Produktionsverdrahtung: `python tools/source_contract_test.py` (4/4). Kein Ersatz für dynamischen Fake-EEPROM- oder Hardwaretest.
+- [x] Detaillierter Oszilloskop-Laborprüfplan für Signalanlage, PWM, Failsafes und PIN-Limits erstellt: [LABOR_PRUEFPLAN_OSZILLOSKOP_WP05_WP06.md](LABOR_PRUEFPLAN_OSZILLOSKOP_WP05_WP06.md).
 - [ ] Statische Analyse und Compilerwarnungen reproduzierbar in den Build aufnehmen.
 
 **Gate G-2:** Alle rein logischen Grenzwerttests bestehen, bevor stromlose Boardtests starten.
 
 ### WP-06: Stromlose Boardtests und I/O-Verifikation
 
-**Status:** OFFEN  
+**Status:** VORBEREITET (Messpunktmatrix TP01 bis TP10 und Prüfprotokoll definiert)  
 **Voraussetzung:** G-1 und G-2 bestanden; Motorleistung physisch getrennt.
 
-- [ ] Versorgung, Reset, Brownout, Bootloader und Flashvorgang mit Strombegrenzung prüfen.
+- [ ] Versorgung, Reset, Brownout, Bootloader und Flashvorgang mit Strombegrenzung prüfen (TP10).
 - [ ] Jeden Pin gegen Schaltplan und Datenblatt verifizieren; keine 5-V-Toleranz voraussetzen.
-- [ ] ADC-Spannung mit kalibrierter Quelle einspeisen und Skalierung/Referenz über Temperatur und Versorgung prüfen.
+- [ ] ADC-Spannung mit kalibrierter Quelle einspeisen und Skalierung/Referenz über Temperatur und Versorgung prüfen (TP04/TP05).
 - [ ] UART-Pegel, Baudrate, Pins und gleichzeitige Portnutzung prüfen.
-- [ ] PAS-/Radsensorpulse mit Signalgenerator über Frequenz-/Pulsbreitengrenzen einspeisen.
-- [ ] PWM-Ausgang mit Oszilloskop/Logikanalysator in Boot, Reset, Fehler und Normalzustand aufzeichnen.
-- [ ] Watchdog und Brownout durch kontrollierte, dokumentierte Versuche auslösen.
+- [ ] PAS-/Radsensorpulse mit Signalgenerator über Frequenz-/Pulsbreitengrenzen einspeisen (TP02/TP03).
+- [ ] PWM-Ausgang mit Oszilloskop/Logikanalysator in Boot, Reset, Fehler und Normalzustand aufzeichnen (TP01).
+- [ ] Watchdog und Brownout durch kontrollierte, dokumentierte Versuche auslösen (TP10).
+- [ ] Licht- und Signalanlage (Blinker 1.5 Hz, ESS-Notbremsblinken 3.5 Hz, Hupe 3.0 s Abschaltung) am Oszilloskop verifizieren (TP06/TP07/TP08).
+- [ ] ST7789 TFT SPI-Busintegrität und Taktflanken bis 40 MHz prüfen (TP09).
 
 **Gate G-3:** Kein unerwartetes aktives Motorausgangssignal während Reset/Boot/Fehler; alle Ein-/Ausgänge stimmen mit freigegebenem Pinplan überein.
 
@@ -354,5 +357,6 @@ Nächster Schritt:
 **WP-00:** Buildbaseline erfasst; lokales Git-Repository initialisiert und Baseline-Checkpoints dokumentiert.  
 **WP-01:** Software-Pin- und Abhängigkeitsinventar vollständig erfasst. Hardware-Referenzprofile definiert.  
 **WP-02:** Statische Quellinventur und Roll-Over-Sicherheit vollständig behoben und durch 4/4 Quellvertragstests abgesichert.  
-**WP-04:** Multi-Architektur HAL (`hal.h`/`hal.cpp`), Licht-/Signalanlage (Blinker, Warnblinker, Bremslicht mit ESS, Hupe) und 3-Stufen PIN-Sicherheitssystem (Master-PIN 210286) implementiert und auf 8 PlatformIO-Zielen erfolgreich verifiziert.  
-**Aktueller autonomer Schritt:** Lokalen Git-Checkpoint für HAL, Licht-/Signalanlage und PIN-Sicherheit anlegen; Vorbereitung von board-spezifischen Pinout-Konfigurationsheadern (`pins_blackpill.h`, `pins_pico.h`, `pins_esp32.h`) und Oszilloskop-Messplan für PWM- und Signal-Frequenzen (WP-05 / WP-06).
+**WP-04:** Multi-Architektur HAL (`hal.h`/`hal.cpp`), Licht-/Signalanlage (Blinker 1.5 Hz, ESS-Notbremslicht 3.5 Hz, Hupe 3.0 s Abschaltung), 3-Stufen PIN-Sicherheitssystem (Master-PIN 210286), portabler Hardware-SPI-Treiber ST7789 (`st7789_portable.h`) sowie modularer Display-Header (`display_tft_pins.h`) implementiert und auf allen 12 PlatformIO-Targets fehlerfrei verifiziert.  
+**WP-05 / WP-06:** Umfassender Oszilloskop-Laborprüfplan (`docs/LABOR_PRUEFPLAN_OSZILLOSKOP_WP05_WP06.md`) mit Messpunktmatrix TP01 bis TP10 und normiertem Abnahmeprotokoll ausgearbeitet.  
+**Nächster Schritt:** Hardware-Prüfstandsmessung mit Signalgenerator und Oszilloskop an realer Hardware (STM32 BlackPill / Raspberry Pi Pico / ESP32) gemäß Laborprüfplan.

@@ -38,21 +38,13 @@
 #define DISPLAY_TYPE_BAFANG         (DISPLAY_TYPE_BAFANG_C961|DISPLAY_TYPE_BAFANG_C965|DISPLAY_TYPE_BAFANG_SW102)
 #define DISPLAY_TYPE_TFT_ST7789     (1<<12)                 // Waveshare 2.8" TFT ST7789 SPI
 
-#define DISPLAY_TYPE DISPLAY_TYPE_NOKIA_4PIN                // Set your display type here (e.g. DISPLAY_TYPE_TFT_ST7789 for Waveshare TFT). CHANGES ONLY HERE!<-----------------------------
-
-// Waveshare 2.8" ST7789 TFT pin assignments (conditional to avoid conflicts)
-#ifndef TFT_CS
-#define TFT_CS 10
+#if defined(__AVR_ATmega328P__)
+#define DISPLAY_TYPE DISPLAY_TYPE_NOKIA_4PIN                // Default for AVR Nano (retains <30KB flash footprint)
+#else
+#define DISPLAY_TYPE DISPLAY_TYPE_TFT_ST7789                // Default for 32-bit platforms (STM32, RP2040, ESP32) & Mega
 #endif
-#ifndef TFT_DC
-#define TFT_DC 7
-#endif
-#ifndef TFT_BL
-#define TFT_BL 9
-#endif
-#ifndef TFT_RST
-#define TFT_RST -1
-#endif
+// Include hardware-specific ST7789 TFT pin and bus configuration
+#include "display_tft_pins.h"
 
 
 //Selection of available display views: comment out any view that you do not want. Can save much programming space!
