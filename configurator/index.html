@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>metisa Universal Web-Konfigurator</title>
+  <meta name="description" content="Browser-basierter, responsiver Konfigurator für den Arduino Pedelec Controller (APC v1.43) und metisa Multi-Target Firmware.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation & Header Bar -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="logo-badge">METISA</div>
+      <div class="app-title">
+        <h1>E-Bike Universal Konfigurator</h1>
+        <p>Arduino Pedelec Controller (APC 1.43 Multi-Target) &bull; Web & Mobile</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Connection Indicator & USB Serial Button -->
+      <div class="connection-pill">
+        <span class="connection-dot"></span>
+        <span id="connectionStatusText">Getrennt</span>
+      </div>
+      <button id="btnConnectSerial" class="btn btn-primary" title="Direkte USB-Verbindung über Web Serial API">
+        <span>🔌</span> USB Verbinden
+      </button>
+
+      <!-- Profile Actions -->
+      <input type="file" id="profileFileInput" accept=".apc,.json" style="display: none;" onchange="handleProfileFileSelect(event)">
+      <button class="btn btn-secondary" onclick="triggerProfileUpload()" title="Profil (.apc oder .json) laden">
+        <span>📂</span> Importieren
+      </button>
+      <button class="btn btn-secondary" onclick="downloadApcProfile()" title="Als klassisches .apc-Profil exportieren">
+        <span>💾</span> .APC Export
+      </button>
+      <button class="btn btn-secondary" onclick="downloadJsonProfile()" title="Als modernes JSON-Profil exportieren">
+        <span>📄</span> JSON Export
+      </button>
+      <button class="btn btn-success" onclick="openConfigModal()" title="C++ config.h für Firmware generieren">
+        <span>⚡</span> Generiere config.h
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="main-container">
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-tab="tab-system">
+        <span class="icon">🎯</span> System & Plattform
+      </div>
+      <div class="nav-item" data-tab="tab-battery">
+        <span class="icon">🔋</span> Akku & Leistung
+      </div>
+      <div class="nav-item" data-tab="tab-motor">
+        <span class="icon">⚡</span> Motor & Regelung
+      </div>
+      <div class="nav-item" data-tab="tab-pas">
+        <span class="icon">🚴</span> PAS & Drehmoment
+      </div>
+      <div class="nav-item" data-tab="tab-throttle">
+        <span class="icon">✊</span> Gasgriff & Taster
+      </div>
+      <div class="nav-item" data-tab="tab-pin">
+        <span class="icon">🔒</span> PIN-Sicherheit
+      </div>
+      <div class="nav-item" data-tab="tab-lights">
+        <span class="icon">💡</span> Licht & Signale
+      </div>
+      <div class="nav-item" data-tab="tab-display">
+        <span class="icon">🖥️</span> Display & Funk
+      </div>
+      <div class="nav-item" data-tab="tab-live">
+        <span class="icon">📊</span> Live-Messung
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+      <!-- Interactive Bike Anatomy Banner -->
+      <section class="bike-banner">
+        <div class="banner-header">
+          <h2><span>🚲</span> Interaktive Fahrrad-Komponenten</h2>
+          <span class="badge badge-metisa">Metisa Responsive Visualizer</span>
+        </div>
+        <p class="form-hint">Klicke auf eine Komponente, um direkt zur zugehörigen Einstellungskarte zu springen:</p>
+        <div class="hotspots-strip">
+          <span class="hotspot-pill" data-tab="tab-battery" data-card="card-battery">🔋 Akku & Shunt</span>
+          <span class="hotspot-pill" data-tab="tab-motor" data-card="card-motor">⚡ Motor & ESC</span>
+          <span class="hotspot-pill" data-tab="tab-pas" data-card="card-pas">🚴 Tretlager / PAS</span>
+          <span class="hotspot-pill" data-tab="tab-throttle" data-card="card-throttle">✊ Gasgriff & Anfahrhilfe</span>
+          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-brakes">🛑 Bremshebel & ESS</span>
+          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-signals">💡 Blinker (ECE-R 50)</span>
+          <span class="hotspot-pill" data-tab="tab-display" data-card="card-display">🖥️ Display & HMI</span>
+          <span class="hotspot-pill" data-tab="tab-pin" data-card="card-pin">🔒 Master-PIN 210286</span>
+        </div>
+      </section>
+
+      <!-- TAB 1: System & Plattform -->
+      <div id="tab-system" class="tab-pane">
+        <div class="cards-grid">
+          <div class="config-card" id="card-system">
+            <div class="card-title">
+              <h3>🎯 Ziel-Architektur & Hardware</h3>
+              <span class="badge badge-metisa">32-Bit / AVR</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="target_mcu">Mikrocontroller-Plattform</label>
+              <select id="target_mcu" class="form-control">
+                <option value="esp32">ESP32 (Classic Dual-Core @ 240 MHz - Onboard BT + WiFi)</option>
+                <option value="esp32s3">ESP32-S3 (Dual-Core @ 240 MHz - WiFi)</option>
+                <option value="stm32_blackpill">STM32F401 BlackPill (Cortex-M4F @ 84 MHz)</option>
+                <option value="stm32_g4">STM32G431RB Motor-MCU (Cortex-M4F @ 170 MHz)</option>
+                <option value="pico">Raspberry Pi Pico (RP2040 Dual-Core @ 133 MHz)</option>
+                <option value="avr_mega">Atmel ATmega2560 (FC 2.x Trägerplatine)</option>
+                <option value="avr_nano">Atmel ATmega328P (FC 1.x Trägerplatine)</option>
+              </select>
+              <span class="form-hint">Wählt die HAL-Plattformtreiber und Pin-Mapping-Routinen in der Firmware aus.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="nud_version">Historische FC-Revision (HARDWARE_REV)</label>
+              <select id="nud_version" class="form-control">
+                <option value="22">FC 2.2 (Standard 32-Bit / Riser-Board)</option>
+                <option value="21">FC 2.1 (Mega-Carrier mit Nokia Pegelwandler)</option>
+                <option value="20">FC 2.0 (Mega-Carrier Basis)</option>
+                <option value="15">FC 1.5 (Nano 328P Basis)</option>
+                <option value="13">FC 1.3 (Nano 328P Basis)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profile_name">Profil-Name</label>
+              <input type="text" id="profile_name" class="form-control" value="Metisa-Trekking-36V">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Akku & Leistung -->
+      <div id="tab-battery" class="tab-pane" style="display: none;">
+        <div class="cards-grid">
+          <div class="config-card" id="card-battery">
+            <div class="card-title">
+              <h3>🔋 Batterie-Spannung & Schutz</h3>
+              <span class="badge badge-legal">Schutzbeschaltung</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_vmax">Ladeschlussspannung <span class="unit">[V]</span></label>
+                <input type="number" id="nud_vmax" class="form-control" step="0.5" value="42.0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_capacity">Kapazität <span class="unit">[Wh]</span></label>
+                <input type="number" id="nud_capacity" class="form-control" step="10" value="500">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_vcutoff">Abschaltspannung <span class="unit">[V]</span></label>
+                <input type="number" id="nud_vcutoff" class="form-control" step="0.5" value="33.0">
+                <span class="form-hint">Abregelung bei Akku leer.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_vemergency">Notabschaltung <span class="unit">[V]</span></label>
+                <input type="number" id="nud_vemergency" class="form-control" step="0.5" value="28.0">
+                <span class="form-hint">Sofortige FET-Abschaltung.</span>
+              </div>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="chb_chargedetection">
+              <label class="form-check-label" for="chb_chargedetection">Automatische Ladeerkennung (Reset Tageszähler)</label>
+            </div>
+          </div>
+
+          <div class="config-card" id="card-shunt">
+            <div class="card-title">
+              <h3>⚡ Kalibrierung (Spannungsteiler & Shunt)</h3>
+              <span class="badge badge-metisa">ADC Abgleich</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_voltage_amplitude">Spannungs-Faktor <span class="unit">[V/ADC]</span></label>
+                <input type="number" id="nud_voltage_amplitude" class="form-control" step="0.0001" value="0.0587">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_current_amplitude">Strom-Faktor <span class="unit">[A/ADC]</span></label>
+                <input type="number" id="nud_current_amplitude" class="form-control" step="0.0001" value="0.0741">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_voltage_offset">Spannungs-Offset <span class="unit">[V]</span></label>
+                <input type="number" id="nud_voltage_offset" class="form-control" step="0.1" value="0.0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_current_offset">Strom-Offset (Ruhestrom) <span class="unit">[A]</span></label>
+                <input type="number" id="nud_current_offset" class="form-control" step="0.1" value="0.0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Motor & Regelung -->
+      <div id="tab-motor" class="tab-pane" style="display: none;">
+        <div class="cards-grid">
+          <div class="config-card" id="card-motor">
+            <div class="card-title">
+              <h3>⚡ Motorleistung & Grenzen</h3>
+              <span class="badge badge-legal">StVZO 250W</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_power_max">Nenndauerleistung <span class="unit">[W]</span></label>
+                <input type="number" id="nud_power_max" class="form-control" step="10" value="250">
+                <span class="form-hint">StVZO Legal: 250 Watt.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_power_thermal">Thermische Grenze <span class="unit">[W]</span></label>
+                <input type="number" id="nud_power_thermal" class="form-control" step="10" value="150">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_speedcutoff_start">Abregelung ab <span class="unit">[km/h]</span></label>
+                <input type="number" id="nud_speedcutoff_start" class="form-control" step="1" value="23">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_speedcutoff_stop">Endabschaltung <span class="unit">[km/h]</span></label>
+                <input type="number" id="nud_speedcutoff_stop" class="form-control" step="1" value="25">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_motor_min">Motor Min PWM (Offset)</label>
+                <input type="number" id="nud_motor_min" class="form-control" value="50">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_motor_max">Motor Max PWM</label>
+                <input type="number" id="nud_motor_max" class="form-control" value="200">
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Power Curve Chart Card -->
+          <div class="config-card" id="card-powergraph">
+            <div class="card-title">
+              <h3>📈 Dynamische Leistungskennlinie</h3>
+              <span class="badge badge-metisa">Live Simulator</span>
+            </div>
+            <div style="position: relative; width: 100%; height: 180px;">
+              <canvas id="powerGraphCanvas" style="width: 100%; height: 100%;"></canvas>
+            </div>
+            <span class="form-hint">Zeigt die kontinuierliche Abregelung von der Nenndauerleistung (Cyan) bis zum Cutoff bei 25 km/h.</span>
+          </div>
+
+          <div class="config-card" id="card-pid">
+            <div class="card-title">
+              <h3>🎛️ PID-Regler Parameter</h3>
+              <span class="badge badge-metisa">Feinabstimmung</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_pidp">Proportional-Faktor (P)</label>
+                <input type="number" id="nud_pidp" class="form-control" step="0.01" value="0.0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_pidi">Integral-Faktor (I)</label>
+                <input type="number" id="nud_pidi" class="form-control" step="0.1" value="2.0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_pidp_throttle">Gasgriff P-Faktor</label>
+                <input type="number" id="nud_pidp_throttle" class="form-control" step="0.01" value="0.05">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_pidi_throttle">Gasgriff I-Faktor</label>
+                <input type="number" id="nud_pidi_throttle" class="form-control" step="0.1" value="2.5">
+              </div>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="chb_resetintegral">
+              <label class="form-check-label" for="chb_resetintegral">Integral-Anteil bei Bremse/Pedalierstopp sofort nullen</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: PAS & Drehmoment -->
+      <div id="tab-pas" class="tab-pane" style="display: none;">
+        <div class="cards-grid">
+          <div class="config-card" id="card-pas">
+            <div class="card-title">
+              <h3>🚴 Tretlagersensor & Drehmoment</h3>
+              <span class="badge badge-legal">EN 15194</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cb_bottombracket">Sensortyp</label>
+              <select id="cb_bottombracket" class="form-control">
+                <option value="1">Standard PAS-Sensor (Digital Hallsensor)</option>
+                <option value="2">Thun X-Cell RT (Drehmoment-Messung)</option>
+                <option value="3">Bafang BBS Tretlager (24 Pulse)</option>
+                <option value="4">Sempu V1 Drehmomentsensor</option>
+                <option value="5">Sempu New Generation</option>
+                <option value="6">Erider T9 Drehmomentsensor</option>
+                <option value="0">Kein Sensor (Nur Prüfstand/Handgas)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_magnets">Magnete am PAS-Ring</label>
+                <input type="number" id="nud_magnets" class="form-control" value="12">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_pastimeout">Abschalt-Timeout <span class="unit">[ms]</span></label>
+                <input type="number" id="nud_pastimeout" class="form-control" step="50" value="500">
+                <span class="form-hint">Motorabschaltung nach Pedalierstopp.</span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_pasfactor_min">Min. PAS-Verhältnis</label>
+                <input type="number" id="nud_pasfactor_min" class="form-control" step="0.1" value="1.2">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_pasfactor_max">Max. PAS-Verhältnis</label>
+                <input type="number" id="nud_pasfactor_max" class="form-control" step="0.1" value="3.0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_circumference">Reifenumfang <span class="unit">[mm]</span></label>
+                <input type="number" id="nud_circumference" class="form-control" step="10" value="2200">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_magnetcount">Speichenmagnete</label>
+                <input type="number" id="nud_magnetcount" class="form-control" value="1">
+              </div>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="chb_brokensensor" checked>
+              <label class="form-check-label" for="chb_brokensensor">Defekten Speedsensor erkennen (DETECT_BROKEN_SPEEDSENSOR)</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: Gasgriff & Taster -->
+      <div id="tab-throttle" class="tab-pane" style="display: none;">
+        <div class="cards-grid">
+          <div class="config-card" id="card-throttle">
+            <div class="card-title">
+              <h3>✊ Daumengas / Drehgriff</h3>
+              <span class="badge badge-legal">Schwellwerte</span>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="chb_throttle" checked>
+              <label class="form-check-label" for="chb_throttle">Gasgriff vorhanden</label>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nud_throttle_min">Ruhe-Schwelle (Min ADC)</label>
+                <input type="number" id="nud_throttle_min" class="form-control" value="180">
+                <span class="form-hint">Kabelbruch-Erkennung unter 150 ADC.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="nud_throttle_max">Vollgas-Schwelle (Max ADC)</label>
+                <input type="number" id="nud_throttle_max" class="form-control" value="870">
+              </div>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="chb_startingaid" checked>
+              <label class="form-check-label" for="chb_startingaid">6 km/h Anfahrhilfe / Schiebehilfe aktiv</label>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="nud_startingaid">Max. Anfahrhilfe-Geschwindigkeit <span class="unit">[km/h]</span></label>
+              <input type="number" id="nud_startingaid" class="form-control" value="6">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: Metisa PIN-Sicherheit -->
+      <div id="tab-pin" class="tab-pane" style="display: none;">
+        <div class="cards-grid">
+          <div class="config-card" id="card-pin">
+            <div class="card-title">
+              <h3>🔒 Multi-Level PIN-Sicherheitssystem</h3>
+              <span class="badge badge-race">Metisa Exklusiv</span>
+            </div>
+            <p class="form-hint">Schützt höhere Leistungsmodi vor unberechtigtem Zugriff. Bei jedem Controller-Neustart wird automatisch Stufe 0 (StVZO-Legal) verriegelt.</p>
+            <div class="form-check">
+              <input type="checkbox" id="metisa_pin_enabled" checked>
+              <label class="form-check-label" for="metisa_pin_enabled">PIN-Sicherheitssystem aktivieren</label>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="metisa_master_pin">Master-PIN (Level 2 Race Entsperrung)</label>
+              <input type="text" id="metisa_master_pin" class="form-control" value="210286" maxlength="10">
+              <span class="form-hint">Default Master-PIN: 210286.</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="metisa_race_speed">Level 2 Race Max Speed <span class="unit">[km/h]</span></label>
+                <input type="number" id="metisa_race_speed" class="form-control" value="99">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="metisa_race_power">Level 2 Race Max Power <span class="unit">[W]</span></label>
+                <input type="number" id="metisa_race_power" class="form-control" value="1000">
+              </div>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="metisa_race_pure_throttle" checked>
+              <label class="form-check-label" for="metisa_race_pure_throttle">Reiner Gasgriff-Betrieb ohne Pedalieren in Level 2 freigeben</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 7: Licht & Signalanlage -->
+      <div id="tab-lights" class="tab-pane" style="display: none;">
+        <div class="cards-grid">
+          <div class="config-card" id="card-signals">
+            <div class="card-title">
+              <h3>💡 E-Bike Beleuchtung & Blinker</h3>
+              <span class="badge badge-metisa">ECE-R 50</span>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="metisa_turn_signals" checked>
+              <label class="form-check-label" for="metisa_turn_signals">Fahrtrichtungsanzeiger (Blinker links / rechts) aktivieren</label>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="metisa_turn_autocancel">Blinker Auto-Cancel Timer <span class="unit">[Sekunden]</span></label>
+              <input type="number" id="metisa_turn_autocancel" class="form-control" value="20">
+              <span class="form-hint">Automatische Abschaltung nach 20 s (Blinkfrequenz normiert auf 1,5 Hz).</span>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="metisa_headlight" checked>
+              <label class="form-check-label" for="metisa_headlight">Scheinwerfer digital schaltbar</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="metisa_highbeam" checked>
+              <label class="form-check-label" for="metisa_highbeam">Fernlicht-Umschaltung unterstützen</label>
+            </div>
+          </div>
+
+          <div class="config-card" id="card-brakes">
+            <div class="card-title">
+              <h3>🛑 Bremslicht & Notbremsblinken (ESS)</h3>
+              <span class="badge badge-legal">Sicherheit</span>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="chb_brake" checked>
+              <label class="form-check-label" for="chb_brake">Bremshebel-Sensor vorhanden</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="chb_brakeinverted">
+              <label class="form-check-label" for="chb_brakeinverted">Bremshebel-Logik invertieren (Active High)</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="metisa_ess_brake_flash" checked>
+              <label class="form-check-label" for="metisa_ess_brake_flash">ESS Notbrems-Warnblinken (3,5 Hz Flash bei Vollbremsung)</label>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="metisa_ess_threshold">ESS Mindestgeschwindigkeit <span class="unit">[km/h]</span></label>
+              <input type="number" id="metisa_ess_threshold" class="form-control" value="15">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="metisa_horn_cutoff">Hupe Überlastabschaltung <span class="unit">[Sekunden]</span></label>
+              <input type="number" id="metisa_horn_cutoff" class="form-control" step="0.5" value="3.0">
+              <span class="form-hint">Schützt Signalhupe vor thermischer Zerstörung bei verklemmtem Taster.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 8: Display & Funk -->
+      <div id="tab-display" class="tab-pane" style="display: none;">
+        <div class="cards-grid">
+          <div class="config-card" id="card-display">
+            <div class="card-title">
+              <h3>🖥️ Display-Typ & HMI</h3>
+              <span class="badge badge-metisa">Display Treiber</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cb_display">Installiertes Display</label>
+              <select id="cb_display" class="form-control">
+                <option value="12">Adafruit ST7789 Color TFT (320x240 SPI - 32-Bit Port)</option>
+                <option value="1">Nokia 5110 (4-Pin SPI)</option>
+                <option value="2">Nokia 5110 (5-Pin SPI)</option>
+                <option value="3">16x2 Text LCD (4-Bit Parallel)</option>
+                <option value="4">16x2 Text LCD (Seriell DOGM)</option>
+                <option value="5">BMS-Battery S-LCD</option>
+                <option value="6">BMS-Battery S-LCD 3</option>
+                <option value="7">King-Meter 618U</option>
+                <option value="8">King-Meter 901U</option>
+                <option value="9">Bafang C961 UART</option>
+                <option value="10">Bafang C965 UART</option>
+                <option value="11">Bafang SW102 UART</option>
+                <option value="0">Kein Display (Headless / Funk-Betrieb)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="txb_welcometext">Begrüßungstext</label>
+                <input type="text" id="txb_welcometext" class="form-control" value="metisa APC 1.43">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="txb_goodbye">Abschalttext</label>
+                <input type="text" id="txb_goodbye" class="form-control" value="Good night!">
+              </div>
+            </div>
+          </div>
+
+          <div class="config-card" id="card-wireless">
+            <div class="card-title">
+              <h3>📡 Onboard-Funk (Bluetooth & WiFi)</h3>
+              <span class="badge badge-metisa">ESP32 & Pico W</span>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="chb_bluetoothstartup" checked>
+              <label class="form-check-label" for="chb_bluetoothstartup">Bluetooth Classic SPP aktivieren ("APC-Pedelec" für Android-App)</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="wireless_wifi_softap" checked>
+              <label class="form-check-label" for="wireless_wifi_softap">WiFi Access Point starten ("APC-Pedelec-WiFi")</label>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="wireless_ssid">WiFi SSID</label>
+                <input type="text" id="wireless_ssid" class="form-control" value="APC-Pedelec-WiFi">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="wireless_pass">WPA2 Passwort</label>
+                <input type="text" id="wireless_pass" class="form-control" value="21028600">
+              </div>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="wireless_web_dashboard" checked>
+              <label class="form-check-label" for="wireless_web_dashboard">Onboard HTML5 Web-Dashboard & REST-API auf Port 80 aktivieren</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 9: Live-Messung & Kalibrierung -->
+      <div id="tab-live" class="tab-pane" style="display: none;">
+        <div class="cards-grid">
+          <div class="config-card" id="card-live-gauges">
+            <div class="card-title">
+              <h3>📊 Echtzeit-Messung (USB Telemetrie)</h3>
+              <span class="badge badge-metisa">115200 Baud</span>
+            </div>
+            <p class="form-hint">Verbinde den Controller über USB mit dem Browser, um Live-Spannungen und Geberpegel abzugleichen:</p>
+            
+            <div class="telemetry-row">
+              <div class="gauge-bar-wrapper">
+                <div class="gauge-header">
+                  <span>Batteriespannung</span>
+                  <span id="lblLiveVoltage">-- V (ADC --)</span>
+                </div>
+                <div class="gauge-progress">
+                  <div id="gaugeFillVoltage" class="gauge-fill"></div>
+                </div>
+              </div>
+
+              <div class="gauge-bar-wrapper">
+                <div class="gauge-header">
+                  <span>Batteriestrom</span>
+                  <span id="lblLiveCurrent">-- A (ADC --)</span>
+                </div>
+                <div class="gauge-progress">
+                  <div id="gaugeFillCurrent" class="gauge-fill red"></div>
+                </div>
+              </div>
+
+              <div class="gauge-bar-wrapper">
+                <div class="gauge-header">
+                  <span>Gasgriff-Rohwert</span>
+                  <span id="lblLiveThrottle">ADC --</span>
+                </div>
+                <div class="gauge-progress">
+                  <div id="gaugeFillThrottle" class="gauge-fill"></div>
+                </div>
+              </div>
+
+              <div class="gauge-bar-wrapper">
+                <div class="gauge-header">
+                  <span>Potentiometer-Rohwert</span>
+                  <span id="lblLivePoti">ADC --</span>
+                </div>
+                <div class="gauge-progress">
+                  <div id="gaugeFillPoti" class="gauge-fill"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal for config.h Source View -->
+  <div id="configModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 1rem; font-weight: 700;">⚡ Generierte config.h Headerdatei</h3>
+        <button class="btn btn-secondary btn-icon-only" onclick="closeConfigModal()">&times;</button>
+      </div>
+      <pre id="configCodeView" class="modal-body"></pre>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeConfigModal()">Schließen</button>
+        <button class="btn btn-secondary" onclick="copyConfigToClipboard()">📋 Kopieren</button>
+        <button class="btn btn-success" onclick="downloadConfigHeader()">💾 Datei herunterladen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
