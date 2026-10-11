@@ -1,239 +1,225 @@
-# 📖 SAGA LABS METISA & APC: Das verständliche Einsteiger-Handbuch (Wiki & FAQ)
+# SAGA LABS METISA // TECHNISCHES INTEGRATIONS- UND BETRIEBSHANDBUCH (WIKI & FAQ)
 
-> **Für wen ist diese Anleitung gedacht?**  
-> Für absolut jeden! Du musst weder Informatik studiert haben, noch wissen, was ein Bit oder Byte ist. Wenn du weißt, wie man einen Stecker einsteckt und ein Fahrrad fährt, bist du hier genau richtig.
+> **Zweck und Zielgruppe:**  
+> Dieses Handbuch vermittelt die physikalischen, elektrischen und systemtechnischen Grundlagen des SaGa Labs metisa Universal-Controllers in verständlicher und präziser Form. Es dient als praxisnaher Leitfaden für Werkstatt, Inbetriebnahme, Leitungsstrang-Konfektionierung und Fehlersuche.
 
 ---
 
 ## Inhaltsverzeichnis
-1. [Teil 1: Was habe ich hier vor mir? (Einfach erklärt)](#teil-1-was-habe-ich-hier-vor-mir-einfach-erklärt)
-2. [Teil 2: Welches Kabel gehört wohin? (Schritt-für-Schritt)](#teil-2-welches-kabel-gehört-wohin-schritt-für-schritt)
-3. [Teil 3: Der Web-Konfigurator für Jedermann](#teil-3-der-web-konfigurator-für-jedermann)
-4. [Teil 4: Betriebsmodi & PIN-Freischaltung für Rennstrecke](#teil-4-betriebsmodi--pin-freischaltung-für-rennstrecke)
-5. [Teil 5: Handy-Verbindung & Funk (Bluetooth & WLAN)](#teil-5-handy-verbindung--funk-bluetooth--wlan)
-6. [Teil 6: Die 25 häufigsten Fragen & Pannen (FAQ & Pannenhilfe)](#teil-6-die-25-häufigsten-fragen--pannen-faq--pannenhilfe)
-7. [Teil 7: Das kleine E-Bike-Wörterbuch (Glossar)](#teil-7-das-kleine-e-bike-wörterbuch-glossar)
+1. [Teil 1: Systemarchitektur im Überblick](#teil-1-systemarchitektur-im-überblick)
+2. [Teil 2: Leitungsstrang & Schnittstellen-Pinout](#teil-2-leitungsstrang--schnittstellen-pinout)
+3. [Teil 3: Der Web-Konfigurator Client](#teil-3-der-web-konfigurator-client)
+4. [Teil 4: Kalibrierungs-Ebenen & PIN-Sicherheitsarchitektur](#teil-4-kalibrierungs-ebenen--pin-sicherheitsarchitektur)
+5. [Teil 5: Telemetrie & Funktransporte (Bluetooth & WLAN)](#teil-5-telemetrie--funktransporte-bluetooth--wlan)
+6. [Teil 6: Felddiagnose & System-FAQ (25 Prüffälle)](#teil-6-felddiagnose--system-faq-25-prüffälle)
+7. [Teil 7: Technisches Glossar & Kenngrößen](#teil-7-technisches-glossar--kenngrößen)
 
 ---
 
-## Teil 1: Was habe ich hier vor mir? (Einfach erklärt)
+## Teil 1: Systemarchitektur im Überblick
 
-Stell dir dein E-Bike wie einen menschlichen Körper vor:
-* 🔋 **Der Akku** ist der *Magen*: Er liefert die Energie (Volt & Amperestunden).
-* ⚙️ **Der Motor** sind die *Beine*: Er treibt das Rad an.
-* 🧠 **METISA / APC** ist das **Gehirn**: Es spürt, wie schnell du trittst, entscheidet, wie viel Kraft der Motor geben darf, steuert dein Licht und sorgt dafür, dass alles sicher und legal bleibt.
-* 🖥️ **Das Display / Smartphone** sind die *Augen & Ohren*: Hier siehst du Tempo, Akkuanzeige und Reichweite.
+Die Antriebseinheit gliedert sich in vier gekoppelte Subsysteme:
+* **DC-Bus / Energiespeicher:** Liefert die elektrische Betriebsspannung (24 V bis 48 V Nennspannung, 10S bis 14S Li-Ion).
+* **BLDC-Inverter & Stator:** Wandelt Gleichspannung über Drehstrom-Halbbrücken in dreiphasige Kommutierung für den Motor.
+* **metisa Universal-Controller:** Erfasst Sensordaten (PAS-Trittfrequenz, Raddrehzahl, Drehmoment, Shunt-Strom), berechnet den PID-Regelkreis und steuert ECE-R 50 Beleuchtungsstufen sowie Sicherheits-Failsafes.
+* **HMI / Cockpit:** Visualisiert Fahrdaten und ermöglicht Parameterabstimmung via USB, SPI/I2C-Displays oder autarken Web-Client.
 
-### Die goldene Regel vor dem Start:
-> ⚠️ **ACHTUNG:** Bevor du an irgendwelchen Kabeln arbeitest: **Schalte IMMER zuerst den Akku aus oder ziehe den Hauptstecker ab!** Ein Kurzschluss am Akku funkt gewaltig und zerstört empfindliche Elektronik in einer Millisekunde.
+### Grundlegende Sicherheitsregel:
+> **SICHERHEITSHINWEIS:** Vor sämtlichen Arbeiten am Leitungsstrang oder an den Steckverbindern ist der **DC-Hauptschalter zu öffnen bzw. der Akku-Hauptstecker physisch zu trennen**. Kurzschlüsse am DC-Bus führen zu extremen Entladeströmen, Lichtbögen und thermischer Zerstörung von Leiterbahnen und Halbleitern.
 
 ---
 
-## Teil 2: Welches Kabel gehört wohin? (Schritt-für-Schritt)
+## Teil 2: Leitungsstrang & Schnittstellen-Pinout
 
-Jedes Kabel hat eine bestimmte Aufgabe und Farbe. Hier ist deine Checkliste:
+Jede Zuleitung erfüllt eine definierte elektrische Funktion. Nachfolgend die standardisierte Leitungsübersicht:
 
 ```
                   +-----------------------------------+
-                  |         METISA GEHIRN             |
-                  |     (Universal-Controller)        |
+                  |         METISA CONTROLLER         |
+                  |     (Universal-ECU Plattform)     |
                   +-----------------------------------+
                      |         |         |         |
     +----------------+         |         |         +----------------+
     |                          |         |                          |
- [AKKU]                     [MOTOR]    [PAS-TRETSENSOR]         [LENKER]
- + / - (Rot/Schwarz)        3 Phasen   Magnetscheibe            Gasgriff, Bremsen,
- 36V / 48V                  zum ESC    am Tretlager             Display & Blinker
+ [DC-BUS]                   [MOTOR]    [PAS-TRETSENSOR]         [LENKER]
+ + / - (Rot/Schwarz)        3 Phasen   Hall-Flanke              Gasgriff, Bremsen,
+ 24V - 48V                  zum ESC    am Tretlager             Display & Blinker
 ```
 
-### 1. Stromversorgung (Akku)
+### 1. DC-Bus Hauptstromversorgung
 * **Rot = Plus (+)**
-* **Schwarz = Minus / Masse (-)**
-* 🔴 **WICHTIG:** Niemals vertauschen (Verpolungsschutz)! Rot gehört an Akku-Plus, Schwarz an Akku-Minus.
+* **Schwarz = Minus / Masse (GND)**
+* **HINWEIS:** Absoluter Verpolungsschutz ist sicherzustellen. Falschpolung überbrückt die internen Freilaufdioden und führt zur thermischen Überlastung der Shunts.
 
-### 2. Der Tretlagersensor (PAS-Sensor)
-* Das ist der kleine schwarze Ring mit Magneten, der sich an deinen Tretkurbeln mitdreht.
-* **Warum ist der da?** In Deutschland und der EU darf der Motor *nur dann* helfen, wenn du auch wirklich selbst in die Pedale trittst. Hören deine Beine auf, muss der Motor sofort stoppen.
-* **Der richtige Abstand:** Der Sensor muss ca. 1 bis 2 mm nah an der Magnetscheibe sitzen. Ist der Abstand zu groß (z. B. 5 mm), "sieht" der Sensor deine Tritte nicht.
+### 2. PAS-Trittfrequenzsensor
+* Hall-Sensorring an der Tretlagerachse zur Messung der Tretbewegung.
+* **Regulatorische Funktion:** Nach EN 15194 darf Motorunterstützung nur bei aktiver Kurbeldrehung freigegeben werden.
+* **Justage:** Der axiale Abstand zwischen Sensorkopf und Magnetscheibe muss **1,0 bis 2,0 mm** betragen. Größere Luftspalte führen zu Signalverlust oder Jitter.
 
-### 3. Der Radsensor (Tacho)
-* Ein kleiner Speichenmagnet am Vorderrad oder Hinterrad.
-* Bei jeder Radumdrehung macht es *klick*. Dadurch weiß der Controller haargenau, wie schnell du fährst (z. B. 24,8 km/h).
+### 3. Raddrehzahl-Sensor (Speichentacho)
+* Magnetschalter an Felge oder Bremsscheibe.
+* Liefert die Taktung für die Raddrehzahl- und Odometrieberechnung im Millisekunden-Raster.
 
-### 4. Der Gasgriff (Daumengas / Drehgriff)
-* Hat meist 3 feine Adern:
-  * **Rot:** 5 Volt Versorgung
+### 4. Analoger Hall-Gasgriff
+* Dreipolige Schnittstelle:
+  * **Rot:** +5 V Hilfsspannung
   * **Schwarz:** Masse (GND)
-  * **Blau oder Grün oder Weiß:** Das Steuersignal (0 bis 5 Volt je nachdem, wie stark du drückst).
-* **Hinweis:** Laut Gesetz darf der Gasgriff ohne Treten nur bis maximal **6 km/h** als Schiebehilfe beschleunigen.
+  * **Signal (Blau/Grün/Weiß):** Analoge Ausgangsspannung (0,8 V bis 4,2 V).
+* **Begrenzung:** Im gesetzlichen Modus nur bis maximal **6 km/h** als Anfahr- und Schiebehilfe wirksam.
 
-### 5. Die Bremshebel (Bremskontakte)
-* Sobald du auch nur leicht am Bremshebel ziehst, schaltet der Controller den Motor **sofort und ohne jede Verzögerung** ab.
-* Gleichzeitig leuchtet hinten dein Bremslicht auf!
-
----
-
-## Teil 3: Der Web-Konfigurator für Jedermann
-
-Du musst **kein Programm installieren** und nichts programmieren!
-
-### So startest du:
-1. Nimm deinen Laptop, dein Tablet oder dein Smartphone.
-2. Doppelklicke auf die Datei `configurator/index.html` oder öffne sie in Chrome, Edge, Safari oder Firefox.
-3. Schon siehst du die moderne **SAGA LABS METISA** Steuerzentrale im Cyber-Orange Design.
-
-### E-Bike per USB-Kabel verbinden (Live-Werte sehen):
-1. Verbinde den Controller per USB-Kabel mit deinem Computer.
-2. Klicke oben rechts auf den orangefarbenen Button **[ 🔌 USB Verbinden ]**.
-3. Dein Browser fragt dich, welchen USB-Anschluss du verbinden willst (z. B. "USB-Serial" oder "CP2102"). Klicke auf "Verbinden".
-4. **Fertig!** Jetzt siehst du unter dem Reiter **Live-Messung** live auf dem Bildschirm, wie sich die Balken bewegen, wenn du am Gasgriff drehst oder die Bremse ziehst!
-
-### Eigene Einstellungen speichern und anwenden:
-1. Stelle deine Werte ein (z. B. Akku auf 36 V oder 48 V, Reifenumfang auf 2200 mm).
-2. Klicke auf **[ 💾 .APC Export ]** oder **[ 📄 JSON Export ]**, um deine Einstellungen als Sicherungsdatei auf deinem PC abzuspeichern.
-3. Klicke auf **[ ⚡ Generiere config.h ]** und danach auf **[ 💾 Datei herunterladen ]** – schon hast du deine fertige Konfigurationsdatei!
+### 5. Bremshebel-Unterbrecher
+* Schaltet den Motor bei Betätigung **latenzfrei (&lt; 2 ms)** stromlos und triggert die ECE-R 50 Bremslicht- und ESS-Stufe.
 
 ---
 
-## Teil 4: Betriebsmodi & PIN-Freischaltung für Rennstrecke
+## Teil 3: Der Web-Konfigurator Client
 
-METISA verfügt über ein mehrstufiges Sicherheitssystem für verschiedene Einsatzbereiche:
+Der metisa Web-Konfigurator arbeitet autark im Browser ohne externe Abhängigkeiten oder Installationsprozesse:
 
-| Stufe | Name | Höchsttempo | Motorleistung | Treten Pflicht? | Gasgriff erlaubt? |
+### Start der Kalibrierumgebung:
+1. Öffne die Datei `configurator/index.html` in einem modernen WebKit- oder Chromium-Browser (Chrome, Edge, Safari, Firefox).
+2. Die Oberfläche präsentiert sich im hochauflösenden SaGa Labs Orbit Design mit dunklem Obsidian-Thema und technischer Datendichte.
+
+### USB-Verbindung (Web Serial Live-Messung):
+1. Verbinde den Controller via USB-Schnittstelle mit dem Computer.
+2. Betätige in der oberen Werkzeugleiste die Schaltfläche **[ VERBINDEN ]**.
+3. Wähle den entsprechenden COM-Port / UART-Bridge (z. B. CP2102, CH340 oder MCU-CDC) aus.
+4. Nach dem Handshake werden die Telemetrie-Rohdaten im Monitor in Echtzeit aktualisiert.
+
+### Profilexport und Firmware-Header:
+1. Kalibriere die motorspezifischen Parameter (Spannungsschwellen, Shunt-Faktor, Cutoff-Rampen).
+2. Nutze **[ APC ]** oder **[ JSON ]** zum dauerhaften Speichern der Kalibrierungsstände.
+3. Betätige **[ GENERATE CONFIG.H ]**, um den maßgeschneiderten C++ Header für den Build-Prozess zu exportieren.
+
+---
+
+## Teil 4: Kalibrierungs-Ebenen & PIN-Sicherheitsarchitektur
+
+Das Sicherheitskonzept implementiert eine dreistufige Hierarchie:
+
+| Stufe | Bezeichnung | Max. Speed | Nennleistung | Kurbelpflicht (PAS) | Daumengas |
 | :---: | :--- | :---: | :---: | :---: | :---: |
-| **0** | **Standard (Werkseinstellung)** | **25 km/h** | **250 Watt** | **JA (strikte Pflicht)** | Nur bis 6 km/h (Schiebehilfe) |
-| **1** | **Sport** | **32 km/h** | **500 Watt** | JA | Nur bis 6 km/h |
-| **2** | **Race (Nur Rennstrecke & Privatgelände)** | **Bis 99 km/h** | **Bis 3000 Watt** | **NEIN** | **JA (Reines Vollgas)** |
+| **0** | **Standard (Werkseinstellung)** | **25 km/h** | **250 W** | **Strikt aktiv** | Max. 6 km/h (Schiebehilfe) |
+| **1** | **Sport** | **32 km/h** | **500 W** | Aktiv | Max. 6 km/h |
+| **2** | **Track & Dyno (Rennstrecke)** | **Bis 99 km/h** | **Bis 3000 W** | **Deaktiviert** | **Ungedrosselt (Direkt-Gas)** |
 
-### Wie funktioniert der Schutz?
-* **Automatischer Schutz bei jedem Start:** Jedes Mal, wenn du den Akku einschaltest oder das Bike neu startest, startet der Controller **ausnahmslos auf Stufe 0 (Standard-Modus)**.
-* **Wie schalte ich den offenen Modus (Stufe 2) frei?** Stufe 2 lässt sich ausschließlich durch Eingabe einer gültigen Freischalt-PIN freischalten.
-* **Woher bekomme ich meine Freischalt-PIN?**  
-  Die PIN wird aus rechtlichen Gründen **nicht im Konfigurator generiert** und steht dort nicht im Klartext. Um eine Freischalt-PIN zu erhalten:
-  1. Öffne das separate **SAGA LABS Freischalt-Portal** (`configurator/unlock_portal.html`).
-  2. Gib deine Controller-Seriennummer und deine E-Mail-Adresse ein.
-  3. Bestätige die rechtlichen Vorschriften (Nutzung ausschließlich auf abgesperrten Rennstrecken und privatem Betriebsgelände) sowie den vollständigen Garantieverzicht.
-  4. Deine persönliche Freischalt-PIN wird generiert und dir zusammen mit dem Autorisierungszertifikat übermittelt.
-  5. Gib diese PIN im Konfigurator unter „Rennstrecke & Privatgelände“ ein, um alle offenen Menüpunkte freizuschalten.
-
----
-
-## Teil 5: Handy-Verbindung & Funk (Bluetooth & WLAN)
-
-Wenn dein Controller einen ESP32-Chip besitzt, hat er Bluetooth und WLAN schon fest an Bord – ohne externe Module!
-
-### Verbindung mit Android-Smartphones (Bluetooth):
-1. Schalte Bluetooth am Handy ein und suche nach neuen Geräten.
-2. Wähle **"APC-Pedelec"** aus.
-3. Kopplungscode (falls gefragt): `1234` oder `0000`.
-4. Öffne die HMI-App – sie verbindet sich automatisch und zeigt dein digitales Tacho-Cockpit an.
-
-### Verbindung mit iPhone oder beliebigem Smartphone (WLAN / WiFi):
-1. Öffne die WLAN-Einstellungen deines Handys.
-2. Verbinde dich mit dem WLAN-Netzwerk: **`APC-Pedelec-WiFi`**.
-3. Gib das Passwort ein: **`21028600`**.
-4. Öffne den Safari- oder Chrome-Browser und tippe oben als Adresse ein:  
-   👉 **`http://192.168.4.1`**
-5. **Ergebnis:** Auf deinem Handy-Display erscheint sofort das dunkle SAGA LABS Live-Cockpit mit Tempo, Akku, Scheinwerfer-Schalter und Leistungsanzeige – ganz ohne App-Store-Download!
+### Sicherheitsmechanismen:
+* **Autonomer Boot-Schutz:** Bei jedem Kaltstart oder System-Reset lädt die Firmware zwingend **Stufe 0**.
+* **Kryptografische Entkopplung:** Die Freischaltung von Stufe 2 erfordert einen gerätespezifischen PIN-Code.
+* **Autorisierungs-Workflow:**
+  1. Öffne das offizielle Autorisierungsportal (`configurator/unlock_portal.html`).
+  2. Gib Controller-Seriennummer, Halterdaten und Zustell-E-Mail ein.
+  3. Bestätige die regulatorischen Erklärungen für den geschlossenen Motorsportbetrieb sowie den Gewährleistungsverzicht.
+  4. Die gerätespezifische PIN wird generiert und kryptografisch dokumentiert.
+  5. Im Konfigurator Client den PIN-Code eingeben und bestätigen; die Track-Parameter werden sofort freigeschaltet.
 
 ---
 
-## Teil 6: Die 25 häufigsten Fragen & Pannen (FAQ & Pannenhilfe)
+## Teil 5: Telemetrie & Funktransporte (Bluetooth & WLAN)
 
-### ❓ F01: Mein Motor macht überhaupt keinen Mucks – was ist kaputt?
-> **Antwort:** Prüfe diese 3 Dinge:
-> 1. *Akku:* Schaltet der Akku überhaupt Strom frei (LED-Anzeige am Akku an)?
-> 2. *Bremse:* Klemmt der Bremskontakt? Wenn die Steuerung denkt, dass du bremst, wird der Motor komplett totgeschaltet. Ziehe den Bremsstecker testweise ab.
-> 3. *PAS-Sensor:* Im Standard-Modus dreht der Motor **erst**, wenn du kräftig in die Pedale trittst. Drehe die Kurbel vorwärts – blinkt die kleine rote Diode am PAS-Sensor bei jedem Magneten?
+Auf Systemen mit integriertem Wireless-SoC (z. B. ESP32) stehen autarke Funktransporte bereit:
 
-### ❓ F02: Der Motor ruckelt nur oder brummt komisch.
-> **Antwort:** Bei bürstenlosen Motoren (BLDC) sind meist zwei der drei dicken Motorphasenkabel (Blau, Grün, Gelb) vertauscht oder haben schlechten Kontakt. Tausche zwei Phasen untereinander, um die Drehrichtung zu korrigieren.
+### Bluetooth RFCOMM / SPP (Android HMI & Logger):
+1. Am Endgerät Bluetooth aktivieren und nach `APC-Pedelec` suchen.
+2. Koppeln mittels Standard-PIN: `1234`.
+3. Kompatibel mit Android HMI und Standard-Telemetrie-Decodern.
 
-### ❓ F03: Mein Tacho zeigt immer 0,0 km/h an, obwohl ich fahre!
-> **Antwort:** Der Speichenmagnet ist verrutscht! Er muss mit maximal 2–3 mm Abstand am Sensor vorbeilaufen. Drehe das Rad mit der Hand und schau, ob der Magnet genau auf Höhe des Sensor-Strichs vorbeiläuft.
-
-### ❓ F04: Wenn ich aufhöre zu treten, schiebt der Motor noch 1 Sekunde weiter!
-> **Antwort:** Das liegt am `pas_timeout`. Im Konfigurator steht er standardmäßig auf 500 ms (eine halbe Sekunde). Wenn du eine Magnetscheibe mit 12 Magneten hast, kannst du den Wert im Konfigurator auf `250` oder `300 ms` verkürzen – dann stoppt der Motor blitzschnell!
-
-### ❓ F05: Mein Gasgriff reagiert gar nicht.
-> **Antwort:** Im Standard-Modus (Stufe 0) darf der Gasgriff **nur bis 6 km/h** als Schiebehilfe arbeiten oder nur dann, wenn du gleichzeitig pedalisierst. Wenn du vollen Daumengas-Betrieb ohne Treten für Rennstrecken- oder Privatgeländenutzung willst, musst du das offene Menü mit deiner Freischalt-PIN freischalten.
-
-### ❓ F06: Die Akkuanzeige springt beim Beschleunigen stark nach unten!
-> **Antwort:** Das ist völlig normal und nennt sich "Spannungseinbruch unter Last" (Voltage Sag). Wenn der Motor viel Strom zieht, sinkt die Akkuspannung kurzfristig ab. Sobald du rollst, erholt sie sich wieder.
-
-### ❓ F07: Das Display bleibt komplett dunkel.
-> **Antwort:** Überprüfe, ob die Display-Versorgungsspannung (5 V oder Akkuspannung je nach Displaytyp) am Stecker anliegt. Bei Nokia-5110-Displays muss im Konfigurator der richtige Kontrastwert (`nud_display_contrast`, ca. 190) eingestellt sein.
-
-### ❓ F08: Mein Handy findet das WLAN "APC-Pedelec-WiFi" nicht.
-> **Antwort:** Hast du einen Controller mit ESP32-Chip? Ältere AVR-Arduino-Nanos haben kein WLAN. Falls du einen ESP32 hast: Prüfe im Konfigurator unter "Display & Funk", ob das Häkchen bei `wireless_wifi_softap` gesetzt ist.
-
-### ❓ F09: Brauche ich am iPhone eine spezielle App aus dem App Store?
-> **Antwort:** Nein! Apple erlaubt Bluetooth-Serial (SPP) nicht ohne teure Zusatzlizenzen. Deshalb hat METISA den eingebauten WLAN-Webserver: Verbinde dich einfach per WLAN und öffne `192.168.4.1` im Safari-Browser!
-
-### ❓ F10: Was bedeutet „Reifenumfang in mm“ und wie messe ich ihn?
-> **Antwort:** Das ist der Weg, den dein Reifen bei genau einer vollen Umdrehung auf der Straße abrollt.
-> *Tipp:* Mache mit Kreide einen Strich auf den Boden und auf deinen Reifen. Schiebe das Rad geradeaus, bis der Reifen genau eine Umdrehung gemacht hat, und mache wieder einen Strich. Miss den Abstand mit dem Zollstock (meist zwischen 2050 mm bei 26-Zoll und 2280 mm bei 29-Zoll).
-
-### ❓ F11: Was ist ein „Shunt“?
-> **Antwort:** Ein Shunt ist ein winziger, hochpräziser Messwiderstand auf der Platine. Durch ihn fließt der gesamte Strom deines Motors. Der Controller misst den winzigen Spannungsabfall daran und weiß dadurch auf das Milliampere genau, wie viel Kraft und Watt dein Motor gerade verbraucht.
-
-### ❓ F12: Was bedeutet „ECE-R 50 Blinker“?
-> **Antwort:** Das ist die offizielle europäische Fahrzeugnorm für Fahrtrichtungsanzeiger. Sie schreibt vor, dass Blinker gleichmäßig mit **1,5 Hertz (genau 90 Mal pro Minute)** blinken müssen. METISA hält diese Frequenz millimetergenau ein und schaltet den Blinker nach 20 Sekunden automatisch ab, falls du vergisst, ihn auszumachen.
-
-### ❓ F13: Was ist das „ESS Notbremsblinken“?
-> **Antwort:** ESS steht für *Emergency Stop Signal*. Wenn du schneller als 15 km/h fährst und voll in die Eisen gehst, leuchtet das Bremslicht nicht nur normal rot, sondern blinkt rasend schnell mit **3,5 Hertz (ca. 4 Mal pro Sekunde)**. Das warnt Autofahrer hinter dir vor einem Auffahrunfall – genau wie bei modernen Sportwagen!
-
-### ❓ F14: Warum geht meine Hupe nach 3 Sekunden plötzlich aus?
-> **Antwort:** Das ist der integrierte **Überhitzungsschutz**. Wenn dein Hupentaster klemmt oder jemand dauerhaft draufdrückt, würde die Spule der Hupe durchbrennen. Nach 3,0 Sekunden trennt METISA den Strom automatisch, bis du den Taster loslässt.
-
-### ❓ F15: Kann mein Akku tiefentladen und zerstört werden?
-> **Antwort:** Nein! METISA hat zwei Schutzschilde:
-> 1. Ab `vcutoff` (z. B. 33,0 V bei einem 36V-Akku) drosselt das System sanft die Motorleistung, um den Akku zu schonen.
-> 2. Erreicht der Akku `vemergency_shutdown` (z. B. 28,0 V), schaltet der Controller die Stromzufuhr zum Motor **vollständig ab**, um die Akkuzellen vor dem Tod zu retten.
-
-### ❓ F16: Welchen Kabelquerschnitt brauche ich bei 1000 Watt?
-> **Antwort:** Bei 1000 Watt fließen bei einem 36V-Akku knapp 28 Ampere! Verwende für Akku- und Motorphasen immer mindestens **2,5 mm²** (besser **4,0 mm²** Silikonkabel) und hochwertige XT60- oder XT90-Goldkontaktstecker. Dünne Klingeldrähte werden heiß und können schmelzen!
-
-### ❓ F17: Was passiert bei Regen und Nässe?
-> **Antwort:** Das Original METISA-Gehäuse ist nach Industriestandard IP67 geschützt. Achte beim Selberbauen darauf, dass alle Kabeldurchführungen nach unten zeigen (damit Tropfwasser ablaufen kann) und dichte Steckverbindungen mit Schrumpfschlauch oder Dichtmasse ab.
-
-### ❓ F18: Ich habe meine PIN für den offenen Modus vergessen!
-> **Antwort:** Öffne einfach das separate **SAGA LABS Freischalt-Portal** (`configurator/unlock_portal.html`), trage deine Controller-Seriennummer und E-Mail-Adresse ein und bestätige den Garantieverzicht. Deine persönliche Freischalt-PIN wird dir sofort erneut angezeigt und per E-Mail zugestellt.
-
-### ❓ F19: Warum geht das E-Bike nach 30 Minuten Nichtbenutzung von selbst aus?
-> **Antwort:** Das ist der `idle_shutdown_secs` (automatische Stromspar-Abschaltung). Wenn du dein Rad vor dem Supermarkt abstellst und vergisst auszuschalten, trennt METISA nach 30 Minuten das System, damit der Akku nicht leergesaugt wird.
-
-### ❓ F20: Kann ich einen 48V-Akku an einem 36V-Motor betreiben?
-> **Antwort:** Viele E-Bike-Motoren vertragen 48V problemlos und drehen dadurch etwas schneller. **Aber:** Du musst im Konfigurator zwingend die Akkuspannung auf 48V (Ladeschluss `54.6 V`, Cutoff `42.0 V`) anpassen! Tust du das nicht, denkt der Controller, ein voller 48V-Akku sei ein überladener 36V-Akku und verweigert den Dienst.
-
-### ❓ F21: Brauche ich zwingend Bremshebel mit elektrischem Kontakt?
-> **Antwort:** Es wird dringend empfohlen! Moderne Scheibenbremsen bringen das Rad zwar auch so zum Stehen, aber wenn der Motor bei einer Schreckbremsung noch für den Bruchteil einer Sekunde gegendrückt, verlängert sich dein Bremsweg unnötig.
-
-### ❓ F22: Wie stelle ich den Gasgriff ein, wenn er erst ab halbem Weg Gas gibt?
-> **Antwort:** Gehe im Konfigurator auf den Reiter "Live-Messung". Lies ab, welcher ADC-Wert angezeigt wird, wenn du den Gasgriff gar nicht berührst (z. B. 185) und welcher, wenn du voll durchdrückst (z. B. 860). Trage diese beiden Werte unter "Gasgriff & Taster" bei `Min ADC` und `Max ADC` ein – ab sofort reagiert dein Gasgriff butterweich von der ersten Millimeter-Bewegung an!
-
-### ❓ F23: Kann ich die Einstellungen auf die Werkseinstellungen zurücksetzen?
-> **Antwort:** Ja, lade im Konfigurator einfach das Profil `Default-metisa` oder lösche den Browser-Cache. Im Controller kannst du auch das EEPROM löschen (Befehl `clean_eeprom` im seriellen Monitor).
-
-### ❓ F24: Warum schaltet mein Scheinwerfer nicht ein?
-> **Antwort:** Prüfe, ob dein Scheinwerfer an den Lichtausgang des Controllers angeschlossen ist und ob der Schalter im Menü oder am Lenkertaster auf "EIN" steht. Bei vielen Displays schaltet ein langer Druck auf die "Pfeil-Nach-Oben"-Taste das Licht ein.
-
-### ❓ F25: Wo finde ich Hilfe, wenn ich gar nicht mehr weiterkomme?
-> **Antwort:** 
-> 1. Konsultiere das Pedelecforum (Deutschlands größte DIY-Community für den Arduino Pedelec Controller).
-> 2. Besuche die offizielle Support-Seite unter [sagalabs.de/metisa](https://sagalabs.de/metisa).
-> 3. Überprüfe die Protokolldateien im `docs/`-Ordner dieses Projekts.
+### IEEE 802.11 SoftAP (Universelles HTML5 Cockpit):
+1. WLAN-Verbindung mit SSID herstellen: **`APC-Pedelec-WiFi`**.
+2. WPA2-Passwort eingeben: **`21028600`**.
+3. Browser öffnen und die Gateway-Adresse aufrufen:  
+   **`http://192.168.4.1`**
+4. Das interaktive Cockpit stellt Telemetriedaten (Geschwindigkeit, DC-Spannung, Phasenstrom, Beleuchtungsstatus) verzögerungsfrei dar.
 
 ---
 
-## Teil 7: Das kleine E-Bike-Wörterbuch (Glossar)
+## Teil 6: Felddiagnose & System-FAQ (25 Prüffälle)
 
-* **Ampere (A):** Die Stromstärke. Wie viel "Saft" fließt gerade durch die Leitung?
-* **Volt (V):** Die elektrische Spannung. Wie viel "Druck" hat der Akku (typisch 36 V oder 48 V)?
-* **Watt (W):** Die Leistung. Rechnet sich ganz einfach: $\text{Volt} \times \text{Ampere} = \text{Watt}$. Bei $36\text{ V} \times 10\text{ A}$ leistet dein Motor 360 Watt.
-* **Wattstunden (Wh):** Die "Tankgröße" deines Akkus. Ein 500 Wh Akku kann 1 Stunde lang 500 Watt abgeben oder 2 Stunden lang 250 Watt.
-* **BLDC:** *Brushless Direct Current* (Bürstenloser Gleichstrommotor). Nahezu alle modernen E-Bike-Motoren sind bürstenlos und halten viele Jahre ohne Verschleiß.
-* **Kadenz:** Deine Trittfrequenz. Wie viele Kurbelumdrehungen machst du pro Minute (z. B. 70 U/min)?
-* **KERS / Rekuperation:** Energierückgewinnung beim Bremsen oder Bergabfahren. Der Motor wird zum Dynamo und lädt den Akku wieder etwas auf.
-* **PID-Regler:** Eine clevere mathematische Formel im Controller, die dafür sorgt, dass dein Motor sanft anfährt und nicht ruckartig nach vorne springt.
-* **StVZO:** Straßenverkehrs-Zulassungs-Ordnung in Deutschland (regelt die 25 km/h und 250 W Pedelec-Grenzen).
+### CASE 01: Null-Leistungsabgabe trotz aktivem Systemstatus.
+> **Diagnose:** 1. DC-Busspannung am Eingang prüfen (min. 28,0 V). 2. Bremshebel-Schaltzustand prüfen (geschlossener Kontakt forciert 0 W Notabschaltung). 3. PAS-Signalflanken im Live-Monitor verifizieren; im Standardprofil wird Leistung erst bei registrierter Kurbeldrehzahl freigegeben.
+
+### CASE 02: Drehmoment-Ruckeln oder Kommutierungsfehler beim Anlauf.
+> **Diagnose:** BLDC-Phasensequenz inkonsistent. Bei sensorlosen oder Block-Kommutierungs-Invertern zwei der drei Motorphasenleitungen (U, V, W) tauschen, um korrekte Phasenlage und Drehrichtung herzustellen.
+
+### CASE 03: Raddrehzahl-Signal verharrt statisch auf 0,0 km/h.
+> **Diagnose:** Reed- bzw. Hall-Sensor dejustiert. Der Speichenmagnet muss einen radialen Abstand von maximal 2,0 bis 3,0 mm zur Sensorstirnfläche aufweisen. Flankenerkennung im Live-Monitor gegenprüfen.
+
+### CASE 04: Motorischer Nachlauf nach Kurbelstillstand.
+> **Diagnose:** Der Parameter `pas_timeout` definiert die Latenz bis zur Abschaltung (Standard: 500 ms). Bei PAS-Scheiben mit 12 Magneten kann der Wert im Konfigurator auf `200 - 250 ms` herabgesetzt werden.
+
+### CASE 05: Gasgriff ohne Sollwertausgabe bei Null-Trittfrequenz.
+> **Diagnose:** Im Standard-Profil (Level 0) ist die reine Gasgriff-Funktion gesetzlich auf 6 km/h Anfahrhilfe limitiert. Für ungedrosselten Betrieb auf abgesperrten Strecken muss Level 2 über das Autorisierungsportal freigeschaltet werden.
+
+### CASE 06: DC-Bus-Spannungseinbruch unter Beschleunigungslast.
+> **Diagnose:** Physikalischer Spannungseinbruch (Voltage Sag) durch Innenwiderstand der Akkuzellen und Zuleitungsimpedanz. Bei hohem Innenwiderstand Zuleitungsquerschnitte (min. 2,5 - 4,0 mm²) und Zellgesundheit prüfen.
+
+### CASE 07: Display-Interface initialisiert nicht / Display bleibt dunkel.
+> **Diagnose:** Versorgungsspannung am Display-Port prüfen. Bei ST7789 Color TFT SPI-Signale (DC, CS, BL) und Hintergrundbeleuchtungs-Treiberstufe prüfen. Bei PCD8544 Monochrom-Displays Kontrast-Register im Konfigurator anpassen.
+
+### CASE 08: WLAN-SoftAP-Beacon "APC-Pedelec-WiFi" nicht auffindbar.
+> **Diagnose:** Controller-Chip prüfen. Ältere AVR-Targets verfügen über keinen Onboard-Transceiver. Bei ESP32-Targets sicherstellen, dass `wireless_wifi_softap` in der Konfiguration gesetzt und 2,4 GHz aktiviert ist.
+
+### CASE 09: Browser-Cockpit auf iOS- oder Desktop-Clients ohne App-Installation.
+> **Diagnose:** Keine native Applikation erforderlich. Nach Verbindung mit `APC-Pedelec-WiFi` (WPA2 Key `21028600`) im Browser `http://192.168.4.1` aufrufen; der autarke Webserver hostet das Cockpit plattformunabhängig.
+
+### CASE 10: Radumfangskalibrierung in Millimetern.
+> **Diagnose:** Der Parameter `nud_circumference` erfordert das exakte Abrollmaß in mm unter Fahrergewicht (z. B. 2200 mm bei 28 Zoll / 700x38C). Fehlerhafte Werte verfälschen Geschwindigkeits- und Odometrie-Berechnungen.
+
+### CASE 11: Stromerfassung und Shunt-Kalibrierfaktor.
+> **Diagnose:** Die Stromerfassung erfolgt über einen Low-Side-Messshunt. Der Parameter `nud_current_amplitude` [A/ADC] skaliert die ADC-Werte präzise in Ampere für Watt- und Kapazitätsintegratoren.
+
+### CASE 12: Fahrtrichtungsanzeiger nach ECE-R 50 Spezifikation.
+> **Diagnose:** Die integrierte Blinkgeber-Logik taktet mit exakt 1,5 Hz (90 Zyklen/min) bei 50% Tastverhältnis. Die automatische Abschaltung (Auto-Cancel) deaktiviert das Signal nach 20 Sekunden Fahrtzeit.
+
+### CASE 13: Emergency Stop Signal (ESS) Notbrems-Stroboskop.
+> **Diagnose:** Bei Bremsbetätigung oberhalb von 15 km/h und starker Verzögerung taktet die Bremslicht-Endstufe mit 3,5 Hz Hochfrequenz-Stroboskop, um Folgeverkehr vor drohender Kollision zu warnen.
+
+### CASE 14: Thermische Sicherheitsabschaltung der Signalhupe.
+> **Diagnose:** Zum Schutz der Spulenwicklung vor Überhitzung begrenzt metisa die kontinuierliche Bestromung der Hupe auf maximal 3,0 Sekunden. Nach Tasterentlastung erfolgt sofortige Reaktivierung.
+
+### CASE 15: Tiefentladeschutz und Notabschalt-Schwellen.
+> **Diagnose:** Zwei Sicherheitsstufen: 1. `vcutoff` (z. B. 33,0 V bei 10S) bewirkt kontinuierliches Leistungsderating. 2. `vemergency_shutdown` (28,0 V) forciert komplette Endstufen-Abschaltung.
+
+### CASE 16: Leiterquerschnitte und Steckverbinder für Hochstrom-Anwendungen.
+> **Diagnose:** Für Dauerströme bis 25 A mindestens 2,5 mm², oberhalb 25 A min. 4,0 mm² hochflexible Silikonleitung (AWG 12/AWG 10) und korrosionsfeste Goldkontakte (XT60 / XT90-S mit Anti-Spark) verwenden.
+
+### CASE 17: Umgebungsbedingungen und IP-Schutzklasse.
+> **Diagnose:** Gehäuse und Kabeldurchführungen sind nach Schutzart IP67 ausgeführt. Bei individueller Integration Kabelverschraubungen nach unten ausrichten und Kondenswasserbildung durch Druckausgleichselemente verhindern.
+
+### CASE 18: Verlust des Track-Kalibrierungs-PIN-Codes.
+> **Diagnose:** Der Autorisierungs-PIN-Code wird kryptografisch aus der Hardware-Seriennummer und einem geschützten Salt abgeleitet. Er kann jederzeit im offiziellen Autorisierungsportal unter Angabe der Seriennummer erneut abgerufen werden.
+
+### CASE 19: Automatisches Sleep-Timeout nach Inaktivität.
+> **Diagnose:** Der Parameter `idle_shutdown_secs` versetzt den Controller nach programmierter Inaktivität (Standard: 1800 s = 30 min) in den Ruhezustand, um Ruhestromverluste am Akku zu eliminieren.
+
+### CASE 20: Adaption abweichender DC-Bus-Spannungsniveaus (z. B. 48V / 13S).
+> **Diagnose:** Hardwarekompatibilität vorausgesetzt, müssen im Konfigurator Ladeschlussspannung (54,6 V), Derating-Start (42,0 V) und Notabschalt-Schwelle (39,0 V) exakt an die Zellchemie angepasst werden.
+
+### CASE 21: Notwendigkeit elektrischer Bremskontaktschalter.
+> **Diagnose:** Elektrische Unterbrecherkontakte sind sicherheitskritisch. Sie garantieren die unverzügliche Endstufen-Abschaltung unabhängig von I-Anteilen des PID-Reglers und verhindern Gegenmoment-Überlastungen.
+
+### CASE 22: Hall-Gasgriff Kalibrierung und Totband-Justage.
+> **Diagnose:** Über den Live-Monitor den Ruhewert (z. B. ADC 185) und den Vollausschlag (z. B. ADC 860) erfassen. Diese Werte als `nud_throttle_min` und `nud_throttle_max` eintragen; Signale außerhalb dieses Bereichs werden als Sensorfehler gewertet.
+
+### CASE 23: Wiederherstellung der Werkseinstellungen (EEPROM Reset).
+> **Diagnose:** Profil `Default-metisa` im Konfigurator laden. Über die serielle Diagnoseschnittstelle kann das EEPROM mittels des Kommandos `clean_eeprom` vollständig auf Werkszustand bereinigt werden.
+
+### CASE 24: Fehlende Bestromung des Scheinwerfer-Ausgangs.
+> **Diagnose:** Solid-State-Lichtschalterstufe prüfen. Im Konfigurator prüfen, ob `metisa_headlight` aktiviert ist. Zustand im HMI-Displaymenü oder über dedizierten Lenkertaster toggeln.
+
+### CASE 25: Technischer Eskalationssupport und Firmware-Archiv.
+> **Diagnose:** Dokumentation, Schaltpläne und Firmware-Quellcodes stehen im offiziellen SaGa Labs Metisa Orbit Repository bereit. Für technische Audits und Laborprüfungen stehen die automatisierten Testbench-Harnesses zur Verfügung.
+
+---
+
+## Teil 7: Technisches Glossar & Kenngrößen
+
+* **Ampere (A):** Elektrische Stromstärke. Maß für den momentanen Ladungsträgerfluss durch die Leitungsquerschnitte.
+* **Volt (V):** Elektrisches Potenzial bzw. Spannung am DC-Bus.
+* **Leistung (W):** Elektrische Wirkleistung: $P = U \times I$.
+* **Energieinhalt (Wh):** Zeitintegral der Wirkleistung: $E = \int P(t)\,dt$.
+* **BLDC:** *Brushless Direct Current* (Bürstenloser Gleichstrommotor mit permanentmagnetischem Rotor).
+* **Kadenz:** Trittfrequenz in Kurbelumdrehungen pro Minute (RPM).
+* **Rekuperation:** Rückspeisung kinetischer Energie in den DC-Bus bei elektrischer Bremsverzögerung.
+* **PID-Regler:** Proportional-Integral-Differential-Regler zur kontinuierlichen Ausregelung der Motorlast ohne Regelschwingungen.
+* **ECE-R 50 / EN 15194:** Internationale Normen für lichttechnische Einrichtungen von Zweirädern bzw. Pedelec-Sicherheit.

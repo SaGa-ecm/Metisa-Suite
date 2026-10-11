@@ -258,24 +258,50 @@ function renderCanvasGraph() {
   const w = canvas.width = canvas.parentElement.clientWidth || 400;
   const h = canvas.height = 180;
 
-  ctx.clearRect(0, 0, w, h);
+  // Obsidian high-density background
+  ctx.fillStyle = "#090c13";
+  ctx.fillRect(0, 0, w, h);
 
-  // Background grid in subtle SAGA tech style
-  ctx.strokeStyle = "rgba(255, 85, 0, 0.12)";
+  const leftMargin = 42;
+  const bottomMargin = 24;
+  const topMargin = 12;
+  const rightMargin = 16;
+  const plotW = w - leftMargin - rightMargin;
+  const plotH = h - bottomMargin - topMargin;
+
+  // Grid background: 1px hairline engineering grid
+  ctx.strokeStyle = "#161e2e";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  for (let x = 40; x < w; x += 50) { ctx.moveTo(x, 0); ctx.lineTo(x, h - 25); }
-  for (let y = 10; y < h - 25; y += 30) { ctx.moveTo(40, y); ctx.lineTo(w, y); }
+  for (let x = leftMargin; x <= w - rightMargin; x += Math.max(30, plotW / 7)) {
+    ctx.moveTo(Math.round(x) + 0.5, topMargin);
+    ctx.lineTo(Math.round(x) + 0.5, h - bottomMargin);
+  }
+  for (let y = topMargin; y <= h - bottomMargin; y += Math.max(20, plotH / 5)) {
+    ctx.moveTo(leftMargin, Math.round(y) + 0.5);
+    ctx.lineTo(w - rightMargin, Math.round(y) + 0.5);
+  }
   ctx.stroke();
 
-  // Axis Labels in SAGA brand style
-  ctx.fillStyle = "#8892b0";
-  ctx.font = "600 10px 'Chakra Petch', sans-serif";
-  ctx.fillText("0 km/h", 40, h - 10);
-  ctx.fillText("25 km/h", Math.min(w - 60, 40 + (w - 70) * (25 / 35)), h - 10);
-  ctx.fillText("35 km/h", w - 45, h - 10);
-  ctx.fillStyle = "#ff5500";
-  ctx.fillText("W", 15, 20);
+  // Axis lines
+  ctx.strokeStyle = "#273248";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(leftMargin, topMargin);
+  ctx.lineTo(leftMargin, h - bottomMargin);
+  ctx.lineTo(w - rightMargin, h - bottomMargin);
+  ctx.stroke();
+
+  // Axis Labels & Monospace Engineering Units
+  ctx.fillStyle = "#64748b";
+  ctx.font = "600 9px 'JetBrains Mono', 'SF Mono', monospace";
+  ctx.fillText("0", leftMargin - 10, h - bottomMargin + 14);
+  ctx.fillText("15", leftMargin + plotW * (15 / 35) - 6, h - bottomMargin + 14);
+  ctx.fillText("25", leftMargin + plotW * (25 / 35) - 6, h - bottomMargin + 14);
+  ctx.fillText("35 km/h", w - rightMargin - 40, h - bottomMargin + 14);
+
+  ctx.fillStyle = "#ff6200";
+  ctx.fillText("POWER [W]", 6, topMargin + 10);
 
   // Curve Parameters
   const pMax = appState.nud_power_max || 250;
@@ -284,7 +310,7 @@ function renderCanvasGraph() {
   const pThermal = appState.nud_power_thermal || 150;
 
   const maxDisplaySpd = 35;
-  const maxDisplayPower = Math.max(pMax * 1.2, 500);
+  const maxDisplayPower = Math.max(pMax * 1.25, 500);
 
   // Calculate Curve Points
   const points = [];
@@ -296,50 +322,61 @@ function renderCanvasGraph() {
       power = pMax * (1 - (kmh - spdStart) / (spdStop - spdStart));
     }
 
-    const x = 40 + (w - 55) * (kmh / maxDisplaySpd);
-    const y = (h - 25) - ((h - 40) * (power / maxDisplayPower));
+    const x = leftMargin + plotW * (kmh / maxDisplaySpd);
+    const y = (h - bottomMargin) - (plotH * (power / maxDisplayPower));
     points.push({ x, y });
   }
 
-  // Draw Gradient Area Under Curve (Matching Cockpit App in screenshot)
-  const grad = ctx.createLinearGradient(0, 0, 0, h - 25);
-  grad.addColorStop(0, "rgba(255, 85, 0, 0.35)");
-  grad.addColorStop(1, "rgba(255, 85, 0, 0.0)");
+  // Draw Gradient Area Under Curve
+  const grad = ctx.createLinearGradient(0, topMargin, 0, h - bottomMargin);
+  grad.addColorStop(0, "rgba(255, 98, 0, 0.22)");
+  grad.addColorStop(1, "rgba(255, 98, 0, 0.0)");
 
   ctx.fillStyle = grad;
   ctx.beginPath();
-  ctx.moveTo(points[0].x, h - 25);
+  ctx.moveTo(points[0].x, h - bottomMargin);
   for (const pt of points) { ctx.lineTo(pt.x, pt.y); }
-  ctx.lineTo(points[points.length - 1].x, h - 25);
+  ctx.lineTo(points[points.length - 1].x, h - bottomMargin);
   ctx.closePath();
   ctx.fill();
 
-  // Draw SAGA LABS Neon Orange Power Curve
-  ctx.strokeStyle = "#ff5500";
-  ctx.lineWidth = 2.5;
-  ctx.shadowColor = "rgba(255, 85, 0, 0.6)";
-  ctx.shadowBlur = 8;
+  // Draw Primary Dyno Power Curve
+  ctx.strokeStyle = "#ff6200";
+  ctx.lineWidth = 2;
   ctx.beginPath();
   for (let i = 0; i < points.length; i++) {
     if (i === 0) ctx.moveTo(points[i].x, points[i].y);
     else ctx.lineTo(points[i].x, points[i].y);
   }
   ctx.stroke();
-  ctx.shadowBlur = 0; // reset
+
+  // Vertical Cutoff Indicator Line
+  const xCutoff = leftMargin + plotW * (spdStop / maxDisplaySpd);
+  ctx.strokeStyle = "#ef4444";
+  ctx.setLineDash([2, 3]);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(xCutoff, topMargin);
+  ctx.lineTo(xCutoff, h - bottomMargin);
+  ctx.stroke();
+  ctx.setLineDash([]);
 
   // Draw Thermal Limit dashed line
   ctx.strokeStyle = "#f59e0b";
   ctx.setLineDash([4, 4]);
-  ctx.lineWidth = 1.5;
-  const yThermal = (h - 25) - ((h - 40) * (pThermal / maxDisplayPower));
+  ctx.lineWidth = 1;
+  const yThermal = (h - bottomMargin) - (plotH * (pThermal / maxDisplayPower));
   ctx.beginPath();
-  ctx.moveTo(40, yThermal);
-  ctx.lineTo(w - 15, yThermal);
+  ctx.moveTo(leftMargin, yThermal);
+  ctx.lineTo(w - rightMargin, yThermal);
   ctx.stroke();
   ctx.setLineDash([]);
 
+  // Annotations
   ctx.fillStyle = "#f59e0b";
-  ctx.fillText(`Thermal: ${pThermal}W`, w - 100, yThermal - 5);
+  ctx.fillText(`THERMAL LIMIT: ${pThermal} W`, w - rightMargin - 120, yThermal - 4);
+  ctx.fillStyle = "#ef4444";
+  ctx.fillText(`CUTOFF: ${spdStop} km/h`, xCutoff + 4, topMargin + 10);
 }
 
 // -------------------------------------------------------------
@@ -720,7 +757,7 @@ function updateConnectionUI(connected, label) {
   if (dot) dot.classList.toggle("connected", connected);
   if (text) text.textContent = label;
   if (btn) {
-    btn.textContent = connected ? "Trennen" : "USB Verbinden";
+    btn.textContent = connected ? "TRENNEN" : "VERBINDEN";
     btn.classList.toggle("btn-danger", connected);
     btn.classList.toggle("btn-primary", !connected);
   }
@@ -759,28 +796,28 @@ function closeConfigModal() {
 function copyConfigToClipboard() {
   const code = generateConfigHeader();
   navigator.clipboard.writeText(code).then(() => {
-    showToast("config.h in die Zwischenablage kopiert!", "success");
+    showToast("config.h in die Zwischenablage kopiert.", "success");
   });
 }
 
 function downloadConfigHeader() {
   const code = generateConfigHeader();
   downloadBlob(code, "config.h", "text/x-c");
-  showToast("config.h heruntergeladen!", "success");
+  showToast("config.h exportiert.", "success");
 }
 
 function downloadApcProfile() {
   const apc = exportApcString();
   const filename = `${appState.profile_name || "apc_profile"}.apc`;
   downloadBlob(apc, filename, "text/plain");
-  showToast(`${filename} exportiert!`, "success");
+  showToast(`${filename} exportiert.`, "success");
 }
 
 function downloadJsonProfile() {
   const jsonStr = JSON.stringify(appState, null, 2);
   const filename = `${appState.profile_name || "apc_profile"}.json`;
   downloadBlob(jsonStr, filename, "application/json");
-  showToast(`${filename} exportiert!`, "success");
+  showToast(`${filename} exportiert.`, "success");
 }
 
 function triggerProfileUpload() {
@@ -801,9 +838,9 @@ function handleProfileFileSelect(event) {
         appState = { ...defaultState, ...parsed };
         setupFormBindings();
         renderCanvasGraph();
-        showToast("JSON Profil geladen", "success");
+        showToast("JSON Profil geladen.", "success");
       } catch (err) {
-        showToast("Ungültige JSON-Datei", "error");
+        showToast("Ungültiges JSON-Profil.", "error");
       }
     } else {
       // Legacy .apc format
@@ -855,7 +892,7 @@ function verifyAndUnlockRaceMode() {
 
   if (!enteredPin) {
     if (errorBox) {
-      errorBox.textContent = "Bitte geben Sie Ihre Freischalt-PIN ein.";
+      errorBox.textContent = "Bitte Autorisierungs-PIN eingeben.";
       errorBox.style.display = "block";
     }
     return;
@@ -883,22 +920,22 @@ function verifyAndUnlockRaceMode() {
     if (lockedBox) lockedBox.style.display = "none";
     if (unlockedBox) unlockedBox.style.display = "block";
     if (badge) {
-      badge.textContent = "FREIGESCHALTET";
+      badge.textContent = "AUTORISIERT";
       badge.className = "badge badge-race";
     }
     if (statusVal) {
-      statusVal.textContent = "🔓 Rennstrecke & Privatgelände (Offenes Menü aktiv)";
+      statusVal.textContent = "AUTORISIERT // RENNSTRECKE & DOKUMENTIERTES PRIVATGELÄNDE";
       statusVal.className = "tech-status-val status-unlocked";
     }
     if (errorBox) errorBox.style.display = "none";
 
-    showToast("Offenes Menü erfolgreich freigeschaltet!", "success");
+    showToast("Offenes Kalibriermenü autorisiert.", "success");
   } else {
     if (errorBox) {
-      errorBox.textContent = "Ungültige Freischalt-PIN. Bitte prüfen Sie Ihre Seriennummer oder fordern Sie die PIN im Freischalt-Portal an.";
+      errorBox.textContent = "Ungültige Freischalt-PIN. Bitte Seriennummer überprüfen oder PIN im Autorisierungsportal anfordern.";
       errorBox.style.display = "block";
     }
-    showToast("Freischaltung fehlgeschlagen: Ungültige PIN", "error");
+    showToast("Autorisierung fehlgeschlagen: Ungültiger PIN-Code.", "error");
   }
 }
 
@@ -916,12 +953,12 @@ function lockRaceMode() {
     badge.className = "badge badge-legal";
   }
   if (statusVal) {
-    statusVal.textContent = "🔒 Standard-Modus (Begrenzt auf 25 km/h / 250 W)";
+    statusVal.textContent = "AKTIV // STANDARD-STVZO DERATING (25 km/h | 250 W)";
     statusVal.className = "tech-status-val status-locked";
   }
   if (pinInput) pinInput.value = "";
 
-  showToast("Rennstrecken-Modus wieder gesperrt", "info");
+  showToast("Rennstrecken-Kalibrierung gesperrt. Standard-Derating aktiv.", "info");
 }
 
 function switchTab(targetId) {

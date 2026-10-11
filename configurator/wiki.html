@@ -3,516 +3,656 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAGA LABS | METISA Wiki & FAQ Handbuch</title>
-  <meta name="description" content="Verständliches Einsteiger-Handbuch, Verkabelungsanleitung und FAQ für den SAGA LABS METISA E-Bike Controller.">
+  <title>SAGA LABS METISA // OPERATION & INTEGRATION MANUAL</title>
+  <meta name="description" content="DIN/ISO-konformes technisches Betriebshandbuch, Pinbelegung, Busspezifikationen und Felddiagnose für metisa E-Bike Controller.">
   <link rel="stylesheet" href="style.css">
   <style>
-    .wiki-container {
+    .wiki-shell {
       max-width: 1100px;
-      margin: 1.5rem auto 3rem auto;
-      padding: 0 1.5rem;
+      margin: 1.5rem auto 3.5rem auto;
+      padding: 0 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1.5rem;
     }
 
-    .wiki-search-box {
-      width: 100%;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-hover);
-      border-radius: var(--radius-md);
-      padding: 1rem 1.25rem;
-      font-size: 1rem;
-      color: var(--text-white);
-      font-family: var(--font-body);
-      box-shadow: 0 0 20px rgba(255, 85, 0, 0.15);
-      transition: var(--transition);
+    .manual-hero {
+      background: var(--orbit-bg-card);
+      border: 1px solid var(--orbit-border-subtle);
+      border-left: 3px solid var(--orbit-orange);
+      border-radius: var(--orbit-radius-sm);
+      padding: 1.5rem 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
     }
-    .wiki-search-box:focus {
+
+    .manual-hero-title {
+      font-family: var(--orbit-font-brand);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--orbit-text-primary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .manual-hero-sub {
+      font-size: 0.8rem;
+      color: var(--orbit-text-muted);
+      line-height: 1.6;
+      max-width: 720px;
+    }
+
+    .manual-meta-block {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .manual-meta-pill {
+      font-family: var(--orbit-font-mono);
+      font-size: 0.68rem;
+      color: var(--orbit-text-secondary);
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-medium);
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--orbit-radius-xs);
+      text-transform: uppercase;
+    }
+
+    .quick-jump-bar {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      margin-top: 0.85rem;
+    }
+
+    .quick-jump-link {
+      font-family: var(--orbit-font-mono);
+      font-size: 0.7rem;
+      color: var(--orbit-text-secondary);
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-subtle);
+      padding: 0.3rem 0.65rem;
+      border-radius: var(--orbit-radius-xs);
+      text-decoration: none;
+      transition: var(--orbit-transition);
+    }
+    .quick-jump-link:hover {
+      color: var(--orbit-orange);
+      border-color: var(--orbit-orange);
+      background: var(--orbit-bg-input-focus);
+    }
+
+    .wiki-search-field {
+      width: 100%;
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-medium);
+      border-radius: var(--orbit-radius-xs);
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      color: var(--orbit-text-primary);
+      font-family: var(--orbit-font-mono);
+      transition: var(--orbit-transition);
+    }
+    .wiki-search-field:focus {
       outline: none;
-      border-color: var(--brand-orange);
-      box-shadow: 0 0 25px rgba(255, 85, 0, 0.35);
+      border-color: var(--orbit-orange);
+      box-shadow: 0 0 8px var(--orbit-orange-glow);
+    }
+
+    .section-headline {
+      font-family: var(--orbit-font-brand);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--orbit-text-primary);
+      margin-bottom: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .harness-card {
+      background: var(--orbit-bg-card);
+      border: 1px solid var(--orbit-border-subtle);
+      border-left: 2px solid var(--orbit-orange);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .harness-card-title {
+      font-family: var(--orbit-font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--orbit-text-primary);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .harness-card-title span.tag {
+      color: var(--orbit-orange);
+      font-size: 0.68rem;
+    }
+
+    .harness-card p {
+      font-size: 0.76rem;
+      color: var(--orbit-text-secondary);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .faq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
     }
 
     .faq-item {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
+      background: var(--orbit-bg-card);
+      border: 1px solid var(--orbit-border-subtle);
+      border-radius: var(--orbit-radius-xs);
       overflow: hidden;
-      transition: var(--transition);
-      margin-bottom: 0.85rem;
+      transition: var(--orbit-transition);
     }
     .faq-item:hover {
-      border-color: var(--border-hover);
+      border-color: var(--orbit-border-medium);
     }
+
     .faq-header {
-      padding: 1.1rem 1.4rem;
+      padding: 0.75rem 1.15rem;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-family: var(--font-brand);
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-white);
+      font-family: var(--orbit-font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--orbit-text-primary);
       user-select: none;
     }
-    .faq-header .toggle-icon {
-      color: var(--brand-orange-bright);
-      font-size: 1.25rem;
-      transition: transform 0.2s ease;
-    }
-    .faq-body {
-      padding: 0 1.4rem 1.25rem 1.4rem;
+
+    .faq-header .toggle-symbol {
+      color: var(--orbit-orange);
+      font-family: var(--orbit-font-mono);
       font-size: 0.9rem;
-      line-height: 1.7;
-      color: var(--text-silver);
-      display: none;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 1rem;
+      font-weight: 700;
+      transition: transform 0.15s ease;
     }
+
+    .faq-body {
+      padding: 0 1.15rem 0.85rem 1.15rem;
+      font-size: 0.75rem;
+      line-height: 1.65;
+      color: var(--orbit-text-secondary);
+      display: none;
+      border-top: 1px solid var(--orbit-border-subtle);
+      padding-top: 0.75rem;
+    }
+
     .faq-item.open .faq-body {
       display: block;
     }
-    .faq-item.open .toggle-icon {
+
+    .faq-item.open .toggle-symbol {
       transform: rotate(45deg);
-    }
-
-    .wiring-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-left: 4px solid var(--brand-orange);
-      border-radius: var(--radius-md);
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .wiring-title {
-      font-family: var(--font-brand);
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--brand-orange-bright);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .quick-nav-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation & Header Bar -->
+  <!-- SVG Sprite Collection -->
+  <svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </symbol>
+    <symbol id="icon-manual" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </symbol>
+    <symbol id="icon-telemetry" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </symbol>
+  </svg>
+
+  <!-- Client Header Toolbar -->
   <header class="app-header">
-    <div class="brand-group">
+    <div class="brand-group" onclick="window.location.href='index.html'" style="cursor: pointer;">
       <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 26L18 8L23 10L13 28L8 26Z" fill="#ff5500"/>
+        <path d="M8 26L18 8L23 10L13 28L8 26Z" fill="#ff6200"/>
         <path d="M16 32L26 14L31 16L21 34L16 32Z" fill="#ff7700"/>
-        <path d="M11 28C11 28 17 22 25 22C31 22 35 27 35 27" stroke="#ff5500" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M11 28C11 28 17 22 25 22C31 22 35 27 35 27" stroke="#ff6200" stroke-width="2" stroke-linecap="round"/>
       </svg>
       <div class="brand-text-block">
         <span class="saga-title">SAGA</span>
         <span class="saga-labs-sub">LABS</span>
         <div class="brand-divider"></div>
-        <span class="metisa-title">WIKI & FAQ</span>
+        <span class="metisa-title">METISA ORBIT</span>
       </div>
     </div>
 
     <div class="header-actions">
-      <a href="unlock_portal.html" target="_blank" class="btn btn-saga-outline">
-        <span>🔑</span> Freischalt-Portal
+      <a href="unlock_portal.html" class="btn btn-secondary">
+        <svg class="icon-svg"><use href="#icon-shield"/></svg> AUTH PORTAL
       </a>
-      <a href="index.html" class="btn btn-saga-primary">
-        <span>⬅️</span> Zurück zum Konfigurator
+      <a href="index.html" class="btn btn-primary">
+        <svg class="icon-svg"><use href="#icon-gear"/></svg> CONFIGURATOR CLIENT
       </a>
     </div>
   </header>
 
-  <!-- Hero Header -->
-  <section class="hero-saga-banner" style="margin-bottom: 0;">
-    <div class="hero-left-content">
-      <span class="hero-tagline">EINFACH ERKLÄRT &bull; SCHRITT FÜR SCHRITT</span>
-      <h1 class="hero-headline">
-        DAS METISA <span class="highlight-orange">EINSTEIGER-HANDBUCH</span>
-      </h1>
-      <p class="hero-description">
-        Keine Fachbegriffe, kein Kauderwelsch. Hier erfährst du kinderleicht, wie du dein E-Bike anschließt, per Handy steuerst und typische Probleme in wenigen Minuten selbst löst.
-      </p>
-      <div class="quick-nav-pills">
-        <a href="#verkabelung" class="hotspot-pill">🔌 Stecker & Kabel</a>
-        <a href="#pin-system" class="hotspot-pill">🔒 PIN & Rennstrecken-Modus</a>
-        <a href="#handy-funk" class="hotspot-pill">📡 WLAN & Bluetooth</a>
-        <a href="#faq-section" class="hotspot-pill">❓ Die 25 FAQ-Fragen</a>
+  <!-- Wiki Shell Container -->
+  <div class="wiki-shell">
+
+    <!-- Manual Hero Banner -->
+    <div class="manual-hero">
+      <div>
+        <div class="manual-hero-title">SYSTEM OPERATION & INTEGRATION MANUAL</div>
+        <div class="manual-hero-sub">
+          DIN/ISO-konforme technische Dokumentation für Leitungsstrang-Konfektionierung, Signalpegel, kryptografische PIN-Sicherheitsstufen und systematische Felddiagnose.
+        </div>
+        <div class="quick-jump-bar">
+          <a href="#pinout" class="quick-jump-link">HARNESS PINOUT</a>
+          <a href="#profiles" class="quick-jump-link">CALIBRATION HIERARCHY</a>
+          <a href="#telemetry" class="quick-jump-link">TELEMETRY & WIRELESS</a>
+          <a href="#faq" class="quick-jump-link">FIELD DIAGNOSTICS (25 CASES)</a>
+        </div>
+      </div>
+      <div class="manual-meta-block">
+        <span class="manual-meta-pill">REVISION 1.43-METISA</span>
+        <span class="manual-meta-pill">IP67 SPECIFICATION</span>
+        <span class="manual-meta-pill">ECE-R 50 COMPLIANT</span>
       </div>
     </div>
-    <div class="hero-right-badge">
-      <div class="hardware-spec-pill">100% Einsteigerfreundlich</div>
-      <div class="hardware-spec-pill">Pannenhilfe & Checklisten</div>
-    </div>
-  </section>
 
-  <!-- Main Wiki Content Container -->
-  <div class="wiki-container">
-
-    <!-- Interactive Search Box -->
+    <!-- Diagnostic Search Input -->
     <div>
-      <input type="text" id="faqSearchInput" class="wiki-search-box" placeholder="🔍 Suche nach einem Problem (z. B. 'Motor ruckelt', 'WLAN', 'PIN', 'Gasgriff', 'Akku')...">
+      <input type="text" id="faqSearchInput" class="wiki-search-field" placeholder="FILTER DIAGNOSTICS (E.G. 'BUS TIMING', 'PAS JITTER', 'ADC OFFSET', 'THROTTLE', 'BLDC PHASE')...">
     </div>
 
-    <!-- Section 1: Verkabelung -->
-    <section id="verkabelung">
-      <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
-        🔌 1. WELCHES KABEL GEHÖRT WOHIN? (STECK-ANLEITUNG)
-      </h2>
+    <!-- Section 1: Electrical Pinout -->
+    <section id="pinout">
+      <div class="section-headline">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-telemetry"/></svg>
+        1. ELECTRICAL INTERFACES & HARNESS PINOUT
+      </div>
       <div class="cards-grid">
-        <div class="wiring-card">
-          <div class="wiring-title">🔋 1. Akku-Stromversorgung (Hauptleitung)</div>
-          <p style="font-size: 0.85rem; color: var(--text-silver);">
-            <strong>Rot = Plus (+)</strong> | <strong>Schwarz = Minus (-)</strong><br>
-            ⚠️ <em>ACHTUNG:</em> Niemals verpolen! Vor jedem Umstecken immer den Akku ausschalten oder den Hauptstecker trennen.
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>DC BUS PRIMARY FEED</span>
+            <span class="tag">[VBAT / GND]</span>
+          </div>
+          <p>
+            <strong>Rot = DC Bus (+)</strong> | <strong>Schwarz = Power GND (-)</strong><br>
+            Nennspannung 24 V bis 48 V (Absolute Max. 60 V). Vor Leitungsänderungen stets Hauptschütz trennen. Verpolung führt zur Zerstörung der TVS-Schutzdioden.
           </p>
         </div>
-        <div class="wiring-card">
-          <div class="wiring-title">🚴 2. PAS-Tretsensor (Magnetscheibe)</div>
-          <p style="font-size: 0.85rem; color: var(--text-silver);">
-            Sitzt am Tretlager. Der Sensor muss <strong>1 bis 2 mm</strong> nah an der Magnetscheibe sitzen. Dreht sich die Scheibe beim Treten, blinkt die rote LED am Sensor.
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>PAS CADENCE SENSOR</span>
+            <span class="tag">[DIGITAL INT]</span>
+          </div>
+          <p>
+            Montage an Tretlagerachse. Luftspalt 1,0 bis 2,0 mm zum Hall-Array. Signalflanke triggert Pin-Change-Interrupt (ISR). Integrierte LED signalisiert Flankenerkennung.
           </p>
         </div>
-        <div class="wiring-card">
-          <div class="wiring-title">✊ 3. Gasgriff / Daumengas</div>
-          <p style="font-size: 0.85rem; color: var(--text-silver);">
-            3 Adern: <strong>Rot (5V)</strong>, <strong>Schwarz (Masse)</strong>, <strong>Blau/Grün (Signal 0-5V)</strong>.<br>
-            Ohne Treten bis max. 6 km/h als Schiebehilfe. Vollgas ohne Treten gibt es im offenen Rennstrecken-Modus nach Freischaltung per PIN.
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>ANALOG THROTTLE (HALL)</span>
+            <span class="tag">[0-5V ADC]</span>
+          </div>
+          <p>
+            3-polige Schnittstelle: <strong>5V AUX</strong>, <strong>GND</strong>, <strong>SIGNAL (0,8V - 4,2V)</strong>.<br>
+            Totband (Deadband) parametrierbar über <code>nud_throttle_min</code> und <code>nud_throttle_max</code> zur Leitungsbruch-Plausibilisierung.
           </p>
         </div>
-        <div class="wiring-card">
-          <div class="wiring-title">🛑 4. Bremshebel mit Unterbrecher</div>
-          <p style="font-size: 0.85rem; color: var(--text-silver);">
-            Schaltet bei leichtem Ziehen den Motor sofort aus und aktiviert hinten das Bremslicht. Bei Vollbremsung über 15 km/h blinkt das Notbremslicht mit 3,5 Hz!
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>SOLID-STATE BRAKE SWITCH</span>
+            <span class="tag">[SAFETY INTERLOCK]</span>
+          </div>
+          <p>
+            Öffner/Schließer-Logik softwareseitig invertierbar. Triggert sofortigen PWM-Zero-Output (&lt; 2 ms Latenz) und schaltet ECE-R 50 Bremslichtstufe aktiv.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- Section 2: PIN System -->
-    <section id="pin-system">
-      <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
-        🔒 2. BETRIEBSMODI & PIN-SCHUTZ (RENNSTRECKE & PRIVATGELÄNDE)
-      </h2>
-      <div class="promise-strip" style="margin: 0; padding: 0;">
-        <div class="promise-card">
-          <div class="promise-title">STANDARD-MODUS (WERKSEINSTELLUNG)</div>
-          <div class="promise-desc">
-            <strong>25 km/h & 250 Watt</strong>. Strikte Tretunterstützung (PAS). Gasgriff nur bis 6 km/h als Schiebehilfe. Wird bei <em>jedem</em> Neustart automatisch aktiv!
-          </div>
-        </div>
-        <div class="promise-card">
-          <div class="promise-title">STUFE 1: SPORT MODUS</div>
-          <div class="promise-desc">
-            <strong>32 km/h & 500 Watt</strong>. Erweiterte Leistungsstufe für sportlichen Einsatz.
-          </div>
-        </div>
-        <div class="promise-card" style="border-left-color: var(--accent-red);">
-          <div class="promise-title" style="color: var(--accent-red);">OFFENER MODUS (RENNSTRECKE & PRIVATGELÄNDE)</div>
-          <div class="promise-desc">
-            <strong>Bis 99 km/h & 3000 Watt</strong>. Reines Handgas ohne Treten freigeschaltet! Freischaltung nur mit autorisierter PIN aus dem SAGA LABS Freischalt-Portal.
-          </div>
-        </div>
+    <!-- Section 2: Calibration Profiles -->
+    <section id="profiles">
+      <div class="section-headline">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-shield"/></svg>
+        2. CALIBRATION PROFILES & AUTHORIZATION HIERARCHY
       </div>
-      <div style="margin-top: 1rem; background: rgba(255, 85, 0, 0.08); border: 1px solid rgba(255, 85, 0, 0.25); border-radius: var(--radius-md); padding: 1rem;">
-        <p style="font-size: 0.85rem; color: var(--text-silver); margin: 0; line-height: 1.6;">
-          <strong>Wie erhalte ich die Freischalt-PIN?</strong><br>
-          Aus rechtlichen und sicherheitstechnischen Gründen wird die PIN <em>nicht</em> im Konfigurator generiert und steht dort nicht im Klartext. Um eine Freischalt-PIN zu erhalten, besuche das <a href="unlock_portal.html" target="_blank" style="color: var(--brand-orange-bright); font-weight: 700;">SAGA LABS Freischalt-Portal</a>. Dort gibst du deine Controller-Seriennummer und E-Mail-Adresse ein und bestätigst die gesetzlichen Bestimmungen sowie den vollständigen Garantieverzicht. Die PIN wird anschließend generiert und dir zugestellt.
-        </p>
-      </div>
-    </section>
-
-    <!-- Section 3: Handy & Funk -->
-    <section id="handy-funk">
-      <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
-        📡 3. SMARTPHONE-VERBINDUNG (OHNE APP-STORE ZWANG)
-      </h2>
       <div class="cards-grid">
-        <div class="wiring-card">
-          <div class="wiring-title">📱 iPhone & alle Geräte (WLAN / WiFi)</div>
-          <p style="font-size: 0.85rem; color: var(--text-silver);">
-            1. Verbinde dein Handy mit dem WLAN: <strong>APC-Pedelec-WiFi</strong><br>
-            2. Passwort: <strong>21028600</strong><br>
-            3. Öffne im Safari/Chrome-Browser: <strong>http://192.168.4.1</strong><br>
-            Fertig! Sofort erscheint dein digitales Tacho-Cockpit.
+        <div class="harness-card" style="border-left-color: var(--orbit-status-green);">
+          <div class="harness-card-title">
+            <span>LEVEL 0: STANDARD REGULATORY DERATING</span>
+            <span class="tag" style="color: var(--orbit-status-green);">[ACTIVE ON BOOT]</span>
+          </div>
+          <p>
+            Striktes Derating nach EN 15194: 25 km/h Cutoff, 250 W Nenndauerleistung, Pflicht der Kurbelbetätigung (PAS Interlock), Schiebehilfe bis maximal 6 km/h. Wird bei jedem MCU-Reset autark geladen.
           </p>
         </div>
-        <div class="wiring-card">
-          <div class="wiring-title">🤖 Android HMI (Bluetooth Classic)</div>
-          <p style="font-size: 0.85rem; color: var(--text-silver);">
-            1. Bluetooth am Android-Handy einschalten.<br>
-            2. Nach <strong>APC-Pedelec</strong> suchen und koppeln (Code: 1234).<br>
-            3. HMI-App starten – verbindet sich automatisch mit dem Controller.
+        <div class="harness-card" style="border-left-color: var(--orbit-status-amber);">
+          <div class="harness-card-title">
+            <span>LEVEL 1: SPORT CALIBRATION</span>
+            <span class="tag" style="color: var(--orbit-status-amber);">[INTERMEDIATE]</span>
+          </div>
+          <p>
+            Erweiterte Fahrdynamik: 32 km/h Cutoff, 500 W Peak-Leistungsfreigabe. Parametrierbar für geschlossene Sportstrecken.
+          </p>
+        </div>
+        <div class="harness-card" style="border-left-color: var(--orbit-status-red);">
+          <div class="harness-card-title">
+            <span>LEVEL 2: TRACK & DYNO CALIBRATION</span>
+            <span class="tag" style="color: var(--orbit-status-red);">[PIN PROTECTED]</span>
+          </div>
+          <p>
+            Vollständige Freigabe: Bis 99 km/h, 3000 W Spitzenleistung, Direkt-Daumengas ohne PAS-Bindung. Autorisierung ausschließlich nach Signatur im SaGa Labs Freischalt-Portal.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- Section 4: Die 25 FAQ Fragen (Akkordeon) -->
-    <section id="faq-section">
-      <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
-        ❓ 4. DIE 25 HÄUFIGSTEN FRAGEN & ANTWORTEN (FAQ)
-      </h2>
+    <!-- Section 3: Telemetry & Wireless -->
+    <section id="telemetry">
+      <div class="section-headline">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-telemetry"/></svg>
+        3. TELEMETRY & WIRELESS TRANSPORTS (TCP/IP & BT SERIAL)
+      </div>
+      <div class="cards-grid">
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>ONBOARD IEEE 802.11 SOFTAP (HTML5 COCKPIT)</span>
+            <span class="tag">[PORT 80]</span>
+          </div>
+          <p>
+            SSID: <code>APC-Pedelec-WiFi</code> | WPA2 Key: <code>21028600</code><br>
+            Autarker Webserver liefert Low-Latency WebSocket/HTTP Telemetrie-Dashboard direkt an WebKit/Blink Clients unter <code>http://192.168.4.1</code>.
+          </p>
+        </div>
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>BLUETOOTH RFCOMM / SPP PROTOCOL</span>
+            <span class="tag">[115200 BAUD]</span>
+          </div>
+          <p>
+            Device ID: <code>APC-Pedelec</code> | PIN: <code>1234</code><br>
+            Serielles Kommunikationsprotokoll für Android HMI und externe Telemetrie-Logger (z. B. LogView, MMC).
+          </p>
+        </div>
+      </div>
+    </section>
 
-      <div id="faqList">
+    <!-- Section 4: System Diagnostics FAQ -->
+    <section id="faq">
+      <div class="section-headline">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-manual"/></svg>
+        4. SYSTEM DIAGNOSTICS & FIELD FAQ (25 DIAGNOSTIC CASES)
+      </div>
+
+      <div class="faq-container" id="faqList">
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F01: Mein Motor macht überhaupt keinen Mucks – was ist kaputt?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 01: Null-Leistungsabgabe trotz aktivem Systemstatus.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Prüfe 3 Dinge: 1. Ist der Akku eingeschaltet? 2. Klemmt ein Bremshebel? Wenn der Bremskontakt geschlossen ist, wird der Motor komplett gesperrt (Stecker testweise abziehen). 3. Trittst du in die Pedale? Im Standard-Modus dreht der Motor erst, wenn der PAS-Sensor Kurbeldrehungen registriert!
+            Diagnoseschritte: 1. DC-Busspannung am Eingang prüfen (min. 28,0 V). 2. Bremshebel-Schaltzustand prüfen (geschlossener Kontakt forciert 0 W Notabschaltung). 3. PAS-Signalflanken im Live-Monitor verifizieren; im Standardprofil wird Leistung erst bei registrierter Kurbeldrehzahl freigegeben.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F02: Der Motor stottert oder ruckelt beim Anfahren.</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 02: Drehmoment-Ruckeln oder Kommutierungsfehler beim Anlauf.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Bei bürstenlosen Motoren (BLDC) sind meist zwei der drei dicken Motorkabel (Blau, Grün, Gelb) vertauscht oder haben schlechten Kontakt. Tausche zwei Phasen untereinander, um die richtige Kommutierung und Drehrichtung zu finden.
+            BLDC-Phasensequenz inkonsistent. Bei sensorlosen oder Block-Kommutierungs-Invertern zwei der drei Motorphasenleitungen (U, V, W) tauschen, um korrekte Phasenlage und Drehrichtung herzustellen.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F03: Mein Tacho zeigt immer 0,0 km/h an, obwohl ich fahre!</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 03: Raddrehzahl-Signal verharrt statisch auf 0,0 km/h.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Der Speichenmagnet an der Felge hat sich verdreht. Er muss mit maximal 2 bis 3 mm Abstand am Sensor vorbeilaufen. Drehe das Rad von Hand und prüfe, ob der Magnet genau mittig am Sensor vorbeistreift.
+            Reed- bzw. Hall-Sensor dejustiert. Der Speichenmagnet muss einen radialen Abstand von maximal 2,0 bis 3,0 mm zur Sensorstirnfläche aufweisen. Flankenerkennung im Live-Monitor gegenprüfen.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F04: Wenn ich aufhöre zu treten, schiebt der Motor noch kurz weiter!</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 04: Motorischer Nachlauf nach Kurbelstillstand.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Das liegt am Wert <code>pas_timeout</code> im Konfigurator (Standard: 500 ms = eine halbe Sekunde). Bei einer 12-Magnet-Scheibe kannst du den Wert im Konfigurator auf <code>250 ms</code> stellen, dann schaltet der Motor sofort ab.
+            Der Parameter <code>pas_timeout</code> definiert die Latenz bis zur Abschaltung (Standard: 500 ms). Bei PAS-Scheiben mit 12 Magneten kann der Wert im Konfigurator auf <code>200 - 250 ms</code> herabgesetzt werden.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F05: Mein Daumengas reagiert gar nicht.</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 05: Gasgriff ohne Sollwertausgabe bei Null-Trittfrequenz.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Im Standard-Modus arbeitet das Daumengas nur bis 6 km/h als Schiebehilfe oder wenn du gleichzeitig in die Pedale trittst. Für Vollgas ohne Treten kannst du für Rennstrecken- und Privatgeländenutzung den offenen Modus mit deiner autorisierten Freischalt-PIN aktivieren.
+            Im Standard-Profil (Level 0) ist die reine Gasgriff-Funktion gesetzlich auf 6 km/h Anfahrhilfe limitiert. Für ungedrosselten Betrieb auf abgesperrten Strecken muss Level 2 über das Autorisierungsportal freigeschaltet werden.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F06: Die Akkuanzeige bricht beim Beschleunigen stark ein.</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 06: DC-Bus-Spannungseinbruch unter Beschleunigungslast.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Das ist normaler "Spannungseinbruch unter Last" (Voltage Sag). Zieht der Motor viel Strom, sinkt die Batteriespannung kurzfristig um 1 bis 3 Volt ab. Sobald du gleichmäßig rollst, steigt sie wieder an.
+            Physikalischer Spannungseinbruch (Voltage Sag) durch Innenwiderstand der Akkuzellen und Zuleitungsimpedanz. Bei hohem Innenwiderstand Zuleitungsquerschnitte (min. 2,5 - 4,0 mm²) und Zellgesundheit prüfen.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F07: Das Display bleibt komplett schwarz.</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 07: Display-Interface initialisiert nicht / Display bleibt dunkel.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Prüfe die Stromzufuhr am Displaystecker. Bei Nokia-5110-Displays muss im Konfigurator der Kontrastwert (Standard 190) passen. Bei ST7789-Farbdisplays prüfe die Hintergrundbeleuchtung (BL-Pin).
+            Versorgungsspannung am Display-Port prüfen. Bei ST7789 Color TFT SPI-Signale (DC, CS, BL) und Hintergrundbeleuchtungs-Treiberstufe prüfen. Bei PCD8544 Monochrom-Displays Kontrast-Register im Konfigurator anpassen.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F08: Mein Handy findet das WLAN "APC-Pedelec-WiFi" nicht.</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 08: WLAN-SoftAP-Beacon "APC-Pedelec-WiFi" nicht auffindbar.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Hast du einen Controller mit ESP32-Chip? Ältere AVR-Nanos haben kein Funkmodul. Beim ESP32 prüfe im Konfigurator unter "Display & Funk", ob das Häkchen bei <code>wireless_wifi_softap</code> aktiv ist.
+            Controller-Chip prüfen. Ältere AVR-Targets verfügen über keinen Onboard-Transceiver. Bei ESP32-Targets sicherstellen, dass <code>wireless_wifi_softap</code> in der Konfiguration gesetzt und 2,4 GHz aktiviert ist.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F09: Brauche ich am iPhone eine App aus dem App Store?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 09: Browser-Cockpit auf iOS- oder Desktop-Clients ohne App-Installation.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Nein! Verbinde dich einfach per WLAN mit <code>APC-Pedelec-WiFi</code> (Passwort <code>21028600</code>) und öffne im Safari-Browser <code>http://192.168.4.1</code>. Das Cockpit läuft komplett ohne App-Installation!
+            Keine native Applikation erforderlich. Nach Verbindung mit <code>APC-Pedelec-WiFi</code> (WPA2 Key <code>21028600</code>) im Browser <code>http://192.168.4.1</code> aufrufen; der autarke Webserver hostet das Cockpit plattformunabhängig.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F10: Was bedeutet „Reifenumfang in mm“ und wie messe ich ihn?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 10: Radumfangskalibrierung in Millimetern.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Das ist die Strecke, die dein Reifen bei einer vollen Umdrehung abrollt. Markiere Reifen und Boden mit Kreide, rolle eine Umdrehung geradeaus und miss die Distanz mit dem Meterstab (z. B. 2200 mm bei 28 Zoll).
+            Der Parameter <code>nud_circumference</code> erfordert das exakte Abrollmaß in mm unter Fahrergewicht (z. B. 2200 mm bei 28 Zoll / 700x38C). Fehlerhafte Werte verfälschen Geschwindigkeits- und Odometrie-Berechnungen.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F11: Was ist ein „Shunt“?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 11: Stromerfassung und Shunt-Kalibrierfaktor.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Ein Shunt ist ein winziger Messwiderstand auf der Platine. Durch ihn fließt der Motorstrom. Aus dem Spannungsabfall daran berechnet METISA auf das Milliampere genau Stromstärke und Wattverbrauch.
+            Die Stromerfassung erfolgt über einen Low-Side-Messshunt. Der Parameter <code>nud_current_amplitude</code> [A/ADC] skaliert die ADC-Werte präzise in Ampere für Watt- und Kapazitätsintegratoren.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F12: Was bedeutet „ECE-R 50 Blinker“?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 12: Fahrtrichtungsanzeiger nach ECE-R 50 Spezifikation.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Das ist die offizielle europäische Fahrzeugnorm für Blinker: Genau 1,5 Hertz (90 Mal pro Minute). METISA hält diese Frequenz exakt ein und schaltet die Blinker nach 20 Sekunden automatisch ab (Auto-Cancel).
+            Die integrierte Blinkgeber-Logik taktet mit exakt 1,5 Hz (90 Zyklen/min) bei 50% Tastverhältnis. Die automatische Abschaltung (Auto-Cancel) deaktiviert das Signal nach 20 Sekunden Fahrtzeit.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F13: Was ist das „ESS Notbremsblinken“?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 13: Emergency Stop Signal (ESS) Notbrems-Stroboskop.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Emergency Stop Signal: Wenn du bei mehr als 15 km/h eine Vollbremsung hinlegst, blinkt das Bremslicht blitzschnell mit 3,5 Hertz (ca. 4 Mal pro Sekunde), um nachfolgende Autos vor einem Auffahrunfall zu warnen.
+            Bei Bremsbetätigung oberhalb von 15 km/h und starker Verzögerung taktet die Bremslicht-Endstufe mit 3,5 Hz Hochfrequenz-Stroboskop, um Folgeverkehr vor drohender Kollision zu warnen.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F14: Warum geht meine Hupe nach 3 Sekunden plötzlich aus?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 14: Thermische Sicherheitsabschaltung der Signalhupe.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Das ist der integrierte thermische Überlastschutz. Wenn der Hupentaster klemmt, würde die Spule der Hupe durchbrennen. METISA trennt die Stromzufuhr nach 3,0 Sekunden automatisch ab.
+            Zum Schutz der Spulenwicklung vor Überhitzung begrenzt metisa die kontinuierliche Bestromung der Hupe auf maximal 3,0 Sekunden. Nach Tasterentlastung erfolgt sofortige Reaktivierung.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F15: Kann mein Akku tiefentladen und zerstört werden?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 15: Tiefentladeschutz und Notabschalt-Schwellen.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Nein! METISA hat zwei Schutzschwellen: Bei <code>vcutoff</code> (z. B. 33,0 V bei 36V-Akku) wird sanft abgeregelt. Bei <code>vemergency_shutdown</code> (28,0 V) schaltet der Controller den Motor komplett ab.
+            Zwei Sicherheitsstufen: 1. <code>vcutoff</code> (z. B. 33,0 V bei 10S) bewirkt kontinuierliches Leistungsderating. 2. <code>vemergency_shutdown</code> (28,0 V) forciert komplette Endstufen-Abschaltung.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F16: Welchen Kabelquerschnitt brauche ich bei 1000 Watt?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 16: Leiterquerschnitte und Steckverbinder für Hochstrom-Anwendungen.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Mindestens 2,5 mm², besser 4,0 mm² hochflexible Silikonkabel und XT60/XT90-Goldkontaktstecker. Zu dünne Kabel werden heiß und verursachen gefährliche Leistungsverluste.
+            Für Dauerströme bis 25 A mindestens 2,5 mm², oberhalb 25 A min. 4,0 mm² hochflexible Silikonleitung (AWG 12/AWG 10) und korrosionsfeste Goldkontakte (XT60 / XT90-S mit Anti-Spark) verwenden.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F17: Was passiert bei Regen und Nässe?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 17: Umgebungsbedingungen und IP-Schutzklasse.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Das METISA-Gehäuse ist nach IP67 geschützt. Achte beim Selberbauen darauf, dass alle Kabelausgänge nach unten zeigen (damit Tropfwasser abfließen kann) und dichte Steckverbindungen ab.
+            Gehäuse und Kabeldurchführungen sind nach Schutzart IP67 ausgeführt. Bei individueller Integration Kabelverschraubungen nach unten ausrichten und Kondenswasserbildung durch Druckausgleichselemente verhindern.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F18: Ich habe meine PIN für den offenen Modus vergessen!</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 18: Verlust des Track-Kalibrierungs-PIN-Codes.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Öffne einfach das <a href="unlock_portal.html" target="_blank" style="color: var(--brand-orange-bright); font-weight: 700;">SAGA LABS Freischalt-Portal</a>, trage deine Controller-Seriennummer und E-Mail-Adresse ein und bestätige den Garantieverzicht. Die Freischalt-PIN wird für deine Seriennummer sofort neu ausgegeben und dir per E-Mail zugestellt.
+            Der Autorisierungs-PIN-Code wird kryptografisch aus der Hardware-Seriennummer und einem geschützten Salt abgeleitet. Er kann jederzeit im offiziellen Autorisierungsportal unter Angabe der Seriennummer erneut abgerufen werden.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F19: Warum geht das E-Bike nach 30 Minuten Stillstand aus?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 19: Automatisches Sleep-Timeout nach Inaktivität.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Das ist die automatische Stromspar-Abschaltung (<code>idle_shutdown_secs</code>). Sie schützt deinen Akku vor dem schleichenden Entladen, falls du vergisst, das Fahrrad auszuschalten.
+            Der Parameter <code>idle_shutdown_secs</code> versetzt den Controller nach programmierter Inaktivität (Standard: 1800 s = 30 min) in den Ruhezustand, um Ruhestromverluste am Akku zu eliminieren.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F20: Kann ich einen 48V-Akku an einem 36V-Motor betreiben?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 20: Adaption abweichender DC-Bus-Spannungsniveaus (z. B. 48V / 13S).</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Ja, viele Motoren vertragen das. Aber du musst im Konfigurator zwingend die Akkuspannung auf 48 V anpassen (Ladeschluss 54,6 V, Cutoff 42,0 V), damit die Schutzschaltung korrekt arbeitet.
+            Hardwarekompatibilität vorausgesetzt, müssen im Konfigurator Ladeschlussspannung (54,6 V), Derating-Start (42,0 V) und Notabschalt-Schwelle (39,0 V) exakt an die Zellchemie angepasst werden.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F21: Brauche ich zwingend Bremshebel mit elektrischem Schalter?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 21: Notwendigkeit elektrischer Bremskontaktschalter.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Es wird dringend empfohlen! Bei einer Schreckbremsung schaltet der Bremshebel den Motor auf der Stelle stromlos, anstatt dass der Motor gegen die Bremsbeläge ankämpft.
+            Elektrische Unterbrecherkontakte sind sicherheitskritisch. Sie garantieren die unverzügliche Endstufen-Abschaltung unabhängig von I-Anteilen des PID-Reglers und verhindern Gegenmoment-Überlastungen.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F22: Wie stelle ich den Gasgriff ein, wenn er erst ab halbem Weg Gas gibt?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 22: Hall-Gasgriff Kalibrierung und Totband-Justage.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Gehe im Konfigurator auf "Live-Messung" und verbinde dich per USB. Lies den ADC-Wert im Ruhezustand (z. B. 185) und bei Vollgas (z. B. 860) ab und trage sie bei Min/Max ADC unter "Gasgriff" ein.
+            Über den Live-Monitor den Ruhewert (z. B. ADC 185) und den Vollausschlag (z. B. ADC 860) erfassen. Diese Werte als <code>nud_throttle_min</code> und <code>nud_throttle_max</code> eintragen; Signale außerhalb dieses Bereichs werden als Sensorfehler gewertet.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F23: Kann ich auf Werkseinstellungen zurücksetzen?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 23: Wiederherstellung der Werkseinstellungen (EEPROM Reset).</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Ja, lade im Konfigurator einfach das Profil <code>Default-metisa</code>. Im Controller löscht der Befehl <code>clean_eeprom</code> im seriellen Monitor alle gespeicherten Werte.
+            Profil <code>Default-metisa</code> im Konfigurator laden. Über die serielle Diagnoseschnittstelle kann das EEPROM mittels des Kommandos <code>clean_eeprom</code> vollständig auf Werkszustand bereinigt werden.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F24: Warum schaltet mein Scheinwerfer nicht ein?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 24: Fehlende Bestromung des Scheinwerfer-Ausgangs.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Prüfe, ob der Scheinwerfer am Lichtausgang des Controllers angeschlossen ist und ob im Menü oder am Schalter das Licht eingeschaltet ist (oft langer Druck auf die Pfeil-Oben-Taste am Display).
+            Solid-State-Lichtschalterstufe prüfen. Im Konfigurator prüfen, ob <code>metisa_headlight</code> aktiviert ist. Zustand im HMI-Displaymenü oder über dedizierten Lenkertaster toggeln.
           </div>
         </div>
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F25: Wo finde ich Hilfe, wenn ich gar nicht mehr weiterkomme?</span>
-            <span class="toggle-icon">+</span>
+            <span>CASE 25: Technischer Eskalationssupport und Firmware-Archiv.</span>
+            <span class="toggle-symbol">+</span>
           </div>
           <div class="faq-body">
-            Besuche Deutschlands größte DIY-Pedelec-Community auf <strong>pedelecforum.de</strong> oder die offizielle Website auf <strong>sagalabs.de/metisa</strong>.
+            Dokumentation, Schaltpläne und Firmware-Quellcodes stehen im offiziellen SaGa Labs Metisa Orbit Repository bereit. Für technische Audits und Laborprüfungen stehen die automatisierten Testbench-Harnesses zur Verfügung.
           </div>
         </div>
 
@@ -522,7 +662,7 @@
   </div>
 
   <script>
-    // Accordion Toggle Logic
+    // Accordion Toggle
     document.querySelectorAll('.faq-header').forEach(header => {
       header.addEventListener('click', () => {
         const item = header.parentElement;

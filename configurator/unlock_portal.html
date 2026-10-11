@@ -3,362 +3,405 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAGA LABS | METISA Freischalt-Portal (Rennstrecke & Privatgelände)</title>
-  <meta name="description" content="Offizielles SAGA LABS Freischalt-Portal zur Generierung von PIN-Codes für den offenen Rennstrecken- und Privatgelände-Modus.">
+  <title>SAGA LABS // TRACK CALIBRATION AUTHORIZATION PORTAL</title>
+  <meta name="description" content="Rechtsverbindliches Autorisierungsportal für metisa Track- und Dyno-Kalibrierung (Rennstrecke & geschlossenes Privatgelände).">
   <link rel="stylesheet" href="style.css">
   <style>
-    .portal-container {
-      max-width: 860px;
-      margin: 2rem auto 4rem auto;
-      padding: 0 1.5rem;
+    .portal-shell {
+      max-width: 920px;
+      margin: 1.5rem auto 3rem auto;
+      padding: 0 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 1.75rem;
+      gap: 1.25rem;
     }
 
-    .portal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 2.25rem;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    .portal-panel {
+      background: var(--orbit-bg-card);
+      border: 1px solid var(--orbit-border-subtle);
+      border-radius: var(--orbit-radius-sm);
+      padding: 1.75rem 2rem;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
       position: relative;
     }
 
-    .portal-card::before {
+    .portal-panel::before {
       content: "";
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 3px;
-      background: var(--brand-orange-gradient);
+      height: 2px;
+      background: linear-gradient(90deg, var(--orbit-orange) 0%, transparent 100%);
     }
 
-    .portal-header-title {
-      font-family: var(--font-brand);
-      font-size: 1.6rem;
+    .portal-panel-title {
+      font-family: var(--orbit-font-brand);
+      font-size: 1.15rem;
       font-weight: 700;
-      color: var(--text-white);
-      letter-spacing: 0.04em;
-      margin-bottom: 0.5rem;
+      color: var(--orbit-text-primary);
+      letter-spacing: 0.06em;
+      margin-bottom: 0.35rem;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.6rem;
+      text-transform: uppercase;
     }
 
-    .portal-subtitle {
-      font-size: 0.95rem;
-      color: var(--text-silver);
+    .portal-panel-desc {
+      font-size: 0.8rem;
+      color: var(--orbit-text-muted);
       line-height: 1.6;
-      margin-bottom: 1.75rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--orbit-border-subtle);
+      padding-bottom: 1rem;
     }
 
-    .step-badge {
+    .step-index-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: var(--brand-orange);
-      color: #000;
-      font-weight: 700;
-      font-size: 0.85rem;
-      font-family: var(--font-brand);
-      margin-right: 0.5rem;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--orbit-radius-xs);
+      background: var(--orbit-orange);
+      color: #050608;
+      font-weight: 800;
+      font-size: 0.72rem;
+      font-family: var(--orbit-font-mono);
+      margin-right: 0.45rem;
     }
 
-    .section-heading {
-      font-family: var(--font-brand);
-      font-size: 1.1rem;
+    .step-header {
+      font-family: var(--orbit-font-brand);
+      font-size: 0.88rem;
       font-weight: 700;
-      color: var(--text-white);
-      margin-top: 1.5rem;
-      margin-bottom: 1rem;
+      color: var(--orbit-text-primary);
+      margin-top: 1.25rem;
+      margin-bottom: 0.85rem;
       display: flex;
       align-items: center;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
-    .legal-notice-box {
-      background: rgba(14, 17, 24, 0.85);
-      border: 1px solid rgba(255, 85, 0, 0.25);
-      border-radius: var(--radius-md);
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1.5rem;
+    .legal-notice-frame {
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-medium);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.85rem;
     }
 
-    .legal-checkbox-row {
+    .legal-clause-row {
       display: flex;
       align-items: flex-start;
-      gap: 0.85rem;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      gap: 0.75rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--orbit-border-subtle);
     }
-    .legal-checkbox-row:last-child {
+    .legal-clause-row:last-child {
       border-bottom: none;
     }
 
-    .legal-checkbox-row input[type="checkbox"] {
-      margin-top: 0.25rem;
-      width: 18px;
-      height: 18px;
-      accent-color: var(--brand-orange);
+    .legal-clause-row input[type="checkbox"] {
+      margin-top: 0.2rem;
+      width: 15px;
+      height: 15px;
+      accent-color: var(--orbit-orange);
       cursor: pointer;
       flex-shrink: 0;
     }
 
-    .legal-label {
-      font-size: 0.88rem;
-      color: var(--text-silver);
-      line-height: 1.55;
+    .legal-clause-text {
+      font-size: 0.76rem;
+      color: var(--orbit-text-secondary);
+      line-height: 1.6;
       cursor: pointer;
       user-select: none;
     }
 
-    .legal-label strong {
-      color: var(--brand-orange-bright);
+    .legal-clause-text strong {
+      color: var(--orbit-orange);
       font-weight: 600;
     }
 
-    /* Certificate Result Modal / Box */
-    .cert-result-box {
-      background: linear-gradient(135deg, rgba(20, 24, 34, 0.98), rgba(6, 7, 9, 0.99));
-      border: 2px solid var(--brand-orange);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      box-shadow: 0 0 40px rgba(255, 85, 0, 0.35);
+    /* Certificate Result Container */
+    .cert-result-container {
+      background: var(--orbit-bg-surface);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-left: 3px solid var(--orbit-status-green);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1.75rem;
       margin-top: 1.5rem;
-      animation: fadeIn 0.4s ease-out;
+      display: none;
+      animation: fadeIn 0.25s ease-out;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .cert-seal {
-      display: inline-block;
-      font-family: var(--font-brand);
-      font-size: 0.75rem;
+    .cert-status-beacon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--orbit-font-mono);
+      font-size: 0.7rem;
       font-weight: 700;
-      padding: 0.3rem 0.8rem;
-      border-radius: var(--radius-pill);
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--accent-green);
-      border: 1px solid rgba(34, 197, 94, 0.4);
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--orbit-radius-xs);
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--orbit-status-green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
       margin-bottom: 1rem;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
-    .pin-display-card {
-      background: #000;
-      border: 1px dashed var(--brand-orange);
-      border-radius: var(--radius-md);
-      padding: 1.5rem;
+    .pin-readout-panel {
+      background: #040507;
+      border: 1px solid var(--orbit-border-medium);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1.25rem;
       text-align: center;
-      margin: 1.25rem 0;
+      margin: 1rem 0;
     }
 
-    .pin-code-large {
-      font-family: var(--font-mono);
-      font-size: 2.5rem;
+    .pin-readout-digits {
+      font-family: var(--orbit-font-mono);
+      font-size: 2.2rem;
       font-weight: 700;
-      letter-spacing: 0.25em;
-      color: var(--brand-orange-bright);
-      text-shadow: 0 0 20px rgba(255, 85, 0, 0.7);
+      letter-spacing: 0.28em;
+      color: var(--orbit-orange);
+      text-shadow: 0 0 16px var(--orbit-orange-glow);
     }
 
-    .cert-meta-grid {
+    .cert-data-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 1rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      margin-bottom: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.85rem;
+      background: var(--orbit-bg-subsurface);
+      padding: 0.85rem 1rem;
+      border-radius: var(--orbit-radius-xs);
+      border: 1px solid var(--orbit-border-subtle);
+      font-size: 0.75rem;
+      margin-bottom: 1rem;
     }
 
-    .cert-meta-label {
-      color: var(--text-muted);
-      font-size: 0.75rem;
+    .cert-data-label {
+      color: var(--orbit-text-dim);
+      font-size: 0.65rem;
+      font-family: var(--orbit-font-mono);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-bottom: 0.15rem;
     }
 
-    .cert-meta-val {
-      color: var(--text-white);
-      font-family: var(--font-mono);
+    .cert-data-value {
+      color: var(--orbit-text-primary);
+      font-family: var(--orbit-font-mono);
       font-weight: 600;
+      font-size: 0.78rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- SVG Sprite Collection -->
+  <svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </symbol>
+    <symbol id="icon-manual" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </symbol>
+    <symbol id="icon-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    </symbol>
+    <symbol id="icon-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"/>
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+      <rect x="6" y="14" width="12" height="8"/>
+    </symbol>
+  </svg>
+
+  <!-- Client Header Toolbar -->
   <header class="app-header">
-    <div class="brand-group" onclick="window.location.href='index.html'">
+    <div class="brand-group" onclick="window.location.href='index.html'" style="cursor: pointer;">
       <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 26L18 8L23 10L13 28L8 26Z" fill="#ff5500"/>
+        <path d="M8 26L18 8L23 10L13 28L8 26Z" fill="#ff6200"/>
         <path d="M16 32L26 14L31 16L21 34L16 32Z" fill="#ff7700"/>
-        <path d="M11 28C11 28 17 22 25 22C31 22 35 27 35 27" stroke="#ff5500" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M11 28C11 28 17 22 25 22C31 22 35 27 35 27" stroke="#ff6200" stroke-width="2" stroke-linecap="round"/>
       </svg>
       <div class="brand-text-block">
         <span class="saga-title">SAGA</span>
         <span class="saga-labs-sub">LABS</span>
         <div class="brand-divider"></div>
-        <span class="metisa-title">METISA</span>
+        <span class="metisa-title">METISA ORBIT</span>
       </div>
     </div>
+
     <div class="header-actions">
       <a href="index.html" class="btn btn-secondary">
-        <span>⚙️</span> Zum Konfigurator
+        <svg class="icon-svg"><use href="#icon-gear"/></svg> CONFIGURATOR CLIENT
       </a>
-      <a href="wiki.html" class="btn btn-saga-outline">
-        <span>📖</span> Wiki & FAQ
+      <a href="wiki.html" class="btn btn-secondary">
+        <svg class="icon-svg"><use href="#icon-manual"/></svg> INTEGRATION MANUAL
       </a>
     </div>
   </header>
 
-  <!-- Portal Container -->
-  <div class="portal-container">
+  <!-- Shell Container -->
+  <div class="portal-shell">
 
-    <div class="portal-card" id="formCard">
-      <div class="portal-header-title">
-        <span>🔑 FREISCHALT-PORTAL // AUTORISIERUNG</span>
+    <div class="portal-panel" id="formCard">
+      <div class="portal-panel-title">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-shield"/></svg>
+        TRACK & DYNO CALIBRATION // AUTHORIZATION DISPATCH
       </div>
-      <p class="portal-subtitle">
-        Dieses Portal dient der rechtsverbindlichen Autorisierung zur Aufhebung der Standard-Begrenzungen (25 km/h, 250 W, reine Daumengas-Nutzung) für den Betrieb auf abgesperrten Rennstrecken und privatem Gelände.
+      <p class="portal-panel-desc">
+        Rechtsverbindliches Protokoll zur Aufhebung regulatorischer Begrenzungen (25 km/h, 250 W Dauerleistung, entkoppelte Daumengas-Nutzung). Die Autorisierung ist ausschließlich für den Betrieb auf abgesperrten Motorsportstrecken und dokumentiertem, nicht-öffentlichem Prüf- und Privatgelände zulässig.
       </p>
 
       <form id="unlockForm" onsubmit="handlePortalSubmit(event)">
 
-        <!-- Schritt 1: Seriennummer & Halter -->
-        <div class="section-heading">
-          <span class="step-badge">1</span> Controller-Identifikation & Halterangaben
+        <!-- Step 1: Controller ID -->
+        <div class="step-header">
+          <span class="step-index-badge">1</span> CONTROLLER IDENTIFICATION & OPERATOR RECORD
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="portalSerial">Controller-Seriennummer *</label>
+            <label class="form-label" for="portalSerial">HARDWARE SERIAL NUMBER * <span class="unit">[SN]</span></label>
             <input type="text" id="portalSerial" class="form-control" placeholder="z. B. MET-4091-88 oder SN-10294" required>
-            <span class="form-hint">Eingeprägt auf dem Controller-Gehäuse oder Lieferschein.</span>
+            <span class="form-hint">Eingraviert auf der Gehäuserückseite oder auf dem Werks-Kalibrierzertifikat.</span>
           </div>
           <div class="form-group">
-            <label class="form-label" for="portalEmail">E-Mail-Adresse für PIN-Zustellung *</label>
-            <input type="email" id="portalEmail" class="form-control" placeholder="ihre.adresse@beispiel.de" required>
-            <span class="form-hint">An diese Adresse wird der Freischaltnachweis versandt.</span>
+            <label class="form-label" for="portalEmail">DISPATCH EMAIL ADDRESS * <span class="unit">[SECURE]</span></label>
+            <input type="email" id="portalEmail" class="form-control" placeholder="calibration@domain.com" required>
+            <span class="form-hint">Autorisierungsnachweis und PIN-Zertifikat werden kryptografisch signiert versandt.</span>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="portalName">Name des Fahrzeughalters / Eigentümers *</label>
-          <input type="text" id="portalName" class="form-control" placeholder="Vorname Nachname" required>
+          <label class="form-label" for="portalName">REGISTERED OPERATOR / VEHICLE OWNER *</label>
+          <input type="text" id="portalName" class="form-control" placeholder="Vorname Nachname / Organisation" required>
         </div>
 
-        <!-- Schritt 2: Rechtliche Bestätigungen -->
-        <div class="section-heading">
-          <span class="step-badge">2</span> Rechtliche Erklärungen & Garantieverzicht
+        <!-- Step 2: Legal Affirmations -->
+        <div class="step-header">
+          <span class="step-index-badge">2</span> LEGAL PROTOCOL & WARRANTY WAIVER
         </div>
 
-        <div class="legal-notice-box">
-          <div class="legal-checkbox-row">
+        <div class="legal-notice-frame">
+          <div class="legal-clause-row">
             <input type="checkbox" id="checkLegal" required onchange="validateFormState()">
-            <label class="legal-label" for="checkLegal">
-              <strong>1. Kenntnisnahme der gesetzlichen Vorschriften:</strong><br>
-              Ich bestätige, dass mir bekannt ist, dass die Freischaltung des offenen Modus (Leistung bis 3000 W, Geschwindigkeit bis 99 km/h, motorischer Antrieb ohne Tretbewegung) ausschließlich für den Einsatz auf abgesperrten Rennstrecken oder privatem, nicht-öffentlichem Betriebsgelände zulässig ist. Ein Betrieb im öffentlichen Straßenverkehr ist gesetzlich unzulässig.
+            <label class="legal-clause-text" for="checkLegal">
+              <strong>1. Kenntnisnahme des Einsatzbereichs (Closed Course Only):</strong><br>
+              Hiermit wird verbindlich bestätigt, dass die Deaktivierung des Standard-Deratings (Leistung bis 3000 W, Cutoff bis 99 km/h, reiner Motorantrieb ohne Kurbeldrehung) ausschließlich auf permanent abgesperrten Motorsport-Rennstrecken sowie nicht-öffentlichem Betriebsgelände betrieben wird. Ein Betrieb im Geltungsbereich der StVZO / EU-Richtlinie EN 15194 ist untersagt.
             </label>
           </div>
 
-          <div class="legal-checkbox-row">
+          <div class="legal-clause-row">
             <input type="checkbox" id="checkWarranty" required onchange="validateFormState()">
-            <label class="legal-label" for="checkWarranty">
-              <strong>2. Vollständiger Garantieverzicht & Haftungsausschluss:</strong><br>
-              Ich erkläre ausdrücklich und unwiderruflich den Verzicht auf jegliche gesetzliche Gewährleistung sowie Herstellergarantie der SAGA LABS GmbH & Co. KG für alle Komponenten des Antriebssystems (Controller, Motor, Batterie, Getriebe). Mir ist bekannt, dass der Betrieb außerhalb der Serienparameter zu thermischer Überlastung und vorzeitigem Verschleiß führen kann. Jegliche Haftung für Personen-, Sach- und Vermögensschäden wird ausgeschlossen.
+            <label class="legal-clause-text" for="checkWarranty">
+              <strong>2. Vollständiger Verzicht auf Gewährleistung & Haftungsfreistellung:</strong><br>
+              Der Betreiber erklärt den vollständigen, unwiderruflichen Verzicht auf gesetzliche Gewährleistung sowie jegliche Herstellergarantie seitens SaGa Labs für die gesamte Antriebsstrang-Baugruppe (Inverter-Endstufe, BLDC-Stator, Akkuzellen, Getriebe). Es ist bekannt, dass ungedrosselte Dauerströme thermische Belastungsgrenzen erreichen können. Jegliche Produkthaftung für Sach- oder Folgeschäden wird abbedungen.
             </label>
           </div>
 
-          <div class="legal-checkbox-row">
+          <div class="legal-clause-row">
             <input type="checkbox" id="checkSafety" required onchange="validateFormState()">
-            <label class="legal-label" for="checkSafety">
-              <strong>3. Sicherheitsbelehrung & Eigenverantwortung:</strong><br>
-              Ich verpflichte mich, das Fahrzeug im offenen Modus ausschließlich mit adäquater Schutzkleidung (geprüfter Schutzhelm, Protektoren) zu führen und vor jeder Inbetriebnahme Bremsen, Bereifung und Rahmen auf mechanische Festigkeit zu überprüfen.
+            <label class="legal-clause-text" for="checkSafety">
+              <strong>3. Sicherheits- und Prüfpflicht des Betreibers:</strong><br>
+              Der Betreiber verpflichtet sich zur Verwendung motorsporttauglicher Schutzausrüstung (ECE 22.06 Schutzhelm, Protektoren) sowie zur wiederkehrenden mechanischen Prüfung von Bremsanlage, Reifenindex und Rahmenfestigkeit vor jedem Einsatz.
             </label>
           </div>
         </div>
 
         <!-- Submit Button -->
-        <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end;">
-          <button type="submit" id="btnSubmitUnlock" class="btn btn-saga-primary" style="padding: 0.85rem 1.75rem; font-size: 1rem;">
-            <span>🔑</span> PIN-Code Generieren & Anfordern
+        <div style="display: flex; gap: 0.85rem; align-items: center; justify-content: flex-end; margin-top: 1.25rem;">
+          <button type="submit" id="btnSubmitUnlock" class="btn btn-primary" style="padding: 0.65rem 1.5rem; font-size: 0.85rem;">
+            <svg class="icon-svg"><use href="#icon-shield"/></svg> GENERATE & DISPATCH AUTHORIZATION
           </button>
         </div>
 
       </form>
     </div>
 
-    <!-- Schritt 3: Auslieferung & Zertifikat (Initial ausgeblendet) -->
-    <div id="resultCard" class="cert-result-box" style="display: none;">
-      <span class="cert-seal">✓ RECHTSVERBINDLICH AUTORISIERT & ZUGELASSEN</span>
-      <h3 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 0.25rem;">
-        FREISCHALT-ZERTIFIKAT // RENNSTRECKE & PRIVATGELÄNDE
+    <!-- Step 3: Certificate Output Container -->
+    <div id="resultCard" class="cert-result-container">
+      <span class="cert-status-beacon">
+        <span class="beacon-led beacon-green"></span> AUTHORIZED // MOTORSPORT CALIBRATION CERTIFIED
+      </span>
+      <h3 style="font-family: var(--orbit-font-brand); color: var(--orbit-text-primary); margin-bottom: 0.35rem; font-size: 1rem; text-transform: uppercase;">
+        CALIBRATION CERTIFICATE // TRACK & DYNO AUTHORIZATION
       </h3>
-      <p style="font-size: 0.85rem; color: var(--text-silver); margin-bottom: 1.25rem;">
-        Ihre Bestätigung wurde protokolliert. Die Freischalt-PIN für Ihren Controller wurde generiert und an <strong id="sentEmailDisplay" style="color: var(--brand-orange-bright);"></strong> versandt.
+      <p style="font-size: 0.78rem; color: var(--orbit-text-secondary); margin-bottom: 1.25rem;">
+        Die Autorisierung wurde rechtsverbindlich im Audit-Protokoll hinterlegt. Der PIN-Schlüssel wurde an <strong id="sentEmailDisplay" style="color: var(--orbit-orange);"></strong> übermittelt.
       </p>
 
-      <div class="pin-display-card">
-        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 0.5rem;">
-          Ihre persönliche Freischalt-PIN
+      <div class="pin-readout-panel">
+        <span style="font-size: 0.68rem; color: var(--orbit-text-dim); font-family: var(--orbit-font-mono); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 0.35rem;">
+          DEDICATED CONTROLLER PIN CODE
         </span>
-        <div class="pin-code-large" id="pinDisplayVal">------</div>
-        <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.5rem;">
-          (Dieser Code ist fest an die Seriennummer Ihres Controllers gekoppelt)
+        <div class="pin-readout-digits" id="pinDisplayVal">------</div>
+        <span style="font-size: 0.68rem; color: var(--orbit-text-dim); font-family: var(--orbit-font-mono); display: block; margin-top: 0.35rem;">
+          (KRYPTOGRAFISCH AN SERIENNUMMER GEBUNDEN)
         </span>
       </div>
 
-      <div class="cert-meta-grid">
+      <div class="cert-data-grid">
         <div>
-          <div class="cert-meta-label">Seriennummer</div>
-          <div class="cert-meta-val" id="certSerialVal">---</div>
+          <div class="cert-data-label">HARDWARE SERIAL</div>
+          <div class="cert-data-value" id="certSerialVal">---</div>
         </div>
         <div>
-          <div class="cert-meta-label">Zertifikats-ID</div>
-          <div class="cert-meta-val" id="certIdVal">CERT-2026-MET-XXXX</div>
+          <div class="cert-data-label">CERTIFICATE ID</div>
+          <div class="cert-data-value" id="certIdVal">CERT-2026-MET-XXXX</div>
         </div>
         <div>
-          <div class="cert-meta-label">Ausstellungsdatum</div>
-          <div class="cert-meta-val" id="certDateVal">---</div>
+          <div class="cert-data-label">TIMESTAMP</div>
+          <div class="cert-data-value" id="certDateVal">---</div>
         </div>
         <div>
-          <div class="cert-meta-label">Status</div>
-          <div class="cert-meta-val" style="color: var(--accent-green);">Garantieverzicht hinterlegt</div>
+          <div class="cert-data-label">LEGAL AUDIT STATUS</div>
+          <div class="cert-data-value" style="color: var(--orbit-status-green);">WAIVER RECORDED</div>
         </div>
       </div>
 
-      <div style="background: rgba(255, 85, 0, 0.08); border: 1px solid rgba(255, 85, 0, 0.3); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.5rem;">
-        <h5 style="color: var(--brand-orange-bright); font-family: var(--font-brand); margin-bottom: 0.25rem;">Nächste Schritte:</h5>
-        <ol style="font-size: 0.85rem; color: var(--text-silver); padding-left: 1.25rem; margin: 0; line-height: 1.6;">
-          <li>Öffnen Sie den <strong>METISA Web-Konfigurator</strong>.</li>
-          <li>Klicken Sie auf den Menüpunkt <strong>„🔒 Rennstrecke & Privatgelände“</strong>.</li>
-          <li>Geben Sie Ihre PIN oben ein und klicken Sie auf <strong>„Freischalten“</strong>.</li>
-          <li>Alle unbegrenzten Parameter (Geschwindigkeit, Leistung, Daumengas) stehen nun zur Verfügung.</li>
+      <div style="background: rgba(9, 12, 18, 0.95); border: 1px solid var(--orbit-border-subtle); border-radius: var(--orbit-radius-xs); padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+        <div style="font-family: var(--orbit-font-mono); font-size: 0.72rem; color: var(--orbit-orange); font-weight: 700; margin-bottom: 0.45rem; text-transform: uppercase;">
+          CALIBRATION CLIENT ACTIVATION INSTRUCTIONS:
+        </div>
+        <ol style="font-size: 0.76rem; color: var(--orbit-text-secondary); padding-left: 1.15rem; margin: 0; line-height: 1.6; font-family: var(--orbit-font-body);">
+          <li>Öffnen Sie den <strong>metisa Web Configurator Client</strong>.</li>
+          <li>Navigieren Sie zum Modul <strong>TRACK & DYNO AUTHORIZATION</strong>.</li>
+          <li>Geben Sie den generierten PIN-Code in das Autorisierungsfeld ein.</li>
+          <li>Klicken Sie auf <strong>AUTORISIEREN</strong>; sämtliche Inverter- und Drehzahllimits stehen zur freien Abstimmung bereit.</li>
         </ol>
       </div>
 
-      <div style="display: flex; gap: 1rem; justify-content: flex-end; flex-wrap: wrap;">
+      <div style="display: flex; gap: 0.65rem; justify-content: flex-end; flex-wrap: wrap;">
         <button class="btn btn-secondary" onclick="copyPinToClipboard()">
-          <span>📋</span> PIN Kopieren
+          <svg class="icon-svg"><use href="#icon-clipboard"/></svg> COPY PIN
         </button>
         <button class="btn btn-secondary" onclick="window.print()">
-          <span>🖨️</span> Zertifikat Drucken
+          <svg class="icon-svg"><use href="#icon-print"/></svg> PRINT CERTIFICATE
         </button>
-        <a href="index.html" class="btn btn-saga-primary">
-          <span>⚙️</span> Direkt zum Konfigurator &rarr;
+        <a href="index.html" class="btn btn-primary">
+          <svg class="icon-svg"><use href="#icon-gear"/></svg> RETURN TO CONFIGURATOR &rarr;
         </a>
       </div>
     </div>
@@ -398,18 +441,18 @@
       const check3 = document.getElementById("checkSafety").checked;
 
       if (!serial || !email || !name) {
-        alert("Bitte füllen Sie alle erforderlichen Pflichtfelder aus.");
+        alert("Alle Pflichtangaben müssen vollständig hinterlegt werden.");
         return;
       }
       if (!check1 || !check2 || !check3) {
-        alert("Zur Freischaltung müssen Sie alle gesetzlichen Erklärungen und den Garantieverzicht bestätigen.");
+        alert("Zur Autorisierung müssen alle regulatorischen Erklärungen sowie der Garantieverzicht bestätigt werden.");
         return;
       }
 
       // Generate unique PIN for this customer's serial
       const pin = generateUnlockPin(serial);
       const certId = generateCertId(serial);
-      const now = new Date().toLocaleString("de-DE");
+      const now = new Date().toISOString().replace('T', ' ').substring(0, 19) + " UTC";
 
       // Update Result UI
       document.getElementById("pinDisplayVal").textContent = pin;
@@ -419,21 +462,22 @@
       document.getElementById("certDateVal").textContent = now;
 
       // Show Result Card & Scroll
-      document.getElementById("resultCard").style.display = "block";
-      document.getElementById("resultCard").scrollIntoView({ behavior: 'smooth' });
+      const res = document.getElementById("resultCard");
+      res.style.display = "block";
+      res.scrollIntoView({ behavior: 'smooth' });
     }
 
     function copyPinToClipboard() {
       const pin = document.getElementById("pinDisplayVal").textContent;
       navigator.clipboard.writeText(pin).then(() => {
-        alert("PIN " + pin + " in die Zwischenablage kopiert!");
+        alert("PIN " + pin + " in Zwischenablage kopiert.");
       }).catch(() => {
         alert("PIN: " + pin);
       });
     }
 
     function validateFormState() {
-      // live validation feedback if desired
+      // Live validation state
     }
   </script>
 

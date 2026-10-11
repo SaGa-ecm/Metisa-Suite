@@ -23,6 +23,7 @@ Do not place credentials, private data, generated reports, machine-specific path
 | [`project-context-maintenance`](project-context-maintenance/SKILL.md) | Maintaining fixed project rules, agent adapters, and this skill catalogue. |
 | [`modular-development`](modular-development/SKILL.md) | Building independently validated checkpoints for rollback and selective integration. |
 | [`cross-client-integration`](cross-client-integration/SKILL.md) | Versioned interfaces and slices across firmware, mobile apps, and configurators. |
+| [`saga-labs-engineering-orbit`](saga-labs-engineering-orbit/SKILL.md) | High-density motorsport ECU calibration design (Ecumaster/MoTeC benchmark), zero-emoji policy, and factual architecture across all SaGa Labs surfaces. |
 
 ## Using skills
 
