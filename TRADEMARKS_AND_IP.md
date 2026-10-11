@@ -1,7 +1,7 @@
 # SAGA LABS // GEISTIGES EIGENTUM, MARKENSCHUTZ & LIZENZHINWEISE
 # INTELLECTUAL PROPERTY, TRADEMARKS & LEGAL RIGHTS NOTICE
 
-> **Inhaber / Rights Holder:** Ralf Czechowitz | SaGa Labs  
+> **Inhaber / Rights Holder:** Benjamin Everts, Bielefeld | SaGa Labs  
 > **Gültigkeitsbereich:** Metisa Suite, metisa Firmware-Architektur, SaGa Labs Orbit UI/UX & Dokumentation  
 > **Rechtsstand:** 2026 | Alle Rechte vorbehalten (All rights reserved)
 
@@ -9,7 +9,7 @@
 
 ## 1. Gesetzlicher Markenschutz & Unternehmenskennzeichen (Trademarks)
 
-Die nachfolgenden Bezeichnungen, Wort-/Bildmarken, Kennzeichen und Gestaltungsmerkmale sind das ausschließliche geistige Eigentum von **Ralf Czechowitz / SaGa Labs**:
+Die nachfolgenden Bezeichnungen, Wort-/Bildmarken, Kennzeichen und Gestaltungsmerkmale sind das ausschließliche geistige Eigentum von **Benjamin Everts / SaGa Labs**:
 
 1. **Wortmarken & Bezeichnungen:**
    * **SaGa Labs**®
@@ -22,15 +22,15 @@ Die nachfolgenden Bezeichnungen, Wort-/Bildmarken, Kennzeichen und Gestaltungsme
    * Die visuelle Gestaltung der **Metisa Suite** (spezifische Farbpalette Deep Obsidian `#08090d`, Titan `#121620`, Cyber-Orange `#ff6200`, 1.5px Haarlinien-Vektor-Ikonografie, diskrete Status-Beacons und hochdichtes Motorsport-Kalibrier-Layout).
 
 **Nutzungsausschluss:**  
-Die Bereitstellung oder Zugänglichmachung von Quellcodes oder Web-Applikationen gewährt **keinerlei Lizenz, Übertragung oder Nutzungsrecht** an den vorgenannten Marken, Logos oder geschäftlichen Bezeichnungen. Jegliche markenmäßige Nutzung, Nachahmung oder Kennzeichnung Dritter ohne ausdrückliche schriftliche Vorabgenehmigung durch Ralf Czechowitz / SaGa Labs ist untersagt und wird zivil- und strafrechtlich verfolgt.
+Die Bereitstellung oder Zugänglichmachung von Quellcodes oder Web-Applikationen gewährt **keinerlei Lizenz, Übertragung oder Nutzungsrecht** an den vorgenannten Marken, Logos oder geschäftlichen Bezeichnungen. Jegliche markenmäßige Nutzung, Nachahmung oder Kennzeichnung Dritter ohne ausdrückliche schriftliche Vorabgenehmigung durch Benjamin Everts / SaGa Labs ist untersagt und wird zivil- und strafrechtlich verfolgt.
 
 ---
 
 ## 2. Geistiges Eigentum & Urheberrecht (Intellectual Property & Copyright)
 
-### Copyright © 2026 Ralf Czechowitz / SaGa Labs. Alle Rechte vorbehalten.
+### Copyright © 2026 Benjamin Everts, Bielefeld / SaGa Labs. Alle Rechte vorbehalten.
 
-Sämtliche von SaGa Labs neu geschaffenen, eigenständigen Werke, Architekturen und Inhalte sind das exklusive geistige Eigentum von Ralf Czechowitz / SaGa Labs. Dies umfasst insbesondere:
+Sämtliche von SaGa Labs neu geschaffenen, eigenständigen Werke, Architekturen und Inhalte sind das exklusive geistige Eigentum von Benjamin Everts / SaGa Labs. Dies umfasst insbesondere:
 
 1. **Die Metisa Web Configurator Suite:**
    * Sämtlicher HTML5-, CSS3- und JavaScript-Quellcode in `configurator/` und `index.html`.
@@ -55,9 +55,9 @@ In Übereinstimmung mit dem deutschen Urheberrechtsgesetz (UrhG) und internation
 
 | Bereich | Rechtsstatus | Rechteinhaber |
 | :--- | :--- | :--- |
-| **Metisa Suite (Web-Kalibrierer, UI, Portale)** | Proprietäres geistiges Eigentum von SaGa Labs. | **Ralf Czechowitz / SaGa Labs** |
-| **SaGa Labs Marken, Logos & Orbit Design** | Ausschließliche Marken- und Schutzrechte. | **Ralf Czechowitz / SaGa Labs** |
-| **HAL-Architektur, ECE-R 50 Engine & PIN-System** | Eigenständige Neuentwicklungen von SaGa Labs. | **Ralf Czechowitz / SaGa Labs** |
+| **Metisa Suite (Web-Kalibrierer, UI, Portale)** | Proprietäres geistiges Eigentum von SaGa Labs. | **Benjamin Everts / SaGa Labs** |
+| **SaGa Labs Marken, Logos & Orbit Design** | Ausschließliche Marken- und Schutzrechte. | **Benjamin Everts / SaGa Labs** |
+| **HAL-Architektur, ECE-R 50 Engine & PIN-System** | Eigenständige Neuentwicklungen von SaGa Labs. | **Benjamin Everts / SaGa Labs** |
 | **Historische APC v1.43 Basis-Firmware** | Urheberrechte verbleiben bei den Originalautoren (Jenkie, Thomas Jarosch et al., lizenziert unter GNU GPL v3 oder neuer). | **Originalautoren (GPL-3.0-or-later)** |
 | **Eingebundene Drittbibliotheken** | Gemäß jeweiliger Notice (z. B. BMP085: Adafruit / MIT; PCD8544: Carlos Rodrigues / MIT; HX711: bogde / GPLv2; PID: Brett Beauregard / GPLv3). | **Jeweilige Drittautoren (siehe THIRD_PARTY_NOTICES.md)** |
 
@@ -71,6 +71,6 @@ Open-Source-Lizenzen historischer Upstream-Dateien erstrecken sich **nicht** auf
 Jegliche kommerzielle Nutzung, Lizenzierung von Schnittstellen, Fertigung von Hardware-Baugruppen oder Weiterverbreitung der Metisa Suite bedarf einer gesonderten schriftlichen Vereinbarung mit dem Rechteinhaber:
 
 **SaGa Labs**  
-Inhaber: Ralf Czechowitz  
-E-Mail: kontakt@sagalabs.de | info@speeduino.de  
+Inhaber: Benjamin Everts, Bielefeld  
+E-Mail: sagaporsche45@gmail.com | kontakt@sagalabs.de  
 Web: [https://sagalabs.de](https://sagalabs.de) | [https://github.com/SaGa-ecm/Metisa-Suite](https://github.com/SaGa-ecm/Metisa-Suite)

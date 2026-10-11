@@ -1,7 +1,7 @@
 # SAGA LABS // METISA SUITE
 
 **Universal Drive Control & Power Electronics Calibration Platform**  
-*Entwickelt und herausgegeben von SaGa Labs | Ralf Czechowitz*
+*Entwickelt und herausgegeben von SaGa Labs | Benjamin Everts, Bielefeld*
 
 [![GitHub Pages Deployment](https://img.shields.io/badge/GitHub%20Pages-Live%20Suite-success?style=flat-square&logo=github)](https://saga-ecm.github.io/Metisa-Suite/)
 [![PlatformIO Build Status](https://img.shields.io/badge/PlatformIO-12%2F12%20Targets%20Pass-10b981?style=flat-square)](platformio.ini)
@@ -30,12 +30,12 @@ Die gesamte Metisa Suite steht als responsives, installationsfreies System live 
 
 ## 2. Geistiges Eigentum & Gesetzlicher Markenschutz
 
-### Copyright © 2026 Ralf Czechowitz / SaGa Labs. Alle Rechte vorbehalten.
+### Copyright © 2026 Benjamin Everts, Bielefeld / SaGa Labs. Alle Rechte vorbehalten.
 
 * **Markenschutz (Trademarks):**  
-  **SaGa Labs**®, **metisa**™, **Metisa Suite**™ und **SaGa Labs Orbit**™ sowie alle zugehörigen Logos, Vektorsignaturen und UI-Ausstattungsmerkmale (Trade Dress) sind das ausschließliche geistige Eigentum von **Ralf Czechowitz / SaGa Labs**. Eine unautorisierte Nutzung, Nachahmung oder markenmäßige Verwendung ist untersagt.
+  **SaGa Labs**®, **metisa**™, **Metisa Suite**™ und **SaGa Labs Orbit**™ sowie alle zugehörigen Logos, Vektorsignaturen und UI-Ausstattungsmerkmale (Trade Dress) sind das ausschließliche geistige Eigentum von **Benjamin Everts / SaGa Labs**. Eine unautorisierte Nutzung, Nachahmung oder markenmäßige Verwendung ist untersagt.
 * **Proprietäres geistiges Eigentum:**  
-  Die gesamte *Metisa Web Configurator Suite*, das Autorisierungsportal, die Multi-Architecture HAL-Strukturen, das 3-Stufen PIN-Sicherheitssystem, die ECE-R 50 Beleuchtungs- und Signalarchitektur sowie alle Prüfstände und Dokumentationen sind urheberrechtlich geschütztes geistiges Eigentum von Ralf Czechowitz / SaGa Labs.
+  Die gesamte *Metisa Web Configurator Suite*, das Autorisierungsportal, die Multi-Architecture HAL-Strukturen, das 3-Stufen PIN-Sicherheitssystem, die ECE-R 50 Beleuchtungs- und Signalarchitektur sowie alle Prüfstände und Dokumentationen sind urheberrechtlich geschütztes geistiges Eigentum von Benjamin Everts / SaGa Labs.
 * **Drittkomponenten & Historische Basis:**  
   Die Urheberrechte an historischen Upstream-Fragmenten des ursprünglichen Arduino Pedelec Controllers verbleiben bei den jeweiligen Autoren (Jenkie et al., GPL-3.0-or-later). Upstream-Hinweise werden in den Quelldateien vollständig gewahrt.
 * **Vollständige Rechtsdokumentation:**  
@@ -90,6 +90,6 @@ python tools/testbench_harness.py
 ## 5. Kontakt & Lizenzierungsanfragen
 
 **SaGa Labs**  
-Inhaber: Ralf Czechowitz  
-E-Mail: kontakt@sagalabs.de | info@speeduino.de  
+Inhaber: Benjamin Everts, Bielefeld  
+E-Mail: sagaporsche45@gmail.com | kontakt@sagalabs.de  
 Web: [https://sagalabs.de](https://sagalabs.de) | GitHub: [https://github.com/SaGa-ecm/Metisa-Suite](https://github.com/SaGa-ecm/Metisa-Suite)

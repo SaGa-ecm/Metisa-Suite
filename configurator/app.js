@@ -2,7 +2,7 @@
  * METISA SUITE // Web Configurator Core Application Engine
  * Universal Browser-Based Calibration Platform for SaGa Labs metisa & APC
  * 
- * Copyright (c) 2026 Ralf Czechowitz / SaGa Labs. All rights reserved.
+ * Copyright (c) 2026 Benjamin Everts, Bielefeld / SaGa Labs. All rights reserved.
  * Proprietary Intellectual Property. Trademarks: SaGa Labs(R), metisa(TM), Metisa Suite(TM).
  * 
  * Features:
