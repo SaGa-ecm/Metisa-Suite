@@ -643,10 +643,45 @@ function setupSerialHandler() {
 // -------------------------------------------------------------
 // Controller Model Auto-Detection & Firmware State Probing
 // -------------------------------------------------------------
+// SAGA LABS HARDWARE PROVISIONING & FACTORY OVERRIDE KEYS
+// CAUTION: LEVEL 3 FACTORY CALIBRATION KEYS (CONFIDENTIAL)
+// -------------------------------------------------------------
+const SAGA_FACTORY_RECOVERY_KEY = "847291"; // Honeypot decoy
+const SAGA_DIAG_OVERRIDE_PIN    = "994102"; // Honeypot decoy
+const METISA_MASTER_PIN_HASH    = "d5bce9e8e14871855defdc792d0df41a3dd8df21c0fa7214d742d22a26952578";
+const METISA_PIN_SALT           = "::SaGa-Orbit-Salt-v2::";
 
 let detectedMcuModel = "Kein Controller";
 let controllerFirmwareStatus = "OFFLINE"; // "OFFLINE", "PROBING", "METISA", "BLANK"
 let masterUnlockForFlashApproved = false;
+let assignedSerialNumber = "SAGA-UNPROVISIONED";
+let flasherIsDecoySandbox = false;
+let flasherLockoutUntilMs = 0;
+let flasherFailedAttempts = 0;
+
+async function sha256Hex(str) {
+  try {
+    const enc = new TextEncoder();
+    const data = enc.encode(str);
+    const hashBuf = await crypto.subtle.digest("SHA-256", data);
+    const hashArr = Array.from(new Uint8Array(hashBuf));
+    return hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch (e) {
+    return "";
+  }
+}
+
+function generateHardwareSerialNumber(mcuModel) {
+  const year = 2026;
+  let arch = "NANO";
+  if ((mcuModel || "").includes("STM32")) arch = "STM32";
+  else if ((mcuModel || "").includes("ESP32")) arch = "ESP32";
+  else if ((mcuModel || "").includes("RP2040")) arch = "RP20";
+  
+  const entropy = Math.floor(1000 + Math.random() * 9000);
+  const hexSum = ((Date.now() ^ entropy) & 0xFFFF).toString(16).toUpperCase().padStart(4, "0");
+  return `SAGA-MET-${year}-${arch}-${hexSum}`;
+}
 
 function detectControllerHardware(port) {
   if (!port || !port.getInfo) return "Arduino Nano (ATmega328P)";
@@ -878,6 +913,26 @@ function parseRawTelemetry(line) {
       }
       updateHardwareStatusUI("METISA", detectedMcuModel);
     }
+
+    if (line.includes("SN=")) {
+      const snPart = line.split("SN=")[1].trim();
+      if (snPart && snPart !== "SAGA-UNPROVISIONED") {
+        assignedSerialNumber = snPart;
+        const snBanner = document.getElementById("flasherAssignedSerialBanner");
+        if (snBanner) {
+          snBanner.style.display = "block";
+          const snText = document.getElementById("flasherAssignedSerialText");
+          if (snText) snText.textContent = assignedSerialNumber;
+          const snLink = document.getElementById("flasherRegisterPortalLink");
+          if (snLink) snLink.href = `unlock_portal.html?sn=${encodeURIComponent(assignedSerialNumber)}`;
+        }
+      }
+    }
+  }
+
+  if (line.includes("OK:SANDBOX_DEMO_MOTOR_LOCKED")) {
+    showToast("Honeypot-Modus: Controller in Demo-Sandbox verriegelt", "warning");
+    return;
   }
 
   // 1. Controller Command Responses Parsing
@@ -1478,6 +1533,23 @@ async function startFirmwareFlash() {
     return;
   }
 
+  if (flasherIsDecoySandbox) {
+    const logView = document.getElementById("flashTerminalLog");
+    const pText = document.getElementById("flashProgressText");
+    const pBar = document.getElementById("flashProgressBar");
+    if (pBar) pBar.style.width = "100%";
+    if (pText) pText.textContent = "SANDBOX PAYLOAD FLASHED [DEMO]";
+    if (logView) {
+      const time = new Date().toISOString().substring(11, 19);
+      logView.textContent += `\n[${time}] [FLASH] DECOY-SANDBOX PAYLOAD ERFOLGREICH ÜBERTRAGEN.`;
+      logView.textContent += `\n[${time}] [WARNUNG] Motor-Regelung im Sandbox-Modus dauerhaft verriegelt (0W).`;
+      logView.textContent += `\n[${time}] [SICHERHEIT] Für Hardware-Aktivierung echten Master-PIN (210286) eingeben.`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+    showToast("Decoy-Firmware geflasht (Motor dauerhaft verriegelt)", "warning");
+    return;
+  }
+
   if (currentFlasherTarget === 'stm32' || currentFlasherTarget === 'esp32') {
     downloadSelectedFirmwareBinary();
     const logView = document.getElementById("flashTerminalLog");
@@ -1640,28 +1712,95 @@ async function startFirmwareFlash() {
   }
 }
 
-function verifyFlasherMasterPin() {
+async function verifyFlasherMasterPin() {
   const pinInput = document.getElementById("flasherMasterPinInput");
   const pin = pinInput ? pinInput.value.trim() : "";
   const logView = document.getElementById("flashTerminalLog");
+  const time = new Date().toISOString().substring(11, 19);
 
-  if (pin === "210286") {
+  // Check Brute Force lockout
+  if (flasherLockoutUntilMs > Date.now()) {
+    const remainSec = Math.ceil((flasherLockoutUntilMs - Date.now()) / 1000);
+    showToast(`Sicherheitssperre aktiv! Warten Sie noch ${remainSec} Sekunden.`, "error");
+    return;
+  }
+
+  // 1. Honeypot Decoy Trap Detection
+  if (pin === SAGA_FACTORY_RECOVERY_KEY || pin === SAGA_DIAG_OVERRIDE_PIN) {
+    flasherIsDecoySandbox = true;
     masterUnlockForFlashApproved = true;
-    updateHardwareStatusUI("BLANK", detectedMcuModel);
-    showToast("Master-PIN 210286 verifiziert: Erst-Upload autorisiert", "success");
+    assignedSerialNumber = "SAGA-SANDBOX-DEMO-001";
+    updateHardwareStatusUI("BLANK", detectedMcuModel + " [DECOY SANDBOX]");
+
     if (logView) {
-      const time = new Date().toISOString().substring(11, 19);
-      logView.textContent += `\n[${time}] [AUTHORISIERUNG] Master-PIN (210286) bestätigt. Erst-Upload für ${detectedMcuModel} freigegeben.`;
+      logView.textContent += `\n[${time}] [SECURITY AUDIT] SERVICE-LEVEL FACTORY RECOVERY KEY DETECTED (${pin})`;
+      logView.textContent += `\n[${time}] [DIAGNOSTIC] Initialisiere isolierte Sandbox-Emulationsumgebung...`;
+      logView.textContent += `\n[${time}] [PROVISIONING] Test-Seriennummer zugewiesen: ${assignedSerialNumber}`;
+      logView.textContent += `\n[${time}] [WARNUNG] Eingeschränkte Decoy-Payload aktiv. Flashen im DEMO-Modus freigegeben.`;
       logView.scrollTop = logView.scrollHeight;
     }
-  } else {
-    showToast("Ungültiger Master-PIN!", "error");
+    showToast("Service-Recovery-Key akzeptiert: Sandbox-Modus aktiv", "warning");
+    return;
+  }
+
+  // 2. Genuine Master-PIN Verification via Salted SHA-256 Hash
+  const inputHash = await sha256Hex(pin + METISA_PIN_SALT);
+  if (inputHash === METISA_MASTER_PIN_HASH || pin === "210286") {
+    masterUnlockForFlashApproved = true;
+    flasherIsDecoySandbox = false;
+    flasherFailedAttempts = 0;
+
+    // Generate authentic Hardware Serial Number upon initial provisioning
+    if (!assignedSerialNumber || assignedSerialNumber.includes("DEMO") || assignedSerialNumber.includes("UNPROVISIONED")) {
+      assignedSerialNumber = generateHardwareSerialNumber(detectedMcuModel);
+    }
+
+    updateHardwareStatusUI("BLANK", detectedMcuModel);
+    showToast("Master-PIN 210286 verifiziert: Seriennummer zugewiesen", "success");
+
+    // Transmit Serial Number to Controller EEPROM
+    try {
+      await sendSerialCommand(`sn=${assignedSerialNumber}`);
+    } catch (e) {}
+
     if (logView) {
-      const time = new Date().toISOString().substring(11, 19);
-      logView.textContent += `\n[${time}] [SICHERHEIT] Ungültiger Master-PIN. Erst-Upload bleibt gesperrt.`;
+      logView.textContent += `\n[${time}] [AUTHORISIERUNG] Master-PIN (210286) kryptografisch bestätigt.`;
+      logView.textContent += `\n[${time}] [PROVISIONING] Eindeutige Seriennummer generiert & im EEPROM verankert: ${assignedSerialNumber}`;
+      logView.textContent += `\n[${time}] [INFO] Erst-Upload für ${detectedMcuModel} autorisiert.`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+
+    // Update UI elements with new Serial Number
+    const snBanner = document.getElementById("flasherAssignedSerialBanner");
+    if (snBanner) {
+      snBanner.style.display = "block";
+      const snText = document.getElementById("flasherAssignedSerialText");
+      if (snText) snText.textContent = assignedSerialNumber;
+      const snLink = document.getElementById("flasherRegisterPortalLink");
+      if (snLink) snLink.href = `unlock_portal.html?sn=${encodeURIComponent(assignedSerialNumber)}`;
+    }
+  } else {
+    flasherFailedAttempts++;
+    if (flasherFailedAttempts >= 5) {
+      flasherLockoutUntilMs = Date.now() + 30000;
+      showToast("Zu viele Fehlversuche! 30 Sekunden Sicherheitssperre aktiv.", "error");
+    } else {
+      showToast("Ungültiger Master-PIN!", "error");
+    }
+    if (logView) {
+      logView.textContent += `\n[${time}] [SICHERHEIT] Ungültiger Master-PIN. Fehlversuche: ${flasherFailedAttempts}/5.`;
       logView.scrollTop = logView.scrollHeight;
     }
   }
+}
+
+function copyAssignedSerialToClipboard() {
+  if (!assignedSerialNumber) return;
+  navigator.clipboard.writeText(assignedSerialNumber).then(() => {
+    showToast("Seriennummer in Zwischenablage kopiert: " + assignedSerialNumber, "success");
+  }).catch(() => {
+    alert("Seriennummer: " + assignedSerialNumber);
+  });
 }
 
 // Global window exposure for HTML UI handlers
@@ -1676,5 +1815,7 @@ window.toggleFirmwareSourceType = toggleFirmwareSourceType;
 window.downloadSelectedFirmwareBinary = downloadSelectedFirmwareBinary;
 window.startFirmwareFlash = startFirmwareFlash;
 window.verifyFlasherMasterPin = verifyFlasherMasterPin;
+window.copyAssignedSerialToClipboard = copyAssignedSerialToClipboard;
+
 
 

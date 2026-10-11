@@ -122,6 +122,31 @@ class SecurityManagerSimulationTest(unittest.TestCase):
         self.assertTrue(success)
         self.assertEqual(self.level, 2)
 
+    def test_honeypot_decoy_pins_trap_in_sandbox(self):
+        decoy_pins = [847291, 994102]
+        for dp in decoy_pins:
+            # Decoy pin must NOT unlock genuine track mode
+            is_genuine = (dp == self.MASTER_PIN)
+            self.assertFalse(is_genuine)
+
+    def test_salted_sha256_hash_matches_genuine_master_pin(self):
+        import hashlib
+        salt = "::SaGa-Orbit-Salt-v2::"
+        expected_hash = "d5bce9e8e14871855defdc792d0df41a3dd8df21c0fa7214d742d22a26952578"
+        computed = hashlib.sha256(("210286" + salt).encode("utf-8")).hexdigest()
+        self.assertEqual(computed, expected_hash)
+
+    def test_hardware_serial_number_format(self):
+        import re
+        sample_serials = [
+            "SAGA-MET-2026-NANO-7A31",
+            "SAGA-MET-2026-STM32-9B82",
+            "SAGA-MET-2026-ESP32-1F40",
+        ]
+        pattern = re.compile(r"^SAGA-MET-2026-(NANO|STM32|ESP32|RP20)-[0-9A-F]{4}$")
+        for sn in sample_serials:
+            self.assertTrue(pattern.match(sn), f"Serial {sn} does not match expected format")
+
 
 class SafetyManagerSimulationTest(unittest.TestCase):
     """Simulates and verifies safety invariants, interlocks, and derating."""

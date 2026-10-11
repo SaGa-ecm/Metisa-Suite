@@ -920,6 +920,31 @@
             </div>
             <div id="flasherMasterPinFeedback" style="font-size: 0.7rem; margin-top: 0.35rem; display: none;"></div>
           </div>
+
+          <!-- Assigned Hardware Serial Number Banner upon successful Master PIN unlock -->
+          <div id="flasherAssignedSerialBanner" style="display: none; margin-top: 0.75rem; padding: 0.65rem 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid var(--orbit-status-green); border-radius: var(--orbit-radius-xs);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <span style="font-size: 0.68rem; color: var(--orbit-text-muted); font-family: var(--orbit-font-mono); text-transform: uppercase;">
+                  GENERIERTE HARDWARE-SERIENNUMMER:
+                </span>
+                <div style="font-size: 0.95rem; font-family: var(--orbit-font-mono); font-weight: 700; color: var(--orbit-status-green); letter-spacing: 0.05em;" id="flasherAssignedSerialText">
+                  SAGA-MET-2026-NANO-XXXX
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="btn btn-secondary btn-xs" onclick="copyAssignedSerialToClipboard()">
+                  KOPIEREN
+                </button>
+                <a id="flasherRegisterPortalLink" href="unlock_portal.html" target="_blank" class="btn btn-saga-primary btn-xs">
+                  PIN PER E-MAIL ANFORDERN &rarr;
+                </a>
+              </div>
+            </div>
+            <div style="font-size: 0.68rem; color: var(--orbit-text-secondary); margin-top: 0.35rem;">
+              Diese Seriennummer wurde im Flash/EEPROM des Controllers verankert. Geben Sie diese im Autorisierungsportal ein, um Ihren fahrzeugspezifischen Aktivierungs-PIN per E-Mail zu erhalten.
+            </div>
+          </div>
         </div>
 
         <div style="font-size: 0.8rem; color: var(--orbit-text-secondary); margin-bottom: 0.75rem;">

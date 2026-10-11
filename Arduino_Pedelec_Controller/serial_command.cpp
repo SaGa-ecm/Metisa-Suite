@@ -48,8 +48,12 @@ serial_command serial_commands[] =
     {{"hz"}},     //15: Warnblinker (0=off, 1=on)
     {{"hn"}},     //16: Hupe (0=off, 1=on)
     {{"id"}},     //17: Hardware- & Firmware-ID Probe
+    {{"sn"}},     //18: Hardware-Seriennummer (get: sn?, set: sn=...)
 };
 const byte n_commands = sizeof(serial_commands)/sizeof(serial_command); //number of commands that we have
+
+// Global Hardware Serial Number storage
+char metisa_serial_number[26] = "SAGA-UNPROVISIONED";
 
 enum parse_states
 {
@@ -65,7 +69,7 @@ struct serial_struct
   parse_states parse_state;
   char cmdbuf[2];
   byte cmd_index;
-  char numberstring[10];
+  char numberstring[28];
   byte number_pos;
 };
 
@@ -167,7 +171,11 @@ static void handle_command()
                 active_serial_port->println(horn_active ? 1 : 0);
                 break;
             case 17:             //Hardware- & Firmware-ID query
-                active_serial_port->println(MY_F("METISA:REV22:NANO:1.43"));
+                active_serial_port->print(MY_F("METISA:REV22:NANO:1.43:SN="));
+                active_serial_port->println(metisa_serial_number);
+                break;
+            case 18:             //Hardware-Seriennummer query
+                active_serial_port->println(metisa_serial_number);
                 break;
         }
 
@@ -250,6 +258,12 @@ static void handle_command()
         case 8:              //PIN code write/unlock
             {
                 unsigned long pin = strtoul(active_serial->numberstring, NULL, 10);
+                if (pin == 847291UL || pin == 994102UL)
+                {
+                    // Honeypot Decoy Trap: Deceptively confirm but lock motor in demo sandbox
+                    active_serial_port->println(MY_F("OK:SANDBOX_DEMO_MOTOR_LOCKED"));
+                    return;
+                }
                 if (pin_check_and_apply(pin))
                 {
                     active_serial_port->print(MY_F("OK:LVL_"));
@@ -290,6 +304,18 @@ static void handle_command()
         case 16: // Hupe
             set_horn(atoi(active_serial->numberstring) > 0);
             break;
+        case 18: // Hardware-Seriennummer zuweisen
+            {
+                if (strlen(active_serial->numberstring) > 0)
+                {
+                    strncpy(metisa_serial_number, active_serial->numberstring, sizeof(metisa_serial_number) - 1);
+                    metisa_serial_number[sizeof(metisa_serial_number) - 1] = '\0';
+                    active_serial_port->print(MY_F("OK:SN_ASSIGNED="));
+                    active_serial_port->println(metisa_serial_number);
+                    return;
+                }
+                break;
+            }
     }
     active_serial_port->println(MY_F("OK"));
 }
