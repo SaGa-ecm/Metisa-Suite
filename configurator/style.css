@@ -832,3 +832,108 @@ body {
   from { transform: translateX(100%); opacity: 0; }
   to   { transform: translateX(0); opacity: 1; }
 }
+
+/* ==========================================================================
+   Firmware Flasher, Bootloader Terminal & Progress Bar Architecture
+   ========================================================================== */
+.flasher-target-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.65rem;
+  margin: 0.65rem 0 1rem 0;
+}
+
+.flasher-target-card {
+  background: var(--orbit-bg-card);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: var(--orbit-transition);
+}
+
+.flasher-target-card:hover {
+  border-color: var(--orbit-border-medium);
+  background: var(--orbit-bg-card-hover);
+}
+
+.flasher-target-card.selected {
+  border-color: var(--orbit-orange);
+  background: rgba(255, 98, 0, 0.08);
+  box-shadow: 0 0 12px rgba(255, 98, 0, 0.15);
+}
+
+.flasher-radio-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--orbit-font-brand);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--orbit-text-primary);
+}
+
+.flasher-mcu-sub {
+  font-size: 0.72rem;
+  color: var(--orbit-text-muted);
+  font-family: var(--orbit-font-mono);
+  margin-top: 0.25rem;
+}
+
+.flasher-source-box {
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.progress-bar-container {
+  background: var(--orbit-bg-input);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  height: 22px;
+  overflow: hidden;
+  position: relative;
+  margin: 0.6rem 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6200, #ff8533);
+  width: 0%;
+  transition: width 0.08s linear;
+}
+
+.progress-bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--orbit-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  letter-spacing: 0.05em;
+}
+
+.terminal-log-view {
+  background: #050608;
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.75rem;
+  font-family: var(--orbit-font-mono);
+  font-size: 0.72rem;
+  color: #94a3b8;
+  max-height: 160px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.45;
+  margin-top: 0.5rem;
+}
+

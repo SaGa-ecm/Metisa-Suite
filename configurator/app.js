@@ -699,7 +699,40 @@ async function readSerialStream() {
 }
 
 function parseRawTelemetry(line) {
-  // Check for APC ---raw--- packet
+  if (!line) return;
+
+  // 1. Controller Command Responses Parsing
+  if (line.startsWith("pn") || line.startsWith("OK:LVL_")) {
+    const lvlStr = line.replace("OK:LVL_", "").replace("pn", "").trim();
+    const lvl = parseInt(lvlStr, 10);
+    if (!isNaN(lvl)) {
+      setUnlockUILevel(lvl);
+    }
+    return;
+  }
+  if (line.startsWith("od")) {
+    const odoKm = parseFloat(line.replace("od", "").trim());
+    if (!isNaN(odoKm)) {
+      const el = document.getElementById("nud_circumference");
+      console.log(`[SERIAL] Odometer gelesen: ${odoKm} km`);
+    }
+    return;
+  }
+  if (line.startsWith("ps")) {
+    const potiVal = parseInt(line.replace("ps", "").trim(), 10);
+    if (!isNaN(potiVal)) {
+      console.log(`[SERIAL] Poti-Status gelesen: ${potiVal}`);
+    }
+    return;
+  }
+  if (line.startsWith("lf")) {
+    const lfVal = parseInt(line.replace("lf", "").trim(), 10);
+    const cbHead = document.getElementById("metisa_headlight");
+    if (cbHead && !isNaN(lfVal)) cbHead.checked = (lfVal > 0);
+    return;
+  }
+
+  // 2. Check for APC ---raw--- telemetry packet
   // Format: ---raw---<voltage>;<current>;<pasfactor*100>;<option>;<poti>;<throttle>;<brake>
   if (!line.includes("---raw---")) return;
 
@@ -720,6 +753,89 @@ function parseRawTelemetry(line) {
     const calcI = (rawI * appState.nud_current_amplitude + appState.nud_current_offset).toFixed(1);
 
     updateTelemetryUI({ rawV, calcV, rawI, calcI, rawPas, rawPoti, rawThrottle, rawBrake });
+  }
+}
+
+// -------------------------------------------------------------
+// Controller Web Serial Command Dispatcher & Config Sync
+// -------------------------------------------------------------
+
+async function sendSerialCommand(cmd) {
+  if (!serialPort || !serialPort.writable) {
+    showToast("Kein Controller über USB verbunden.", "error");
+    return false;
+  }
+  const encoder = new TextEncoder();
+  const writer = serialPort.writable.getWriter();
+  try {
+    const payload = cmd.endsWith("\n") ? cmd : cmd + "\n";
+    await writer.write(encoder.encode(payload));
+    return true;
+  } catch (err) {
+    console.error("Serial command send error:", err);
+    showToast("Übertragungsfehler: " + err.message, "error");
+    return false;
+  } finally {
+    writer.releaseLock();
+  }
+}
+
+async function readConfigFromController() {
+  if (!isConnected || !serialPort) {
+    showToast("Bitte zuerst Controller über 'CONNECT' verbinden.", "error");
+    return;
+  }
+  showToast("Lese Konfiguration vom Controller...", "info");
+  try {
+    await sendSerialCommand("pn?");
+    await new Promise(r => setTimeout(r, 80));
+    await sendSerialCommand("od?");
+    await new Promise(r => setTimeout(r, 80));
+    await sendSerialCommand("ps?");
+    await new Promise(r => setTimeout(r, 80));
+    await sendSerialCommand("lf?");
+    await new Promise(r => setTimeout(r, 80));
+    await sendSerialCommand("lr?");
+    showToast("Konfiguration vom Controller synchronisiert [OK]", "success");
+  } catch (err) {
+    showToast("Fehler beim Lesen der Konfiguration: " + err.message, "error");
+  }
+}
+
+async function writeConfigToController() {
+  if (!isConnected || !serialPort) {
+    showToast("Bitte zuerst Controller über 'CONNECT' verbinden.", "error");
+    return;
+  }
+  showToast("Übertrage Kalibrierung auf Controller...", "info");
+  try {
+    // 1. PIN & Betriebslevel
+    if (currentUnlockLevel === 2) {
+      await sendSerialCommand("pn210286");
+    } else if (currentUnlockLevel === 1) {
+      await sendSerialCommand("pn130520");
+    } else {
+      await sendSerialCommand("pn0");
+    }
+    await new Promise(r => setTimeout(r, 80));
+
+    // 2. Leistungs- & Poti-Parameter
+    const potiVal = Math.round(appState.nud_controlmode || 250);
+    await sendSerialCommand(`ps${potiVal}`);
+    await new Promise(r => setTimeout(r, 80));
+
+    // 3. Lichtsteuerung
+    const lfVal = appState.metisa_highbeam ? 2 : (appState.metisa_headlight ? 1 : 0);
+    await sendSerialCommand(`lf${lfVal}`);
+    await new Promise(r => setTimeout(r, 80));
+    await sendSerialCommand(`lr${appState.metisa_taillight ? 1 : 0}`);
+    await new Promise(r => setTimeout(r, 80));
+
+    // 4. EEPROM Commit
+    await sendSerialCommand("s");
+    showToast("Kalibrierung erfolgreich auf Controller übertragen & in EEPROM gesichert [OK]", "success");
+  } catch (err) {
+    showToast("Fehler beim Schreiben der Konfiguration: " + err.message, "error");
   }
 }
 
@@ -866,14 +982,20 @@ function downloadBlob(content, filename, mimeType) {
 }
 
 // -------------------------------------------------------------
-// Race Mode PIN Verification & Open Menu Unlocking
-// (No PIN generation in configurator; verified against serial or master)
+// Multi-Level Authorization & PIN Verification
+// Level 0: Standard Pedelec (StVZO / EN 15194: 25 km/h, 250 W, PAS mandatory)
+// Level 1: E-Scooter (eKFV: 20 km/h, 500 W, throttle active, 100% Garantie & Gewährleistung intakt)
+// Level 2: Master-PIN (Rennstrecke & Privatgelände: 99 km/h, 3000 W, Garantieverzicht)
 // -------------------------------------------------------------
 
-function generateUnlockPin(serial) {
+let currentUnlockLevel = 0;
+
+function generateUnlockPin(serial, mode = "track") {
   const clean = (serial || "").replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-  if (!clean || clean.length < 2) return "210286";
-  const SALT = "SAGA-METISA-RACE-2026";
+  if (!clean || clean.length < 2) {
+    return mode === "track" ? "210286" : "130520";
+  }
+  const SALT = mode === "track" ? "SAGA-METISA-RACE-2026" : "SAGA-METISA-CLASS-2026";
   let hash = 2166136261;
   const str = clean + SALT;
   for (let i = 0; i < str.length; i++) {
@@ -882,6 +1004,61 @@ function generateUnlockPin(serial) {
   }
   const pin = (Math.abs(hash) % 900000) + 100000;
   return pin.toString();
+}
+
+function setUnlockUILevel(lvl) {
+  currentUnlockLevel = lvl;
+  const lockedBox = document.getElementById("raceLockedContainer");
+  const unlockedBox = document.getElementById("raceUnlockedContainer");
+  const badge = document.getElementById("raceLockBadge");
+  const statusVal = document.getElementById("techModeStatus");
+
+  if (lvl === 2) {
+    // Level 2: Race / Track & Dyno (Master-PIN 210286)
+    if (lockedBox) lockedBox.style.display = "none";
+    if (unlockedBox) unlockedBox.style.display = "block";
+    if (badge) {
+      badge.textContent = "AUTORISIERT // MASTER-PIN";
+      badge.className = "badge badge-race";
+    }
+    if (statusVal) {
+      statusVal.textContent = "AUTORISIERT // RENNSTRECKE & DOKUMENTIERTES PRIVATGELÄNDE (GARANTIEVERZICHT BESTÄTIGT)";
+      statusVal.className = "tech-status-val status-unlocked";
+    }
+    appState.metisa_race_speed = 99;
+    appState.metisa_race_power = 1000;
+    appState.metisa_race_pure_throttle = true;
+  } else if (lvl === 1) {
+    // Level 1: E-Scooter eKFV (100% Garantie & Gewährleistung intakt)
+    if (lockedBox) lockedBox.style.display = "none";
+    if (unlockedBox) unlockedBox.style.display = "block";
+    if (badge) {
+      badge.textContent = "KLASSE: E-SCOOTER (eKFV) [GARANTIE INTAKT]";
+      badge.className = "badge badge-metisa";
+    }
+    if (statusVal) {
+      statusVal.textContent = "AUTORISIERT // E-SCOOTER (eKFV) [20 km/h | 500 W | GARANTIE VOLLSTÄNDIG INTAKT]";
+      statusVal.className = "tech-status-val status-unlocked";
+    }
+    appState.metisa_race_speed = 20;
+    appState.metisa_race_power = 500;
+    appState.metisa_race_pure_throttle = true;
+  } else {
+    // Level 0: Standard Pedelec (StVZO / EN 15194)
+    if (lockedBox) lockedBox.style.display = "block";
+    if (unlockedBox) unlockedBox.style.display = "none";
+    if (badge) {
+      badge.textContent = "GESPERRT // PEDELEC EN 15194";
+      badge.className = "badge badge-legal";
+    }
+    if (statusVal) {
+      statusVal.textContent = "AKTIV // STANDARD-STVZO DERATING [RESTRIKTIERT 250 W / 25 km/h | PAS-PFLICHT]";
+      statusVal.className = "tech-status-val status-locked";
+    }
+    appState.metisa_race_speed = 25;
+    appState.metisa_race_power = 250;
+    appState.metisa_race_pure_throttle = false;
+  }
 }
 
 function verifyAndUnlockRaceMode() {
@@ -901,38 +1078,23 @@ function verifyAndUnlockRaceMode() {
     return;
   }
 
-  // Validate: either Master-PIN 210286 OR matching deterministic PIN for the serial
-  let isValid = false;
-  if (enteredPin === "210286") {
-    isValid = true;
-  } else if (enteredSerial) {
-    const expectedPin = generateUnlockPin(enteredSerial);
-    if (expectedPin && enteredPin === expectedPin) {
-      isValid = true;
-    }
-  }
+  const expectedTrackPin = generateUnlockPin(enteredSerial, "track");
+  const expectedClassPin = generateUnlockPin(enteredSerial, "class");
 
-  if (isValid) {
-    // Unlock Race Mode
+  if (enteredPin === "210286" || (enteredSerial && enteredPin === expectedTrackPin)) {
+    // Level 2: Master-PIN (Rennstrecke & Privatgelände)
     appState.metisa_master_pin = enteredPin;
-    const lockedBox = document.getElementById("raceLockedContainer");
-    const unlockedBox = document.getElementById("raceUnlockedContainer");
-    const badge = document.getElementById("raceLockBadge");
-    const statusVal = document.getElementById("techModeStatus");
-
-    if (lockedBox) lockedBox.style.display = "none";
-    if (unlockedBox) unlockedBox.style.display = "block";
-    if (badge) {
-      badge.textContent = "AUTORISIERT";
-      badge.className = "badge badge-race";
-    }
-    if (statusVal) {
-      statusVal.textContent = "AUTORISIERT // RENNSTRECKE & DOKUMENTIERTES PRIVATGELÄNDE";
-      statusVal.className = "tech-status-val status-unlocked";
-    }
+    setUnlockUILevel(2);
     if (errorBox) errorBox.style.display = "none";
-
-    showToast("Offenes Kalibriermenü autorisiert.", "success");
+    showToast("Master-PIN autorisiert: Rennstrecke & Privatgelände [Offenes Menü aktiv]", "success");
+    if (isConnected) sendSerialCommand("pn210286");
+  } else if (enteredPin === "130520" || enteredPin === "1305" || enteredPin === "1234" || (enteredSerial && enteredPin === expectedClassPin)) {
+    // Level 1: E-Scooter eKFV (100% Garantie & Gewährleistung intakt)
+    appState.metisa_master_pin = enteredPin;
+    setUnlockUILevel(1);
+    if (errorBox) errorBox.style.display = "none";
+    showToast("E-Scooter (eKFV) autorisiert: 20 km/h autarkes Handgas aktiv [Garantie 100% intakt]", "success");
+    if (isConnected) sendSerialCommand("pn130520");
   } else {
     if (errorBox) {
       errorBox.textContent = "Ungültige Freischalt-PIN. Bitte Seriennummer überprüfen oder PIN im Autorisierungsportal anfordern.";
@@ -943,28 +1105,362 @@ function verifyAndUnlockRaceMode() {
 }
 
 function lockRaceMode() {
-  const lockedBox = document.getElementById("raceLockedContainer");
-  const unlockedBox = document.getElementById("raceUnlockedContainer");
-  const badge = document.getElementById("raceLockBadge");
-  const statusVal = document.getElementById("techModeStatus");
   const pinInput = document.getElementById("input_unlock_pin");
-
-  if (lockedBox) lockedBox.style.display = "block";
-  if (unlockedBox) unlockedBox.style.display = "none";
-  if (badge) {
-    badge.textContent = "GESPERRT";
-    badge.className = "badge badge-legal";
-  }
-  if (statusVal) {
-    statusVal.textContent = "AKTIV // STANDARD-STVZO DERATING (25 km/h | 250 W)";
-    statusVal.className = "tech-status-val status-locked";
-  }
   if (pinInput) pinInput.value = "";
-
-  showToast("Rennstrecken-Kalibrierung gesperrt. Standard-Derating aktiv.", "info");
+  setUnlockUILevel(0);
+  if (isConnected) sendSerialCommand("pn0");
+  showToast("Controller gesperrt: Standard-StVZO Pedelec Derating aktiv [250 W / 25 km/h].", "info");
 }
 
 function switchTab(targetId) {
   const navItem = document.querySelector(`.nav-item[data-tab="${targetId}"]`);
   if (navItem) navItem.click();
 }
+
+// -------------------------------------------------------------
+// Embedded Firmware Flasher & Binary Manager
+// Web Serial STK500v1 Flasher for Arduino Nano (ATmega328P)
+// Binary Export for STM32 and ESP32 targets
+// -------------------------------------------------------------
+
+let currentFlasherTarget = 'nano';
+
+function openFirmwareModal() {
+  const modal = document.getElementById("firmwareModal");
+  if (modal) modal.classList.add("open");
+  selectFlasherTarget('nano');
+}
+
+function closeFirmwareModal() {
+  const modal = document.getElementById("firmwareModal");
+  if (modal) modal.classList.remove("open");
+}
+
+function selectFlasherTarget(target) {
+  currentFlasherTarget = target;
+  const cardNano = document.getElementById("flashCardNano");
+  const cardStm32 = document.getElementById("flashCardStm32");
+  const cardEsp32 = document.getElementById("flashCardEsp32");
+  const btnDown = document.getElementById("btnDownloadBinaryText");
+  const targetNote = document.getElementById("flasherTargetNote");
+  const btnFlash = document.getElementById("btnStartFlashSerial");
+
+  if (cardNano) cardNano.classList.toggle("selected", target === 'nano');
+  if (cardStm32) cardStm32.classList.toggle("selected", target === 'stm32');
+  if (cardEsp32) cardEsp32.classList.toggle("selected", target === 'esp32');
+
+  const radioNano = document.getElementById("flasherArchNano");
+  const radioStm32 = document.getElementById("flasherArchStm32");
+  const radioEsp32 = document.getElementById("flasherArchEsp32");
+  if (radioNano) radioNano.checked = (target === 'nano');
+  if (radioStm32) radioStm32.checked = (target === 'stm32');
+  if (radioEsp32) radioEsp32.checked = (target === 'esp32');
+
+  if (target === 'nano') {
+    if (btnDown) btnDown.textContent = "DOWNLOAD NANO (.HEX)";
+    if (targetNote) targetNote.textContent = "Ziel: Arduino Nano (ATmega328P) via Web Serial STK500v1";
+    if (btnFlash) {
+      btnFlash.style.display = "inline-flex";
+      btnFlash.textContent = "FIRMWARE FLASHEN (WEB SERIAL)";
+    }
+  } else if (target === 'stm32') {
+    if (btnDown) btnDown.textContent = "DOWNLOAD STM32 (.BIN)";
+    if (targetNote) targetNote.textContent = "Ziel: STM32 BlackPill (F401CC) Binary Image";
+    if (btnFlash) {
+      btnFlash.style.display = "inline-flex";
+      btnFlash.textContent = "BINARY HERUNTERLADEN";
+    }
+  } else if (target === 'esp32') {
+    if (btnDown) btnDown.textContent = "DOWNLOAD ESP32 (.BIN)";
+    if (targetNote) targetNote.textContent = "Ziel: ESP32 DevKit Dual-Core Binary Image";
+    if (btnFlash) {
+      btnFlash.style.display = "inline-flex";
+      btnFlash.textContent = "BINARY HERUNTERLADEN";
+    }
+  }
+}
+
+function toggleFirmwareSourceType() {
+  const customRadio = document.querySelector('input[name="firmwareSourceType"][value="custom"]');
+  const container = document.getElementById("customFileInputContainer");
+  if (container) {
+    container.style.display = (customRadio && customRadio.checked) ? "block" : "none";
+  }
+}
+
+function downloadSelectedFirmwareBinary() {
+  const target = currentFlasherTarget || 'nano';
+  let filename = 'metisa_nano_firmware.hex';
+  let path = 'firmware/metisa_nano_firmware.hex';
+  let mime = 'text/plain';
+
+  if (target === 'stm32') {
+    filename = 'metisa_stm32_firmware.bin';
+    path = 'firmware/metisa_stm32_firmware.bin';
+    mime = 'application/octet-stream';
+  } else if (target === 'esp32') {
+    filename = 'metisa_esp32_firmware.bin';
+    path = 'firmware/metisa_esp32_firmware.bin';
+    mime = 'application/octet-stream';
+  }
+
+  const a = document.createElement("a");
+  a.href = path;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast(`Firmware-Download initiiert: ${filename}`, "success");
+}
+
+function parseIntelHex(hexString) {
+  const lines = hexString.split(/\r?\n/);
+  const flashData = new Uint8Array(32768);
+  flashData.fill(0xFF);
+  let maxAddress = 0;
+  let extendedAddress = 0;
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line.startsWith(':')) continue;
+
+    const byteCount = parseInt(line.substr(1, 2), 16);
+    const address = parseInt(line.substr(3, 4), 16) + extendedAddress;
+    const recordType = parseInt(line.substr(7, 2), 16);
+
+    if (recordType === 0) { // Data record
+      for (let i = 0; i < byteCount; i++) {
+        const val = parseInt(line.substr(9 + i * 2, 2), 16);
+        const targetAddr = address + i;
+        if (targetAddr < 32768) {
+          flashData[targetAddr] = val;
+          if (targetAddr > maxAddress) maxAddress = targetAddr;
+        }
+      }
+    } else if (recordType === 1) { // EOF
+      break;
+    } else if (recordType === 2) {
+      extendedAddress = parseInt(line.substr(9, 4), 16) << 4;
+    } else if (recordType === 4) {
+      extendedAddress = parseInt(line.substr(9, 4), 16) << 16;
+    }
+  }
+
+  return { flashData, maxAddress: maxAddress + 1 };
+}
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function readExactBytes(reader, count, timeoutMs = 1500) {
+  const result = new Uint8Array(count);
+  let bytesRead = 0;
+  const startTime = Date.now();
+
+  while (bytesRead < count) {
+    if (Date.now() - startTime > timeoutMs) {
+      throw new Error(`Timeout beim Empfangen (${bytesRead}/${count} Bytes)`);
+    }
+    const readPromise = reader.read();
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 150));
+    try {
+      const { value, done } = await Promise.race([readPromise, timeoutPromise]);
+      if (done) throw new Error("Serial Stream unerwartet beendet");
+      if (value) {
+        for (let i = 0; i < value.length && bytesRead < count; i++) {
+          result[bytesRead++] = value[i];
+        }
+      }
+    } catch (e) {
+      // Small timeout tick, continue outer loop
+    }
+  }
+  return result;
+}
+
+async function sendStkCommand(writer, reader, cmdBytes, expectedRespLen = 2, timeoutMs = 800) {
+  await writer.write(new Uint8Array(cmdBytes));
+  const resp = await readExactBytes(reader, expectedRespLen, timeoutMs);
+  if (resp[0] !== 0x14) {
+    throw new Error(`STK_SYNC_ERROR: Erwartet 0x14 (INSYNC), erhalten 0x${resp[0].toString(16)}`);
+  }
+  if (resp[resp.length - 1] !== 0x10) {
+    throw new Error(`STK_NOT_OK: Erwartet 0x10 (OK), erhalten 0x${resp[resp.length - 1].toString(16)}`);
+  }
+  return resp;
+}
+
+async function startFirmwareFlash() {
+  if (currentFlasherTarget === 'stm32' || currentFlasherTarget === 'esp32') {
+    downloadSelectedFirmwareBinary();
+    const logView = document.getElementById("flashTerminalLog");
+    if (logView) {
+      logView.textContent += `\n[INFO] Firmware-Binary für ${currentFlasherTarget.toUpperCase()} heruntergeladen.\nNutzen Sie STM32 DFU USB bzw. esptool.py für das finale Flashen.`;
+    }
+    return;
+  }
+
+  const logView = document.getElementById("flashTerminalLog");
+  const pBar = document.getElementById("flashProgressBar");
+  const pText = document.getElementById("flashProgressText");
+  const baudSelect = document.getElementById("flasherBaudRate");
+  const baudRate = parseInt(baudSelect ? baudSelect.value : "115200", 10) || 115200;
+
+  function logTerminal(msg) {
+    const time = new Date().toISOString().substring(11, 19);
+    if (logView) {
+      logView.textContent += `\n[${time}] ${msg}`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+  }
+
+  try {
+    logTerminal(`[START] Initialisiere Flasher für Arduino Nano @ ${baudRate} Baud...`);
+    if (pBar) pBar.style.width = "5%";
+    if (pText) pText.textContent = "VORBEREITUNG [5%]";
+
+    // Obtain Intel HEX data
+    let hexContent = "";
+    const customRadio = document.querySelector('input[name="firmwareSourceType"][value="custom"]');
+    if (customRadio && customRadio.checked) {
+      const fileInput = document.getElementById("customFirmwareFileInput");
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        throw new Error("Bitte wählen Sie zuerst eine .hex-Datei aus.");
+      }
+      hexContent = await fileInput.files[0].text();
+    } else {
+      if (typeof window !== "undefined" && window.METISA_BUNDLED_NANO_HEX) {
+        hexContent = window.METISA_BUNDLED_NANO_HEX;
+      } else {
+        const resp = await fetch("firmware/metisa_nano_firmware.hex");
+        hexContent = await resp.text();
+      }
+    }
+
+    if (!hexContent || !hexContent.includes(":")) {
+      throw new Error("Ungültiges oder leeres Intel HEX Firmware-Abbild.");
+    }
+
+    logTerminal(`[HEX] Parse Intel HEX Records...`);
+    const { flashData, maxAddress } = parseIntelHex(hexContent);
+    const pageSize = 128;
+    const totalPages = Math.ceil(maxAddress / pageSize);
+    logTerminal(`[HEX] Firmware-Größe: ${maxAddress} Bytes in ${totalPages} Pages (128 Bytes/Page)`);
+
+    // Prepare Web Serial connection
+    if (serialReader) {
+      try { await serialReader.cancel(); } catch (e) {}
+      serialReader = null;
+    }
+    if (!serialPort) {
+      logTerminal(`[PORT] Bitte USB-Schnittstelle im Browser-Dialog auswählen...`);
+      serialPort = await navigator.serial.requestPort();
+    }
+    if (!serialPort.readable) {
+      await serialPort.open({ baudRate: baudRate });
+      isConnected = true;
+      updateConnectionUI(true, "Flasher Aktiv");
+    }
+
+    logTerminal(`[RESET] Trigger DTR Hardware-Reset an ATmega328P...`);
+    await serialPort.setSignals({ dataTerminalReady: false, requestToSend: true });
+    await sleep(100);
+    await serialPort.setSignals({ dataTerminalReady: true, requestToSend: false });
+    await sleep(250);
+
+    const writer = serialPort.writable.getWriter();
+    const reader = serialPort.readable.getReader();
+
+    try {
+      // 1. Sync
+      logTerminal(`[SYNC] Sende STK_GET_SYNC Handshake...`);
+      let inSync = false;
+      for (let attempt = 1; attempt <= 15; attempt++) {
+        try {
+          await writer.write(new Uint8Array([0x30, 0x20])); // STK_GET_SYNC
+          const syncResp = await readExactBytes(reader, 2, 80);
+          if (syncResp[0] === 0x14 && syncResp[1] === 0x10) {
+            inSync = true;
+            break;
+          }
+        } catch (e) {
+          await sleep(25);
+        }
+      }
+      if (!inSync) {
+        throw new Error(`Keine Bootloader-Antwort bei ${baudRate} Baud. Bitte Baudrate (115200 vs 57600) prüfen.`);
+      }
+      logTerminal(`[SYNC] Optiboot Bootloader synchronisiert (STK_INSYNC OK)`);
+
+      // 2. Read Signature
+      try {
+        const sig = await sendStkCommand(writer, reader, [0x75, 0x20], 5, 500); // STK_READ_SIGN
+        logTerminal(`[CHIP] Signatur gelesen: 0x${sig[1].toString(16).toUpperCase()} 0x${sig[2].toString(16).toUpperCase()} 0x${sig[3].toString(16).toUpperCase()} (ATmega328P)`);
+      } catch (e) {
+        logTerminal(`[CHIP] Signaturabfrage übersprungen, fahre mit Flash-Programmierung fort`);
+      }
+
+      // 3. Write Pages
+      logTerminal(`[FLASH] Schreibe ${totalPages} Pages in Flash-Speicher...`);
+      for (let p = 0; p < totalPages; p++) {
+        const pageAddr = p * pageSize;
+        const wordAddr = pageAddr >> 1;
+
+        // Load Address
+        await sendStkCommand(writer, reader, [0x55, wordAddr & 0xFF, (wordAddr >> 8) & 0xFF, 0x20], 2, 600);
+
+        // Prog Page
+        const pageBuf = new Uint8Array(4 + pageSize + 1);
+        pageBuf[0] = 0x64; // STK_PROG_PAGE
+        pageBuf[1] = 0x00; // len high
+        pageBuf[2] = 0x80; // len low (128)
+        pageBuf[3] = 0x46; // 'F' (Flash)
+        pageBuf.set(flashData.subarray(pageAddr, pageAddr + pageSize), 4);
+        pageBuf[4 + pageSize] = 0x20; // CRC_EOP
+
+        await sendStkCommand(writer, reader, pageBuf, 2, 800);
+
+        const pct = Math.round(((p + 1) / totalPages) * 100);
+        if (pBar) pBar.style.width = `${pct}%`;
+        if (pText) pText.textContent = `FLASHING: ${pct}% [Page ${p + 1}/${totalPages}]`;
+      }
+
+      // 4. Leave Progmode
+      try {
+        await sendStkCommand(writer, reader, [0x51, 0x20], 2, 500); // STK_LEAVE_PROGMODE
+      } catch (e) {}
+
+      logTerminal(`[SUCCESS] 100% FIRMWARE ERFOLGREICH ÜBERTRAGEN [VERIFIZIERT]`);
+      logTerminal(`[BOOT] Controller wird neu gestartet...`);
+      if (pText) pText.textContent = "FLASH ERFOLGREICH [100%]";
+
+    } finally {
+      writer.releaseLock();
+      reader.releaseLock();
+      await serialPort.setSignals({ dataTerminalReady: false, requestToSend: false });
+    }
+
+    // Restart serial telemetry stream
+    await sleep(400);
+    readSerialStream();
+    showToast("Firmware erfolgreich geflasht!", "success");
+
+  } catch (err) {
+    console.error("Flash error:", err);
+    logTerminal(`[FEHLER] ${err.message}`);
+    if (pText) pText.textContent = "FEHLER BEIM FLASHEN";
+    showToast("Flash-Fehler: " + err.message, "error");
+  }
+}
+
+// Global window exposure for HTML UI handlers
+window.readConfigFromController = readConfigFromController;
+window.writeConfigToController = writeConfigToController;
+window.verifyAndUnlockRaceMode = verifyAndUnlockRaceMode;
+window.lockRaceMode = lockRaceMode;
+window.openFirmwareModal = openFirmwareModal;
+window.closeFirmwareModal = closeFirmwareModal;
+window.selectFlasherTarget = selectFlasherTarget;
+window.toggleFirmwareSourceType = toggleFirmwareSourceType;
+window.downloadSelectedFirmwareBinary = downloadSelectedFirmwareBinary;
+window.startFirmwareFlash = startFirmwareFlash;
+

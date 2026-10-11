@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAGA LABS // TRACK CALIBRATION AUTHORIZATION PORTAL</title>
-  <meta name="description" content="Rechtsverbindliches Autorisierungsportal für metisa Track- und Dyno-Kalibrierung (Rennstrecke & geschlossenes Privatgelände).">
+  <title>SAGA LABS // CALIBRATION &amp; VEHICLE CLASS AUTHORIZATION PORTAL</title>
+  <meta name="description" content="Offizielles Freischalt-Portal für metisa Fahrzeugklassen (E-Scooter eKFV per PIN mit voller Garantie) und Track &amp; Dyno Rennstrecken-Kalibrierung per Master-PIN.">
   <link rel="stylesheet" href="style.css">
   <style>
     .portal-shell {
-      max-width: 920px;
+      max-width: 960px;
       margin: 1.5rem auto 3rem auto;
       padding: 0 1.25rem;
       display: flex;
@@ -33,6 +33,55 @@
       width: 100%;
       height: 2px;
       background: linear-gradient(90deg, var(--orbit-orange) 0%, transparent 100%);
+    }
+
+    .portal-mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .portal-mode-btn {
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-medium);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1rem 1.25rem;
+      color: var(--orbit-text-secondary);
+      cursor: pointer;
+      font-family: var(--orbit-font-brand);
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .portal-mode-btn:hover {
+      border-color: var(--orbit-border-focus);
+      color: var(--orbit-text-primary);
+    }
+
+    .portal-mode-btn.active {
+      border-color: var(--orbit-orange);
+      background: rgba(255, 98, 0, 0.08);
+      color: var(--orbit-text-primary);
+      box-shadow: 0 0 16px rgba(255, 98, 0, 0.2);
+    }
+
+    .portal-mode-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--orbit-orange);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .portal-mode-desc {
+      font-size: 0.75rem;
+      color: var(--orbit-text-muted);
+      line-height: 1.5;
     }
 
     .portal-panel-title {
@@ -127,6 +176,22 @@
     .legal-clause-text strong {
       color: var(--orbit-orange);
       font-weight: 600;
+    }
+
+    .warranty-active-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--orbit-status-green);
+      border-radius: var(--orbit-radius-xs);
+      color: var(--orbit-status-green);
+      font-family: var(--orbit-font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-transform: uppercase;
     }
 
     /* Certificate Result Container */
@@ -265,67 +330,106 @@
   <!-- Shell Container -->
   <div class="portal-shell">
 
-    <div class="portal-panel" id="formCard">
-      <div class="portal-panel-title">
-        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-shield"/></svg>
-        TRACK & DYNO CALIBRATION // AUTHORIZATION DISPATCH
+    <!-- Mode Selector: Vehicle Class PIN (Warranty Intact) vs. Master-PIN (Track Waiver) -->
+    <div class="portal-mode-selector">
+      <div class="portal-mode-btn active" id="btnModeClass" onclick="setPortalMode('class')">
+        <div class="portal-mode-title">
+          <svg class="icon-svg"><use href="#icon-shield"/></svg>
+          KLASSE 01: E-SCOOTER / eKFV &amp; LEICHTFAHRZEUGE
+        </div>
+        <div class="portal-mode-desc">
+          Freischaltung <strong>nur per PIN</strong>. Gesetzliche Vorgaben erfüllt (20 km/h Handgas nach eKFV). <strong>Volle Garantie &amp; Gewährleistung bleiben bestehen!</strong>
+        </div>
       </div>
-      <p class="portal-panel-desc">
-        Rechtsverbindliches Protokoll zur Aufhebung regulatorischer Begrenzungen (25 km/h, 250 W Dauerleistung, entkoppelte Daumengas-Nutzung). Die Autorisierung ist ausschließlich für den Betrieb auf abgesperrten Motorsportstrecken und dokumentiertem, nicht-öffentlichem Prüf- und Privatgelände zulässig.
+
+      <div class="portal-mode-btn" id="btnModeTrack" onclick="setPortalMode('track')">
+        <div class="portal-mode-title">
+          <svg class="icon-svg"><use href="#icon-gear"/></svg>
+          KLASSE 02: MASTER-PIN // TRACK &amp; DYNO (OFFENES MENÜ)
+        </div>
+        <div class="portal-mode-desc">
+          Vollständige Freigabe aller Limits (99 km/h, 3000 W) für Rennstrecke &amp; Privatgelände. Erfordert Garantieverzicht für Überlastung.
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-panel" id="formCard">
+      <div class="portal-panel-title" id="panelHeading">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-shield"/></svg>
+        <span id="panelTitleText">E-SCOOTER (eKFV) FREISCHALTUNG // AUTORISIERUNGS-PIN</span>
+      </div>
+      <p class="portal-panel-desc" id="panelDescText">
+        Offizielle Freischaltung für E-Scooter und Elektrokleinstfahrzeuge (eKFV): Aktiviert den autarken Daumengas-Betrieb bis maximal 20.0 [km/h] ohne Kurbel-/PAS-Zwang. <strong>Sämtliche gesetzlichen Gewährleistungs- und Garantieansprüche bleiben in vollem Umfang erhalten.</strong>
       </p>
 
       <form id="unlockForm" onsubmit="handlePortalSubmit(event)">
 
         <!-- Step 1: Controller ID -->
         <div class="step-header">
-          <span class="step-index-badge">1</span> CONTROLLER IDENTIFICATION & OPERATOR RECORD
+          <span class="step-index-badge">1</span> STEUERGERÄTE-IDENTIFIKATION &amp; BETREIBER-DATEN
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="portalSerial">HARDWARE SERIAL NUMBER * <span class="unit">[SN]</span></label>
+            <label class="form-label" for="portalSerial">HARDWARE SERIENNUMMER * <span class="unit">[SN]</span></label>
             <input type="text" id="portalSerial" class="form-control" placeholder="z. B. MET-4091-88 oder SN-10294" required>
             <span class="form-hint">Eingraviert auf der Gehäuserückseite oder auf dem Werks-Kalibrierzertifikat.</span>
           </div>
           <div class="form-group">
-            <label class="form-label" for="portalEmail">DISPATCH EMAIL ADDRESS * <span class="unit">[SECURE]</span></label>
-            <input type="email" id="portalEmail" class="form-control" placeholder="calibration@domain.com" required>
-            <span class="form-hint">Autorisierungsnachweis und PIN-Zertifikat werden kryptografisch signiert versandt.</span>
+            <label class="form-label" for="portalEmail">EMPFÄNGER E-MAIL-ADRESSE * <span class="unit">[SECURE]</span></label>
+            <input type="email" id="portalEmail" class="form-control" placeholder="owner@domain.com" required>
+            <span class="form-hint">Der fahrzeugspezifische PIN-Code wird an diese Adresse zertifiziert übermittelt.</span>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="portalName">REGISTERED OPERATOR / VEHICLE OWNER *</label>
+          <label class="form-label" for="portalName">FAHRZEUGHALTER / BETREIBER *</label>
           <input type="text" id="portalName" class="form-control" placeholder="Vorname Nachname / Organisation" required>
+        </div>
+
+        <!-- Class Selector for Class Mode -->
+        <div id="vehicleClassGroup" class="form-group" style="margin-top: 0.75rem;">
+          <label class="form-label" for="vehicleClassSelect">FAHRZEUGKLASSIFIZIERUNG *</label>
+          <select id="vehicleClassSelect" class="form-control" style="background: var(--orbit-bg-surface); color: var(--orbit-text-primary);">
+            <option value="escooter_ekfv">E-Scooter nach eKFV (max. 20 km/h, Daumengas aktiv, 500 W Nenndauerleistung, StVZO konform)</option>
+            <option value="l1e_a">L1e-A Leichtmofa / E-Mofa (max. 20/25 km/h, Handgas aktiv, Versicherungskennzeichen)</option>
+            <option value="spedelec_l1eb">S-Pedelec L1e-B (max. 45 km/h, Tretunterstützung, Versicherungskennzeichen)</option>
+          </select>
+          <span class="form-hint">Wählen Sie die zutreffende zugelassene Fahrzeugkategorie.</span>
         </div>
 
         <!-- Step 2: Legal Affirmations -->
         <div class="step-header">
-          <span class="step-index-badge">2</span> LEGAL PROTOCOL & WARRANTY WAIVER
+          <span class="step-index-badge">2</span> RECHTLICHE BESTÄTIGUNG &amp; GARANTIE-STATUS
+        </div>
+
+        <!-- Guarantee Confirmation Notice for Class Mode -->
+        <div id="warrantyPreservedBadge" class="warranty-active-badge">
+          <span>&#10003;</span> HERSTELLERGARANTIE &amp; GESETZLICHE GEWÄHRLEISTUNG BLEIBEN VOLL ERHALTEN
         </div>
 
         <div class="legal-notice-frame">
           <div class="legal-clause-row">
             <input type="checkbox" id="checkLegal" required onchange="validateFormState()">
-            <label class="legal-clause-text" for="checkLegal">
-              <strong>1. Kenntnisnahme des Einsatzbereichs (Closed Course Only):</strong><br>
-              Hiermit wird verbindlich bestätigt, dass die Deaktivierung des Standard-Deratings (Leistung bis 3000 W, Cutoff bis 99 km/h, reiner Motorantrieb ohne Kurbeldrehung) ausschließlich auf permanent abgesperrten Motorsport-Rennstrecken sowie nicht-öffentlichem Betriebsgelände betrieben wird. Ein Betrieb im Geltungsbereich der StVZO / EU-Richtlinie EN 15194 ist untersagt.
+            <label class="legal-clause-text" for="checkLegal" id="lblCheckLegal">
+              <strong>1. Einhaltung der Fahrzeugklassengrenzen (eKFV / StVZO):</strong><br>
+              Hiermit wird bestätigt, dass das Fahrzeug die technischen Voraussetzungen der gewählten Fahrzeugklasse erfüllt (insbesondere 2 voneinander unabhängige Bremsen, Lichtanlage und Nenndauerleistungs-Grenzwerte).
             </label>
           </div>
 
           <div class="legal-clause-row">
             <input type="checkbox" id="checkWarranty" required onchange="validateFormState()">
-            <label class="legal-clause-text" for="checkWarranty">
-              <strong>2. Vollständiger Verzicht auf Gewährleistung & Haftungsfreistellung:</strong><br>
-              Der Betreiber erklärt den vollständigen, unwiderruflichen Verzicht auf gesetzliche Gewährleistung sowie jegliche Herstellergarantie seitens SaGa Labs für die gesamte Antriebsstrang-Baugruppe (Inverter-Endstufe, BLDC-Stator, Akkuzellen, Getriebe). Es ist bekannt, dass ungedrosselte Dauerströme thermische Belastungsgrenzen erreichen können. Jegliche Produkthaftung für Sach- oder Folgeschäden wird abbedungen.
+            <label class="legal-clause-text" for="checkWarranty" id="lblCheckWarranty">
+              <strong>2. Garantie- und Gewährleistungs-Bestätigung:</strong><br>
+              Es wird bestätigt, dass der Controller innerhalb der spezifizierten elektrischen Betriebsdaten der freigeschalteten Klasse betrieben wird. <strong>Die gesetzliche Gewährleistung sowie die Herstellergarantie von SaGa Labs bleiben bei ordnungsgemäßem Betrieb uneingeschränkt bestehen.</strong>
             </label>
           </div>
 
           <div class="legal-clause-row">
             <input type="checkbox" id="checkSafety" required onchange="validateFormState()">
-            <label class="legal-clause-text" for="checkSafety">
-              <strong>3. Sicherheits- und Prüfpflicht des Betreibers:</strong><br>
-              Der Betreiber verpflichtet sich zur Verwendung motorsporttauglicher Schutzausrüstung (ECE 22.06 Schutzhelm, Protektoren) sowie zur wiederkehrenden mechanischen Prüfung von Bremsanlage, Reifenindex und Rahmenfestigkeit vor jedem Einsatz.
+            <label class="legal-clause-text" for="checkSafety" id="lblCheckSafety">
+              <strong>3. Sicherheits- und Prüfpflicht des Halters:</strong><br>
+              Der Halter verpflichtet sich zur wiederkehrenden Sicht- und Funktionsprüfung von Bremsabschaltung, Reifendruck und Lenkung vor jeder Inbetriebnahme.
             </label>
           </div>
         </div>
@@ -333,7 +437,7 @@
         <!-- Submit Button -->
         <div style="display: flex; gap: 0.85rem; align-items: center; justify-content: flex-end; margin-top: 1.25rem;">
           <button type="submit" id="btnSubmitUnlock" class="btn btn-primary" style="padding: 0.65rem 1.5rem; font-size: 0.85rem;">
-            <svg class="icon-svg"><use href="#icon-shield"/></svg> GENERATE & DISPATCH AUTHORIZATION
+            <svg class="icon-svg"><use href="#icon-shield"/></svg> <span id="btnSubmitText">KLASSEN-PIN GENERIEREN &amp; ZUSENDEN</span>
           </button>
         </div>
 
@@ -342,23 +446,23 @@
 
     <!-- Step 3: Certificate Output Container -->
     <div id="resultCard" class="cert-result-container">
-      <span class="cert-status-beacon">
-        <span class="beacon-led beacon-green"></span> AUTHORIZED // MOTORSPORT CALIBRATION CERTIFIED
+      <span class="cert-status-beacon" id="beaconCertStatus">
+        <span class="beacon-led beacon-green"></span> <span id="beaconStatusText">AUTORISIERT // E-SCOOTER eKFV KLASSEN-ZERTIFIKAT</span>
       </span>
-      <h3 style="font-family: var(--orbit-font-brand); color: var(--orbit-text-primary); margin-bottom: 0.35rem; font-size: 1rem; text-transform: uppercase;">
-        CALIBRATION CERTIFICATE // TRACK & DYNO AUTHORIZATION
+      <h3 style="font-family: var(--orbit-font-brand); color: var(--orbit-text-primary); margin-bottom: 0.35rem; font-size: 1rem; text-transform: uppercase;" id="certTitleText">
+        FAHRZEUGKLASSEN-ZERTIFIKAT // E-SCOOTER eKFV
       </h3>
-      <p style="font-size: 0.78rem; color: var(--orbit-text-secondary); margin-bottom: 1.25rem;">
-        Die Autorisierung wurde rechtsverbindlich im Audit-Protokoll hinterlegt. Der PIN-Schlüssel wurde an <strong id="sentEmailDisplay" style="color: var(--orbit-orange);"></strong> übermittelt.
+      <p style="font-size: 0.78rem; color: var(--orbit-text-secondary); margin-bottom: 1.25rem;" id="certSubtitleText">
+        Die Freischaltung wurde im System registriert. Der PIN-Code wurde an <strong id="sentEmailDisplay" style="color: var(--orbit-orange);"></strong> übermittelt.
       </p>
 
       <div class="pin-readout-panel">
-        <span style="font-size: 0.68rem; color: var(--orbit-text-dim); font-family: var(--orbit-font-mono); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 0.35rem;">
-          DEDICATED CONTROLLER PIN CODE
+        <span style="font-size: 0.68rem; color: var(--orbit-text-dim); font-family: var(--orbit-font-mono); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 0.35rem;" id="pinPanelLabel">
+          DEDIZIERTER FREISCHALT-PIN
         </span>
         <div class="pin-readout-digits" id="pinDisplayVal">------</div>
         <span style="font-size: 0.68rem; color: var(--orbit-text-dim); font-family: var(--orbit-font-mono); display: block; margin-top: 0.35rem;">
-          (KRYPTOGRAFISCH AN SERIENNUMMER GEBUNDEN)
+          (KRYPTOGRAFISCH AN SERIENNUMMER &amp; KLASSE GEBUNDEN)
         </span>
       </div>
 
@@ -368,28 +472,28 @@
           <div class="cert-data-value" id="certSerialVal">---</div>
         </div>
         <div>
+          <div class="cert-data-label">FAHRZEUGKLASSE</div>
+          <div class="cert-data-value" id="certClassVal">E-SCOOTER eKFV (20 km/h)</div>
+        </div>
+        <div>
+          <div class="cert-data-label">GARANTIE-STATUS</div>
+          <div class="cert-data-value" id="certWarrantyVal" style="color: var(--orbit-status-green);">VOLLSTÄNDIG INTAKT</div>
+        </div>
+        <div>
           <div class="cert-data-label">CERTIFICATE ID</div>
           <div class="cert-data-value" id="certIdVal">CERT-2026-MET-XXXX</div>
-        </div>
-        <div>
-          <div class="cert-data-label">TIMESTAMP</div>
-          <div class="cert-data-value" id="certDateVal">---</div>
-        </div>
-        <div>
-          <div class="cert-data-label">LEGAL AUDIT STATUS</div>
-          <div class="cert-data-value" style="color: var(--orbit-status-green);">WAIVER RECORDED</div>
         </div>
       </div>
 
       <div style="background: rgba(9, 12, 18, 0.95); border: 1px solid var(--orbit-border-subtle); border-radius: var(--orbit-radius-xs); padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
         <div style="font-family: var(--orbit-font-mono); font-size: 0.72rem; color: var(--orbit-orange); font-weight: 700; margin-bottom: 0.45rem; text-transform: uppercase;">
-          CALIBRATION CLIENT ACTIVATION INSTRUCTIONS:
+          AKTIVIERUNGS-ANWEISUNG:
         </div>
         <ol style="font-size: 0.76rem; color: var(--orbit-text-secondary); padding-left: 1.15rem; margin: 0; line-height: 1.6; font-family: var(--orbit-font-body);">
-          <li>Öffnen Sie den <strong>metisa Web Configurator Client</strong>.</li>
-          <li>Navigieren Sie zum Modul <strong>TRACK & DYNO AUTHORIZATION</strong>.</li>
-          <li>Geben Sie den generierten PIN-Code in das Autorisierungsfeld ein.</li>
-          <li>Klicken Sie auf <strong>AUTORISIEREN</strong>; sämtliche Inverter- und Drehzahllimits stehen zur freien Abstimmung bereit.</li>
+          <li>Öffnen Sie den <strong>metisa Web Configurator</strong> oder das Cockpit.</li>
+          <li>Geben Sie den generierten PIN-Code in das PIN-Eingabefeld ein.</li>
+          <li>Die gewählte Konfiguration (z. B. Daumengas bis 20 km/h für E-Scooter) wird freigeschaltet.</li>
+          <li id="certInstructionNote">Gesetzliche Grenzwerte bleiben aktiv; Garantie und Gewährleistung bleiben uneingeschränkt bestehen.</li>
         </ol>
       </div>
 
@@ -401,7 +505,7 @@
           <svg class="icon-svg"><use href="#icon-print"/></svg> PRINT CERTIFICATE
         </button>
         <a href="index.html" class="btn btn-primary">
-          <svg class="icon-svg"><use href="#icon-gear"/></svg> RETURN TO CONFIGURATOR &rarr;
+          <svg class="icon-svg"><use href="#icon-gear"/></svg> ZURÜCK ZUM KONFIGURATOR &rarr;
         </a>
       </div>
     </div>
@@ -415,12 +519,57 @@
   </div>
 
   <script>
-    // Deterministic PIN Generation Algorithm
-    function generateUnlockPin(serial) {
+    let currentMode = "class"; // "class" or "track"
+
+    function setPortalMode(mode) {
+      currentMode = mode;
+      const btnClass = document.getElementById("btnModeClass");
+      const btnTrack = document.getElementById("btnModeTrack");
+      const headingText = document.getElementById("panelTitleText");
+      const descText = document.getElementById("panelDescText");
+      const classGroup = document.getElementById("vehicleClassGroup");
+      const warrantyBadge = document.getElementById("warrantyPreservedBadge");
+      const lblLegal = document.getElementById("lblCheckLegal");
+      const lblWarranty = document.getElementById("lblCheckWarranty");
+      const btnSubmit = document.getElementById("btnSubmitText");
+
+      if (mode === "class") {
+        btnClass.classList.add("active");
+        btnTrack.classList.remove("active");
+        headingText.textContent = "E-SCOOTER (eKFV) FREISCHALTUNG // AUTORISIERUNGS-PIN";
+        descText.innerHTML = "Offizielle Freischaltung für E-Scooter und Elektrokleinstfahrzeuge (eKFV): Aktiviert den autarken Daumengas-Betrieb bis maximal 20.0 [km/h] ohne Kurbel-/PAS-Zwang. <strong>Sämtliche gesetzlichen Gewährleistungs- und Garantieansprüche bleiben in vollem Umfang erhalten.</strong>";
+        classGroup.style.display = "block";
+        warrantyBadge.style.display = "inline-flex";
+        lblLegal.innerHTML = "<strong>1. Einhaltung der Fahrzeugklassengrenzen (eKFV / StVZO):</strong><br>Hiermit wird bestätigt, dass das Fahrzeug die gesetzlichen Vorgaben der gewählten Fahrzeugklasse einhält (2 voneinander unabhängige Bremsen, 20 km/h Höchstgeschwindigkeit, Lichtanlage).";
+        lblWarranty.innerHTML = "<strong>2. Garantie- und Gewährleistungs-Bestätigung:</strong><br>Es wird bestätigt, dass der Controller innerhalb der spezifizierten elektrischen Betriebsdaten der freigeschalteten Klasse betrieben wird. <strong>Die gesetzliche Gewährleistung sowie die Herstellergarantie von SaGa Labs bleiben uneingeschränkt bestehen.</strong>";
+        btnSubmit.textContent = "KLASSEN-PIN GENERIEREN & ZUSENDEN";
+      } else {
+        btnTrack.classList.add("active");
+        btnClass.classList.remove("active");
+        headingText.textContent = "MASTER-PIN // TRACK & DYNO CALIBRATION (RENNSTRECKE & PRIVATGELÄNDE)";
+        descText.innerHTML = "Rechtsverbindliches Protokoll zur vollständigen Aufhebung aller Begrenzungen (bis 99 km/h, 3000 W Spitzenleistung, entkoppeltes Vollgas). Ausschließlich für den Betrieb auf abgesperrten Motorsportstrecken und dokumentiertem Privatgelände zulässig. <strong>Erfordert Garantieverzicht für Überlastung.</strong>";
+        classGroup.style.display = "none";
+        warrantyBadge.style.display = "none";
+        lblLegal.innerHTML = "<strong>1. Kenntnisnahme des Einsatzbereichs (Closed Course Only):</strong><br>Hiermit wird verbindlich bestätigt, dass die Deaktivierung des Standard-Deratings (Leistung bis 3000 W, Cutoff bis 99 km/h, entkoppeltes Handgas) ausschließlich auf permanent abgesperrten Motorsport-Rennstrecken und nicht-öffentlichem Betriebsgelände betrieben wird.";
+        lblWarranty.innerHTML = "<strong>2. Vollständiger Verzicht auf Gewährleistung & Haftungsfreistellung:</strong><br>Der Betreiber erklärt den vollständigen, unwiderruflichen Verzicht auf gesetzliche Gewährleistung sowie jegliche Herstellergarantie seitens SaGa Labs für die gesamte Antriebsstrang-Baugruppe im Renneinsatz.";
+        btnSubmit.textContent = "MASTER- / TRACK-PIN ANFORDERN";
+      }
+
+      // Reset checkboxes
+      document.getElementById("checkLegal").checked = false;
+      document.getElementById("checkWarranty").checked = false;
+      document.getElementById("checkSafety").checked = false;
+      document.getElementById("resultCard").style.display = "none";
+    }
+
+    // Deterministic PIN Generation
+    function generateUnlockPin(serial, mode) {
       const clean = (serial || "").replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-      if (!clean || clean.length < 2) return "210286";
+      if (!clean || clean.length < 2) {
+        return mode === "track" ? "210286" : "130520";
+      }
       
-      const SALT = "SAGA-METISA-RACE-2026";
+      const SALT = mode === "track" ? "SAGA-METISA-RACE-2026" : "SAGA-METISA-CLASS-2026";
       let hash = 2166136261;
       const str = clean + SALT;
       for (let i = 0; i < str.length; i++) {
@@ -431,10 +580,11 @@
       return pin.toString();
     }
 
-    function generateCertId(serial) {
+    function generateCertId(serial, mode) {
       const timeHex = Date.now().toString(16).toUpperCase().slice(-6);
       const clean = (serial || "SN").replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 4);
-      return `CERT-2026-MET-${clean}-${timeHex}`;
+      const prefix = mode === "track" ? "TRACK" : "EKFV";
+      return `CERT-2026-${prefix}-${clean}-${timeHex}`;
     }
 
     function handlePortalSubmit(e) {
@@ -451,23 +601,44 @@
         return;
       }
       if (!check1 || !check2 || !check3) {
-        alert("Zur Autorisierung müssen alle regulatorischen Erklärungen sowie der Garantieverzicht bestätigt werden.");
+        alert("Zur Autorisierung müssen alle Erklärungen bestätigt werden.");
         return;
       }
 
-      // Generate unique PIN for this customer's serial
-      const pin = generateUnlockPin(serial);
-      const certId = generateCertId(serial);
+      const pin = generateUnlockPin(serial, currentMode);
+      const certId = generateCertId(serial, currentMode);
       const now = new Date().toISOString().replace('T', ' ').substring(0, 19) + " UTC";
 
-      // Update Result UI
+      // Populate Result UI
       document.getElementById("pinDisplayVal").textContent = pin;
       document.getElementById("sentEmailDisplay").textContent = email;
       document.getElementById("certSerialVal").textContent = serial;
       document.getElementById("certIdVal").textContent = certId;
-      document.getElementById("certDateVal").textContent = now;
 
-      // Show Result Card & Scroll
+      const certTitle = document.getElementById("certTitleText");
+      const beaconText = document.getElementById("beaconStatusText");
+      const certWarranty = document.getElementById("certWarrantyVal");
+      const certClass = document.getElementById("certClassVal");
+      const certNote = document.getElementById("certInstructionNote");
+
+      if (currentMode === "class") {
+        const classSelect = document.getElementById("vehicleClassSelect");
+        const className = classSelect.options[classSelect.selectedIndex].text;
+        beaconText.textContent = "AUTORISIERT // GESETZESKONFORME FAHRZEUGKLASSE";
+        certTitle.textContent = "FAHRZEUGKLASSEN-ZERTIFIKAT // " + className;
+        certClass.textContent = className.split('(')[0].trim();
+        certWarranty.textContent = "VOLLSTÄNDIG INTAKT (100% GARANTIE)";
+        certWarranty.style.color = "var(--orbit-status-green)";
+        certNote.textContent = "Gesetzliche Grenzwerte (z. B. eKFV 20 km/h) bleiben aktiv; Garantie und Gewährleistung bleiben uneingeschränkt bestehen.";
+      } else {
+        beaconText.textContent = "AUTORISIERT // RENNSTRECKE & PRIVATGELÄNDE (OFFEN)";
+        certTitle.textContent = "TRACK & DYNO MASTER-AUTORISIERUNG";
+        certClass.textContent = "TRACK / DYNO (RENNSPORT UNGEDROSSELT)";
+        certWarranty.textContent = "GARANTIEVERZICHT BESTÄTIGT";
+        certWarranty.style.color = "var(--orbit-orange)";
+        certNote.textContent = "Alle Inverter- und Drehzahllimits freigeschaltet. Nur auf abgesperrten Strecken betreiben.";
+      }
+
       const res = document.getElementById("resultCard");
       res.style.display = "block";
       res.scrollIntoView({ behavior: 'smooth' });
@@ -482,9 +653,7 @@
       });
     }
 
-    function validateFormState() {
-      // Live validation state
-    }
+    function validateFormState() {}
   </script>
 
 </body>

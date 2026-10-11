@@ -30,6 +30,7 @@
       <g id="icon-telemetry"><path d="M3 3v18h18M7 16l4-4 4 4 6-6"/></g>
       <g id="icon-copy"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></g>
       <g id="icon-download"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></g>
+      <g id="icon-flash"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></g>
     </defs>
   </svg>
 
@@ -61,9 +62,19 @@
         <span>CONNECT</span>
       </button>
 
-      <!-- Profile Actions -->
+      <!-- Controller Web Serial Sync (Read & Write) -->
+      <button id="btnReadConfig" class="btn btn-secondary" onclick="readConfigFromController()" title="Konfiguration aus Controller-EEPROM über USB auslesen">
+        <svg class="svg-icon"><use href="#icon-download"/></svg>
+        <span>READ CONFIG</span>
+      </button>
+      <button id="btnWriteConfig" class="btn btn-secondary" onclick="writeConfigToController()" title="Aktive Kalibrierung über USB auf Controller schreiben & speichern">
+        <svg class="svg-icon"><use href="#icon-export"/></svg>
+        <span>WRITE CONFIG</span>
+      </button>
+
+      <!-- Profile File Actions -->
       <input type="file" id="profileFileInput" accept=".apc,.json" style="display: none;" onchange="handleProfileFileSelect(event)">
-      <button class="btn btn-secondary" onclick="triggerProfileUpload()" title="Import calibration profile (.apc / .json)">
+      <button class="btn btn-secondary" onclick="triggerProfileUpload()" title="Profil laden (.apc / .json)">
         <svg class="svg-icon"><use href="#icon-import"/></svg>
         <span>OPEN</span>
       </button>
@@ -75,18 +86,26 @@
         <svg class="svg-icon"><use href="#icon-export"/></svg>
         <span>JSON</span>
       </button>
+
+      <!-- Firmware Flasher & Generator -->
+      <button id="btnOpenFirmware" class="btn btn-saga-primary" onclick="openFirmwareModal()" title="Firmware flashen / Binaries herunterladen">
+        <svg class="svg-icon"><use href="#icon-flash"/></svg>
+        <span>FLASH FIRMWARE</span>
+      </button>
+      <button class="btn btn-secondary" onclick="openConfigModal()" title="Generate C++ firmware configuration header">
+        <svg class="svg-icon"><use href="#icon-code"/></svg>
+        <span>CONFIG.H</span>
+      </button>
+
+      <!-- Wiki & Auth Portal -->
       <a href="wiki.html" class="btn btn-secondary" title="Engineering documentation & field troubleshooting">
         <svg class="svg-icon"><use href="#icon-manual"/></svg>
         <span>MANUAL</span>
       </a>
-      <a href="unlock_portal.html" target="_blank" class="btn btn-saga-outline" title="Calibration authorization portal (Track / Dyno Mode)">
+      <a href="unlock_portal.html" target="_blank" class="btn btn-saga-outline" title="Dual-Mode Autorisierungsportal (E-Scooter eKFV / Track & Dyno)">
         <svg class="svg-icon"><use href="#icon-key"/></svg>
         <span>AUTH PORTAL</span>
       </a>
-      <button class="btn btn-saga-primary" onclick="openConfigModal()" title="Generate C++ firmware configuration header">
-        <svg class="svg-icon"><use href="#icon-code"/></svg>
-        <span>GENERATE CONFIG.H</span>
-      </button>
     </div>
   </header>
 
@@ -859,12 +878,130 @@
     </div>
   </div>
 
+  <!-- Modal for Firmware Flasher & Binary Manager -->
+  <div id="firmwareModal" class="modal-overlay">
+    <div class="modal-window" style="max-width: 820px;">
+      <div class="modal-header">
+        <h4>EMBEDDED FIRMWARE FLASHER & BINARY MANAGER</h4>
+        <button class="modal-close" onclick="closeFirmwareModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="background: var(--orbit-bg-subsurface); color: var(--orbit-text-secondary); font-family: var(--orbit-font-body);">
+        
+        <div style="font-size: 0.8rem; color: var(--orbit-text-secondary); margin-bottom: 0.75rem;">
+          Wählen Sie die Ziel-Mikrocontroller-Architektur für das direkte Flashen über Web Serial oder den Download des vorkompilierten Firmware-Binaries:
+        </div>
+
+        <!-- Target Hardware Architecture Cards -->
+        <div class="flasher-target-grid">
+          <div class="flasher-target-card selected" id="flashCardNano" onclick="selectFlasherTarget('nano')">
+            <div class="flasher-radio-header">
+              <input type="radio" name="flasherArchRadio" id="flasherArchNano" checked>
+              <label for="flasherArchNano" style="cursor: pointer;">Arduino Nano</label>
+            </div>
+            <div class="flasher-mcu-sub">ATmega328P @ 16 MHz [AVR]</div>
+            <div style="font-size: 0.7rem; color: var(--orbit-status-green); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
+              WEB SERIAL STK500v1 DIRECT FLASH
+            </div>
+          </div>
+
+          <div class="flasher-target-card" id="flashCardStm32" onclick="selectFlasherTarget('stm32')">
+            <div class="flasher-radio-header">
+              <input type="radio" name="flasherArchRadio" id="flasherArchStm32">
+              <label for="flasherArchStm32" style="cursor: pointer;">STM32 BlackPill</label>
+            </div>
+            <div class="flasher-mcu-sub">STM32F401CC @ 84 MHz [ARM]</div>
+            <div style="font-size: 0.7rem; color: var(--orbit-orange); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
+              BINARY DOWNLOAD (.BIN)
+            </div>
+          </div>
+
+          <div class="flasher-target-card" id="flashCardEsp32" onclick="selectFlasherTarget('esp32')">
+            <div class="flasher-radio-header">
+              <input type="radio" name="flasherArchRadio" id="flasherArchEsp32">
+              <label for="flasherArchEsp32" style="cursor: pointer;">ESP32 DevKit</label>
+            </div>
+            <div class="flasher-mcu-sub">Xtensa Dual-Core @ 240 MHz [WIFI/BLE]</div>
+            <div style="font-size: 0.7rem; color: var(--orbit-orange); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
+              BINARY DOWNLOAD (.BIN)
+            </div>
+          </div>
+        </div>
+
+        <!-- Flasher Source & Settings Box -->
+        <div class="flasher-source-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="font-family: var(--orbit-font-mono); font-weight: 700; font-size: 0.75rem; color: var(--orbit-text-primary);">
+              FIRMWARE QUELLE & PARAMETER
+            </span>
+            <div style="display: flex; gap: 0.75rem; font-family: var(--orbit-font-mono); font-size: 0.75rem;">
+              <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                <input type="radio" name="firmwareSourceType" value="bundled" checked onchange="toggleFirmwareSourceType()">
+                <span>Vorkompiliertes Metisa-Binary</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                <input type="radio" name="firmwareSourceType" value="custom" onchange="toggleFirmwareSourceType()">
+                <span>Eigene Datei (.hex / .bin)</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="customFileInputContainer" style="display: none; margin-top: 0.5rem;">
+            <input type="file" id="customFirmwareFileInput" accept=".hex,.bin,.uf2" class="form-control" style="font-size: 0.75rem;">
+            <div style="font-size: 0.7rem; color: var(--orbit-text-muted); margin-top: 0.25rem;">
+              Unterstützt Intel HEX (.hex) für ATmega328P oder Binär-Images (.bin) für STM32/ESP32.
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; margin-top: 0.65rem; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; font-family: var(--orbit-font-mono); font-size: 0.72rem;">
+              <span>BOOTLOADER BAUDRATE:</span>
+              <select id="flasherBaudRate" class="form-control" style="width: auto; padding: 0.2rem 0.5rem; font-size: 0.72rem;">
+                <option value="115200" selected>115200 Baud (Optiboot / Neuer Bootloader)</option>
+                <option value="57600">57600 Baud (Alter Nano-Bootloader)</option>
+              </select>
+            </div>
+            <div id="flasherTargetNote" style="font-family: var(--orbit-font-mono); font-size: 0.72rem; color: var(--orbit-text-muted);">
+              Ziel: Arduino Nano (ATmega328P) via Web Serial STK500v1
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar-container">
+          <div id="flashProgressBar" class="progress-bar-fill"></div>
+          <div id="flashProgressText" class="progress-bar-text">BEREIT ZUM FLASHEN [0%]</div>
+        </div>
+
+        <!-- Terminal Log Console -->
+        <pre id="flashTerminalLog" class="terminal-log-view">[METISA BOOTLOADER SUBSYSTEM BEREIT]
+Wählen Sie 'FIRMWARE FLASHEN (WEB SERIAL)' um den Flash-Vorgang zu starten.</pre>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeFirmwareModal()">SCHLIESSEN</button>
+        <button class="btn btn-secondary" onclick="downloadSelectedFirmwareBinary()" title="Kompiliertes Firmware-Binary herunterladen">
+          <svg class="svg-icon"><use href="#icon-download"/></svg>
+          <span id="btnDownloadBinaryText">DOWNLOAD NANO (.HEX)</span>
+        </button>
+        <button class="btn btn-secondary" onclick="downloadConfigHeader()" title="C++ config.h Header herunterladen">
+          <svg class="svg-icon"><use href="#icon-code"/></svg>
+          <span>CONFIG.H</span>
+        </button>
+        <button id="btnStartFlashSerial" class="btn btn-saga-primary" onclick="startFirmwareFlash()" title="Startet den STK500v1 Flash-Vorgang über Web Serial">
+          <svg class="svg-icon"><use href="#icon-flash"/></svg>
+          <span>FIRMWARE FLASHEN (WEB SERIAL)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Client Legal & Copyright Footer -->
   <footer style="margin: 3rem auto 1.5rem auto; text-align: center; font-size: 0.68rem; color: var(--orbit-text-dim); font-family: var(--orbit-font-mono); border-top: 1px solid var(--orbit-border-subtle); padding-top: 1rem; max-width: 1400px;">
     <div>Copyright &copy; 2026 Benjamin Everts, Bielefeld / SaGa Labs. Alle Rechte vorbehalten.</div>
     <div style="margin-top: 0.25rem;">Trademarks: SaGa Labs&reg;, metisa&trade;, Metisa Suite&trade;, SaGa Labs Orbit&trade;. All contents are proprietary intellectual property.</div>
   </footer>
 
+  <script src="firmware/embedded_nano_hex.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1852,7 +1852,7 @@ void pin_set_level(byte new_level)
         curr_power_max = power_max_sport;
         curr_power_poti_max = power_poti_max_sport;
         curr_capacity = (current_profile == 0) ? capacity : capacity_2;
-        pure_throttle_allowed = false;
+        pure_throttle_allowed = true; // E-Scooter (eKFV): autarker Daumengasbetrieb bis 20 km/h zulässig (100% Garantie & Gewährleistung intakt)
     }
     else if (pin_security_level == 2) // Level 2: Race / Privatgelände (Master-PIN 210286)
     {
@@ -1873,7 +1873,7 @@ bool pin_check_and_apply(unsigned long entered_pin)
         pin_set_level(2);
         return true;
     }
-    else if (entered_pin == PIN_SPORT_TRAIL) // 1305: Sport-PIN
+    else if (entered_pin == PIN_SPORT_TRAIL || entered_pin == 1234UL || entered_pin == 130520UL) // E-Scooter (eKFV) / Sport-PIN
     {
         pin_set_level(1);
         return true;
