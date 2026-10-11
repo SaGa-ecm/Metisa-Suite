@@ -261,20 +261,21 @@ function renderCanvasGraph() {
 
   ctx.clearRect(0, 0, w, h);
 
-  // Background grid
-  ctx.strokeStyle = "rgba(71, 85, 105, 0.3)";
+  // Background grid in subtle SAGA tech style
+  ctx.strokeStyle = "rgba(255, 85, 0, 0.12)";
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let x = 40; x < w; x += 50) { ctx.moveTo(x, 0); ctx.lineTo(x, h - 25); }
   for (let y = 10; y < h - 25; y += 30) { ctx.moveTo(40, y); ctx.lineTo(w, y); }
   ctx.stroke();
 
-  // Axis Labels
-  ctx.fillStyle = "#94a3b8";
-  ctx.font = "10px sans-serif";
+  // Axis Labels in SAGA brand style
+  ctx.fillStyle = "#8892b0";
+  ctx.font = "600 10px 'Chakra Petch', sans-serif";
   ctx.fillText("0 km/h", 40, h - 10);
   ctx.fillText("25 km/h", Math.min(w - 60, 40 + (w - 70) * (25 / 35)), h - 10);
   ctx.fillText("35 km/h", w - 45, h - 10);
+  ctx.fillStyle = "#ff5500";
   ctx.fillText("W", 15, 20);
 
   // Curve Parameters
@@ -283,14 +284,11 @@ function renderCanvasGraph() {
   const spdStop = appState.nud_speedcutoff_stop || 25;
   const pThermal = appState.nud_power_thermal || 150;
 
-  // Draw Normal Power Derating Curve
-  ctx.strokeStyle = "#06b6d4";
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-
   const maxDisplaySpd = 35;
   const maxDisplayPower = Math.max(pMax * 1.2, 500);
 
+  // Calculate Curve Points
+  const points = [];
   for (let kmh = 0; kmh <= maxDisplaySpd; kmh += 0.5) {
     let power = pMax;
     if (kmh > spdStop) {
@@ -301,11 +299,34 @@ function renderCanvasGraph() {
 
     const x = 40 + (w - 55) * (kmh / maxDisplaySpd);
     const y = (h - 25) - ((h - 40) * (power / maxDisplayPower));
+    points.push({ x, y });
+  }
 
-    if (kmh === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+  // Draw Gradient Area Under Curve (Matching Cockpit App in screenshot)
+  const grad = ctx.createLinearGradient(0, 0, 0, h - 25);
+  grad.addColorStop(0, "rgba(255, 85, 0, 0.35)");
+  grad.addColorStop(1, "rgba(255, 85, 0, 0.0)");
+
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, h - 25);
+  for (const pt of points) { ctx.lineTo(pt.x, pt.y); }
+  ctx.lineTo(points[points.length - 1].x, h - 25);
+  ctx.closePath();
+  ctx.fill();
+
+  // Draw SAGA LABS Neon Orange Power Curve
+  ctx.strokeStyle = "#ff5500";
+  ctx.lineWidth = 2.5;
+  ctx.shadowColor = "rgba(255, 85, 0, 0.6)";
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  for (let i = 0; i < points.length; i++) {
+    if (i === 0) ctx.moveTo(points[i].x, points[i].y);
+    else ctx.lineTo(points[i].x, points[i].y);
   }
   ctx.stroke();
+  ctx.shadowBlur = 0; // reset
 
   // Draw Thermal Limit dashed line
   ctx.strokeStyle = "#f59e0b";

@@ -3,19 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>metisa Universal Web-Konfigurator</title>
-  <meta name="description" content="Browser-basierter, responsiver Konfigurator für den Arduino Pedelec Controller (APC v1.43) und metisa Multi-Target Firmware.">
+  <title>SAGA LABS | METISA Universal Motorcontroller Konfigurator</title>
+  <meta name="description" content="Offizieller SAGA LABS METISA Web-Konfigurator für den adaptiven Universal-Motorcontroller (APC v1.43 Multi-Target Firmware).">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Top Navigation & Header Bar -->
+  <!-- Top Navigation & Header Bar in SAGA LABS / METISA Design -->
   <header class="app-header">
-    <div class="brand-section">
-      <div class="logo-badge">METISA</div>
-      <div class="app-title">
-        <h1>E-Bike Universal Konfigurator</h1>
-        <p>Arduino Pedelec Controller (APC 1.43 Multi-Target) &bull; Web & Mobile</p>
+    <div class="brand-group">
+      <!-- SAGA LABS Stylized Flame/Wings Vector Emblem -->
+      <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 26L18 8L23 10L13 28L8 26Z" fill="#ff5500"/>
+        <path d="M16 32L26 14L31 16L21 34L16 32Z" fill="#ff7700"/>
+        <path d="M11 28C11 28 17 22 25 22C31 22 35 27 35 27" stroke="#ff5500" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text-block">
+        <span class="saga-title">SAGA</span>
+        <span class="saga-labs-sub">LABS</span>
+        <div class="brand-divider"></div>
+        <span class="metisa-title">METISA</span>
       </div>
     </div>
 
@@ -25,14 +32,14 @@
         <span class="connection-dot"></span>
         <span id="connectionStatusText">Getrennt</span>
       </div>
-      <button id="btnConnectSerial" class="btn btn-primary" title="Direkte USB-Verbindung über Web Serial API">
+      <button id="btnConnectSerial" class="btn btn-saga-primary" title="Direkte USB-Verbindung über Web Serial API">
         <span>🔌</span> USB Verbinden
       </button>
 
       <!-- Profile Actions -->
       <input type="file" id="profileFileInput" accept=".apc,.json" style="display: none;" onchange="handleProfileFileSelect(event)">
       <button class="btn btn-secondary" onclick="triggerProfileUpload()" title="Profil (.apc oder .json) laden">
-        <span>📂</span> Importieren
+        <span>📂</span> Profil Importieren
       </button>
       <button class="btn btn-secondary" onclick="downloadApcProfile()" title="Als klassisches .apc-Profil exportieren">
         <span>💾</span> .APC Export
@@ -40,11 +47,57 @@
       <button class="btn btn-secondary" onclick="downloadJsonProfile()" title="Als modernes JSON-Profil exportieren">
         <span>📄</span> JSON Export
       </button>
-      <button class="btn btn-success" onclick="openConfigModal()" title="C++ config.h für Firmware generieren">
+      <button class="btn btn-saga-primary" onclick="openConfigModal()" title="C++ config.h für Firmware generieren">
         <span>⚡</span> Generiere config.h
       </button>
     </div>
   </header>
+
+  <!-- Hero Banner: Original Design von sagalabs.de/metisa -->
+  <section class="hero-saga-banner">
+    <div class="hero-left-content">
+      <span class="hero-tagline">SAGA LABS &bull; UNIVERSAL MOTORCONTROLLER</span>
+      <h1 class="hero-headline">
+        EIN GEHIRN.<br>
+        JEDE MASCHINE.<br>
+        <span class="highlight-orange">KEINE GRENZEN.</span>
+      </h1>
+      <p class="hero-description">
+        METISA ist der weltweit erste adaptiv konfigurierbare Motorcontroller, der dein Fahrzeug vollständig an deine Wünsche anpasst. Egal ob 250W Pedelec, 3000W E-Lastenrad, E-Scooter oder Custom-Bike.
+      </p>
+      <div class="hero-btn-row">
+        <button class="btn btn-saga-primary" onclick="openConfigModal()">⚡ JETZT CONFIG.H GENERIEREN</button>
+        <button class="btn btn-saga-outline" onclick="triggerProfileUpload()">📖 PROFIL LADEN (.APC / JSON)</button>
+      </div>
+    </div>
+    <div class="hero-right-badge">
+      <div class="hardware-spec-pill">Universal BLDC / PMSM / FOC</div>
+      <div class="hardware-spec-pill">StVZO 250W bis 3000W Offroad</div>
+      <div class="hardware-spec-pill">STM32 &bull; ESP32 &bull; RP2040 &bull; AVR</div>
+    </div>
+  </section>
+
+  <!-- Drei-Spalten-Vorteilsbereich („DAS KERNVERSPRECHEN“) -->
+  <section class="promise-strip">
+    <div class="promise-card">
+      <div class="promise-title">„UNIVERSAL MOTOR- & AKKU-MANAGEMENT“</div>
+      <div class="promise-desc">
+        Für jeden Motor, Akku, Display, Leistung und Spannung. Native Unterstützung für BLDC, CAN-Bus, UART, Rekuperation (KERS), Drehmoment- und Trittfrequenzsensoren.
+      </div>
+    </div>
+    <div class="promise-card">
+      <div class="promise-title">„COCKPIT APP & PC-CONFIGURATOR“</div>
+      <div class="promise-desc">
+        Responsive Software für feinstes Setup & Android-/iOS-Web-App als Displayersatz oder Erweiterung. Erstelle unbegrenzte Profile (Pendler, Sport, Offroad Race).
+      </div>
+    </div>
+    <div class="promise-card">
+      <div class="promise-title">„HIGH-TECH, ALARM & SICHERHEIT“</div>
+      <div class="promise-desc">
+        Multi-Level PIN-Sicherheit mit Master-PIN 210286, ECE-R 50 Signalanlage mit 1,5 Hz Blinkern, Notbremslicht (ESS 3,5 Hz) und thermischer Hupenabschaltung.
+      </div>
+    </div>
+  </section>
 
   <!-- Main Container -->
   <div class="main-container">
@@ -76,28 +129,26 @@
         <span class="icon">🖥️</span> Display & Funk
       </div>
       <div class="nav-item" data-tab="tab-live">
-        <span class="icon">📊</span> Live-Messung
+        <span class="icon">📊</span> Live-Messung & Cockpit
       </div>
     </nav>
 
     <!-- Main Content Area -->
     <main class="content-area">
 
-      <!-- Interactive Bike Anatomy Banner -->
-      <section class="bike-banner">
-        <div class="banner-header">
-          <h2><span>🚲</span> Interaktive Fahrrad-Komponenten</h2>
-          <span class="badge badge-metisa">Metisa Responsive Visualizer</span>
-        </div>
-        <p class="form-hint">Klicke auf eine Komponente, um direkt zur zugehörigen Einstellungskarte zu springen:</p>
+      <!-- Interactive Bike Anatomy Hotspots -->
+      <section style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <span style="font-family: var(--font-brand); font-size: 0.8rem; font-weight: 700; color: var(--brand-orange-bright); text-transform: uppercase;">
+          FAHRZEUG-SCHNELLKONFIGURATION:
+        </span>
         <div class="hotspots-strip">
           <span class="hotspot-pill" data-tab="tab-battery" data-card="card-battery">🔋 Akku & Shunt</span>
           <span class="hotspot-pill" data-tab="tab-motor" data-card="card-motor">⚡ Motor & ESC</span>
           <span class="hotspot-pill" data-tab="tab-pas" data-card="card-pas">🚴 Tretlager / PAS</span>
-          <span class="hotspot-pill" data-tab="tab-throttle" data-card="card-throttle">✊ Gasgriff & Anfahrhilfe</span>
-          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-brakes">🛑 Bremshebel & ESS</span>
-          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-signals">💡 Blinker (ECE-R 50)</span>
-          <span class="hotspot-pill" data-tab="tab-display" data-card="card-display">🖥️ Display & HMI</span>
+          <span class="hotspot-pill" data-tab="tab-throttle" data-card="card-throttle">✊ Gasgriff & 6 km/h</span>
+          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-brakes">🛑 Bremse & ESS Flash</span>
+          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-signals">💡 ECE-R 50 Blinker</span>
+          <span class="hotspot-pill" data-tab="tab-display" data-card="card-display">🖥️ Display ST7789</span>
           <span class="hotspot-pill" data-tab="tab-pin" data-card="card-pin">🔒 Master-PIN 210286</span>
         </div>
       </section>
@@ -107,8 +158,8 @@
         <div class="cards-grid">
           <div class="config-card" id="card-system">
             <div class="card-title">
-              <h3>🎯 Ziel-Architektur & Hardware</h3>
-              <span class="badge badge-metisa">32-Bit / AVR</span>
+              <h3>🎯 „ZIEL-ARCHITEKTUR & MCU“</h3>
+              <span class="badge badge-metisa">Multi-Platform</span>
             </div>
             <div class="form-group">
               <label class="form-label" for="target_mcu">Mikrocontroller-Plattform</label>
@@ -135,7 +186,7 @@
             </div>
             <div class="form-group">
               <label class="form-label" for="profile_name">Profil-Name</label>
-              <input type="text" id="profile_name" class="form-control" value="Metisa-Trekking-36V">
+              <input type="text" id="profile_name" class="form-control" value="Saga-Trekking-36V">
             </div>
           </div>
         </div>
@@ -146,7 +197,7 @@
         <div class="cards-grid">
           <div class="config-card" id="card-battery">
             <div class="card-title">
-              <h3>🔋 Batterie-Spannung & Schutz</h3>
+              <h3>🔋 „BATTERIE-MANAGEMENT & SCHUTZ“</h3>
               <span class="badge badge-legal">Schutzbeschaltung</span>
             </div>
             <div class="form-row">
@@ -172,14 +223,14 @@
               </div>
             </div>
             <div class="form-check">
-              <input type="checkbox" id="chb_chargedetection">
+              <input type="checkbox" id="chb_chargedetection" checked>
               <label class="form-check-label" for="chb_chargedetection">Automatische Ladeerkennung (Reset Tageszähler)</label>
             </div>
           </div>
 
           <div class="config-card" id="card-shunt">
             <div class="card-title">
-              <h3>⚡ Kalibrierung (Spannungsteiler & Shunt)</h3>
+              <h3>⚡ „KALIBRIERUNG SPANNUNG & SHUNT“</h3>
               <span class="badge badge-metisa">ADC Abgleich</span>
             </div>
             <div class="form-row">
@@ -211,7 +262,7 @@
         <div class="cards-grid">
           <div class="config-card" id="card-motor">
             <div class="card-title">
-              <h3>⚡ Motorleistung & Grenzen</h3>
+              <h3>⚡ „MOTORLEISTUNG & DREHZAHLGRENZEN“</h3>
               <span class="badge badge-legal">StVZO 250W</span>
             </div>
             <div class="form-row">
@@ -247,22 +298,22 @@
             </div>
           </div>
 
-          <!-- Dynamic Power Curve Chart Card -->
+          <!-- Dynamic Power Curve Chart Card in Cyber-Orange -->
           <div class="config-card" id="card-powergraph">
             <div class="card-title">
-              <h3>📈 Dynamische Leistungskennlinie</h3>
+              <h3>📈 „DYNAMISCHE LEISTUNGSKENNLINIE“</h3>
               <span class="badge badge-metisa">Live Simulator</span>
             </div>
-            <div style="position: relative; width: 100%; height: 180px;">
+            <div style="position: relative; width: 100%; height: 180px; background: #050608; border-radius: 8px; border: 1px solid rgba(255,85,0,0.15);">
               <canvas id="powerGraphCanvas" style="width: 100%; height: 100%;"></canvas>
             </div>
-            <span class="form-hint">Zeigt die kontinuierliche Abregelung von der Nenndauerleistung (Cyan) bis zum Cutoff bei 25 km/h.</span>
+            <span class="form-hint">Zeigt die kontinuierliche Abregelung von der Nenndauerleistung (Orange) bis zum Cutoff bei 25 km/h.</span>
           </div>
 
           <div class="config-card" id="card-pid">
             <div class="card-title">
-              <h3>🎛️ PID-Regler Parameter</h3>
-              <span class="badge badge-metisa">Feinabstimmung</span>
+              <h3>🎛️ „PID-REGLER FEINABSTIMMUNG“</h3>
+              <span class="badge badge-metisa">Regelung</span>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -297,7 +348,7 @@
         <div class="cards-grid">
           <div class="config-card" id="card-pas">
             <div class="card-title">
-              <h3>🚴 Tretlagersensor & Drehmoment</h3>
+              <h3>🚴 „TRETLAGERSENSOR & DREHMOMENT“</h3>
               <span class="badge badge-legal">EN 15194</span>
             </div>
             <div class="form-group">
@@ -325,16 +376,6 @@
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="nud_pasfactor_min">Min. PAS-Verhältnis</label>
-                <input type="number" id="nud_pasfactor_min" class="form-control" step="0.1" value="1.2">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="nud_pasfactor_max">Max. PAS-Verhältnis</label>
-                <input type="number" id="nud_pasfactor_max" class="form-control" step="0.1" value="3.0">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
                 <label class="form-label" for="nud_circumference">Reifenumfang <span class="unit">[mm]</span></label>
                 <input type="number" id="nud_circumference" class="form-control" step="10" value="2200">
               </div>
@@ -356,7 +397,7 @@
         <div class="cards-grid">
           <div class="config-card" id="card-throttle">
             <div class="card-title">
-              <h3>✊ Daumengas / Drehgriff</h3>
+              <h3>✊ „DAUMENGAS & SCHIEBEHILFE“</h3>
               <span class="badge badge-legal">Schwellwerte</span>
             </div>
             <div class="form-check">
@@ -391,8 +432,8 @@
         <div class="cards-grid">
           <div class="config-card" id="card-pin">
             <div class="card-title">
-              <h3>🔒 Multi-Level PIN-Sicherheitssystem</h3>
-              <span class="badge badge-race">Metisa Exklusiv</span>
+              <h3>🔒 „MULTI-LEVEL PIN-SICHERHEIT“</h3>
+              <span class="badge badge-race">Master-PIN</span>
             </div>
             <p class="form-hint">Schützt höhere Leistungsmodi vor unberechtigtem Zugriff. Bei jedem Controller-Neustart wird automatisch Stufe 0 (StVZO-Legal) verriegelt.</p>
             <div class="form-check">
@@ -427,8 +468,8 @@
         <div class="cards-grid">
           <div class="config-card" id="card-signals">
             <div class="card-title">
-              <h3>💡 E-Bike Beleuchtung & Blinker</h3>
-              <span class="badge badge-metisa">ECE-R 50</span>
+              <h3>💡 „ECE-R 50 FAHRTRICHTUNGSANZEIGER“</h3>
+              <span class="badge badge-metisa">Signalanlage</span>
             </div>
             <div class="form-check">
               <input type="checkbox" id="metisa_turn_signals" checked>
@@ -451,7 +492,7 @@
 
           <div class="config-card" id="card-brakes">
             <div class="card-title">
-              <h3>🛑 Bremslicht & Notbremsblinken (ESS)</h3>
+              <h3>🛑 „BREMSLICHT & NOTBREMSEN (ESS)“</h3>
               <span class="badge badge-legal">Sicherheit</span>
             </div>
             <div class="form-check">
@@ -484,7 +525,7 @@
         <div class="cards-grid">
           <div class="config-card" id="card-display">
             <div class="card-title">
-              <h3>🖥️ Display-Typ & HMI</h3>
+              <h3>🖥️ „DISPLAY-TYP & HMI“</h3>
               <span class="badge badge-metisa">Display Treiber</span>
             </div>
             <div class="form-group">
@@ -508,7 +549,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="txb_welcometext">Begrüßungstext</label>
-                <input type="text" id="txb_welcometext" class="form-control" value="metisa APC 1.43">
+                <input type="text" id="txb_welcometext" class="form-control" value="SAGA METISA 1.43">
               </div>
               <div class="form-group">
                 <label class="form-label" for="txb_goodbye">Abschalttext</label>
@@ -519,7 +560,7 @@
 
           <div class="config-card" id="card-wireless">
             <div class="card-title">
-              <h3>📡 Onboard-Funk (Bluetooth & WiFi)</h3>
+              <h3>📡 „ONBOARD-FUNK & WEB COCKPIT“</h3>
               <span class="badge badge-metisa">ESP32 & Pico W</span>
             </div>
             <div class="form-check">
@@ -548,12 +589,12 @@
         </div>
       </div>
 
-      <!-- TAB 9: Live-Messung & Kalibrierung -->
+      <!-- TAB 9: Live-Messung & Cockpit -->
       <div id="tab-live" class="tab-pane" style="display: none;">
         <div class="cards-grid">
           <div class="config-card" id="card-live-gauges">
             <div class="card-title">
-              <h3>📊 Echtzeit-Messung (USB Telemetrie)</h3>
+              <h3>📊 „ECHTZEIT-TELEMETRIE & COCKPIT“</h3>
               <span class="badge badge-metisa">115200 Baud</span>
             </div>
             <p class="form-hint">Verbinde den Controller über USB mit dem Browser, um Live-Spannungen und Geberpegel abzugleichen:</p>
@@ -562,7 +603,7 @@
               <div class="gauge-bar-wrapper">
                 <div class="gauge-header">
                   <span>Batteriespannung</span>
-                  <span id="lblLiveVoltage">-- V (ADC --)</span>
+                  <span id="lblLiveVoltage" class="gauge-val">-- V (ADC --)</span>
                 </div>
                 <div class="gauge-progress">
                   <div id="gaugeFillVoltage" class="gauge-fill"></div>
@@ -572,7 +613,7 @@
               <div class="gauge-bar-wrapper">
                 <div class="gauge-header">
                   <span>Batteriestrom</span>
-                  <span id="lblLiveCurrent">-- A (ADC --)</span>
+                  <span id="lblLiveCurrent" class="gauge-val">-- A (ADC --)</span>
                 </div>
                 <div class="gauge-progress">
                   <div id="gaugeFillCurrent" class="gauge-fill red"></div>
@@ -582,7 +623,7 @@
               <div class="gauge-bar-wrapper">
                 <div class="gauge-header">
                   <span>Gasgriff-Rohwert</span>
-                  <span id="lblLiveThrottle">ADC --</span>
+                  <span id="lblLiveThrottle" class="gauge-val">ADC --</span>
                 </div>
                 <div class="gauge-progress">
                   <div id="gaugeFillThrottle" class="gauge-fill"></div>
@@ -592,7 +633,7 @@
               <div class="gauge-bar-wrapper">
                 <div class="gauge-header">
                   <span>Potentiometer-Rohwert</span>
-                  <span id="lblLivePoti">ADC --</span>
+                  <span id="lblLivePoti" class="gauge-val">ADC --</span>
                 </div>
                 <div class="gauge-progress">
                   <div id="gaugeFillPoti" class="gauge-fill"></div>
@@ -610,14 +651,14 @@
   <div id="configModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 style="font-size: 1rem; font-weight: 700;">⚡ Generierte config.h Headerdatei</h3>
+        <h3>⚡ GENERIERTE CONFIG.H HEADERDATEI</h3>
         <button class="btn btn-secondary btn-icon-only" onclick="closeConfigModal()">&times;</button>
       </div>
       <pre id="configCodeView" class="modal-body"></pre>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeConfigModal()">Schließen</button>
-        <button class="btn btn-secondary" onclick="copyConfigToClipboard()">📋 Kopieren</button>
-        <button class="btn btn-success" onclick="downloadConfigHeader()">💾 Datei herunterladen</button>
+        <button class="btn btn-secondary" onclick="copyConfigToClipboard()">📋 In Zwischenablage kopieren</button>
+        <button class="btn btn-saga-primary" onclick="downloadConfigHeader()">💾 Datei herunterladen</button>
       </div>
     </div>
   </div>
