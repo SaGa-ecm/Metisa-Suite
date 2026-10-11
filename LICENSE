@@ -1,46 +1,19 @@
-METISA PROPRIETARY LICENSE NOTICE
-Draft for review by qualified intellectual-property counsel
+METISA PROPRIETARY & INTELLECTUAL PROPERTY NOTICE
+Copyright (c) 2026 Ralf Czechowitz / SaGa Labs. All rights reserved.
 
-IMPORTANT: This notice is not a certification that SaGaLabs owns all rights
-in this repository, is not a worldwide-enforceability opinion, and does not
-replace any license or permission granted by an upstream rights holder.
+1. Intellectual Property & Ownership
+All proprietary assets, innovations, software surfaces, designs, and trademarks created by SaGa Labs—including but not limited to the Metisa Suite Web Configurator, the calibration authorization portal, the SaGa Labs Orbit design system, the multi-target hardware abstraction layer (HAL), and all associated documentation—are the exclusive intellectual property of Ralf Czechowitz / SaGa Labs.
 
-1. Scope
+2. Trademarks & Brand Protection
+"SaGa Labs", "metisa", "Metisa Suite", "SaGa Labs Orbit", and all associated logos, vector iconography, and trade dress are protected trademarks of Ralf Czechowitz / SaGa Labs. No trademark license or permission to use these brands is granted without prior written consent. See TRADEMARKS_AND_IP.md.
 
-This proposed restriction can apply only to material for which SaGaLabs has
-verified ownership or written authority to license. The repository includes
-inherited firmware and third-party components. Existing copyright notices and
-component-specific licenses remain in force for those materials and are not
-revoked or replaced by this notice. See THIRD_PARTY_NOTICES.md.
+3. Reservation of Rights on SaGa Labs Material
+No general, blanket, or commercial license is granted merely by making this repository or its web services available. Any use, copying, modification, integration, distribution, manufacture, commercial exploitation, or sublicensing of SaGa Labs intellectual property requires a separate written agreement executed by Ralf Czechowitz / SaGa Labs.
 
-2. Proposed permission model for SaGaLabs-owned material
+4. Inherited & Third-Party Code
+This repository includes modified base firmware and third-party libraries originally derived from the Arduino Pedelec Controller project and open-source contributors. Upstream copyright notices, attributions, and license grants (including GNU GPL v3.0, LGPL, and MIT) are strictly preserved for their respective historical files as detailed in THIRD_PARTY_NOTICES.md. Open-source licensing of underlying components does not apply to SaGa Labs trademarks, trade dress, or independent proprietary works.
 
-No general license is granted by making a copy of this repository available.
-Private, non-commercial use may be permitted only with prior written
-authorization from the verified rights holder. Any other use, including
-copying, modification, publication, redistribution, manufacture, commercial
-use, or sublicensing, requires a separate written agreement signed by the
-verified rights holder.
-
-3. Conditions and reservations
-
-Nothing in this notice transfers ownership, grants patent rights, overrides
-mandatory rights under applicable law, or limits permissions already granted
-under an applicable third-party license. SaGaLabs branding does not imply
-ownership of upstream contributions. Rights in product names, trademarks,
-hardware designs, and any registered or pending utility-model protection are
-separate and are not granted here.
-
-4. Publication hold
-
-This file is a draft, not an operative final license. The licensing status of
-the combined firmware must be reviewed before public source or binary
-distribution. In particular, the repository contains a GPL version 2 license
-text for HX711-related code and contradictory public-domain/LGPL notices for
-MenuSystem. A qualified lawyer and the relevant upstream rights holders must
-resolve the rights chain and compatibility before release.
-
-For the upstream GPL-3.0-or-later notice present in inherited firmware, the
-license text is available at https://www.gnu.org/licenses/gpl-3.0.txt. That
-upstream grant applies only to the material covered by its notice; it is not a
-blanket license for every file in this repository.
+5. Inquiries & Licensing
+For licensing, commercial deployment, or authorization inquiries, contact:
+SaGa Labs | Ralf Czechowitz
+kontakt@sagalabs.de | info@speeduino.de | https://sagalabs.de

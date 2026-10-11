@@ -1,14 +1,17 @@
 /**
- * metisa Web Configurator - Core Application Engine
- * Universal Browser-Based Configurator for Arduino Pedelec Controller (APC) & metisa
+ * METISA SUITE // Web Configurator Core Application Engine
+ * Universal Browser-Based Calibration Platform for SaGa Labs metisa & APC
+ * 
+ * Copyright (c) 2026 Ralf Czechowitz / SaGa Labs. All rights reserved.
+ * Proprietary Intellectual Property. Trademarks: SaGa Labs(R), metisa(TM), Metisa Suite(TM).
  * 
  * Features:
  * - 100% Backward-compatible .apc profile loading & saving
  * - Modern JSON profiles
  * - Clean C++ config.h code generation
  * - Web Serial API (USB-to-MCU direct live link)
- * - Interactive Canvas Power Curve Rendering
- * - Multi-Level PIN Security System (Race & Private Ground Mode)
+ * - Interactive Canvas Oscilloscope & Dyno Power Curve Rendering
+ * - Multi-Level PIN Security System (Track & Dyno Authorization)
  * - Full ECE-R 50 Lighting & Signaling Controls
  */
 
