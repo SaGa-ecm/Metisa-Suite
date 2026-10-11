@@ -50,55 +50,35 @@
       <a href="wiki.html" class="btn btn-saga-outline" title="Verständliches Handbuch & 25 FAQ Fragen">
         <span>📖</span> Wiki & FAQ
       </a>
+      <a href="unlock_portal.html" target="_blank" class="btn btn-saga-outline" title="Freischalt-PIN für Rennstrecke & Privatgelände anfordern">
+        <span>🔑</span> Freischalt-Portal
+      </a>
       <button class="btn btn-saga-primary" onclick="openConfigModal()" title="C++ config.h für Firmware generieren">
         <span>⚡</span> Generiere config.h
       </button>
     </div>
   </header>
 
-  <!-- Hero Banner: Original Design von sagalabs.de/metisa -->
-  <section class="hero-saga-banner">
-    <div class="hero-left-content">
-      <span class="hero-tagline">SAGA LABS &bull; UNIVERSAL MOTORCONTROLLER</span>
-      <h1 class="hero-headline">
-        EIN GEHIRN.<br>
-        JEDE MASCHINE.<br>
-        <span class="highlight-orange">KEINE GRENZEN.</span>
-      </h1>
-      <p class="hero-description">
-        METISA ist der weltweit erste adaptiv konfigurierbare Motorcontroller, der dein Fahrzeug vollständig an deine Wünsche anpasst. Egal ob 250W Pedelec, 3000W E-Lastenrad, E-Scooter oder Custom-Bike.
-      </p>
-      <div class="hero-btn-row">
-        <button class="btn btn-saga-primary" onclick="openConfigModal()">⚡ JETZT CONFIG.H GENERIEREN</button>
-        <a href="wiki.html" class="btn btn-saga-outline">📖 ZUR DOKUMENTATION & FAQ</a>
-      </div>
+  <!-- Technischer Status- & Betriebsmodus-Balken -->
+  <section class="tech-status-bar">
+    <div class="tech-status-col">
+      <span class="tech-status-label">AKTIVES PROFIL:</span>
+      <span class="tech-status-val" id="displayProfileName">Saga-Trekking-36V</span>
     </div>
-    <div class="hero-right-badge">
-      <div class="hardware-spec-pill">Universal BLDC / PMSM / FOC</div>
-      <div class="hardware-spec-pill">StVZO 250W bis 3000W Offroad</div>
-      <div class="hardware-spec-pill">STM32 &bull; ESP32 &bull; RP2040 &bull; AVR</div>
+    <div class="tech-status-col">
+      <span class="tech-status-label">BETRIEBSMODUS:</span>
+      <span class="tech-status-val status-locked" id="techModeStatus">🔒 Standard-Modus (Begrenzt auf 25 km/h / 250 W)</span>
     </div>
-  </section>
-
-  <!-- Drei-Spalten-Vorteilsbereich („DAS KERNVERSPRECHEN“) -->
-  <section class="promise-strip">
-    <div class="promise-card">
-      <div class="promise-title">„UNIVERSAL MOTOR- & AKKU-MANAGEMENT“</div>
-      <div class="promise-desc">
-        Für jeden Motor, Akku, Display, Leistung und Spannung. Native Unterstützung für BLDC, CAN-Bus, UART, Rekuperation (KERS), Drehmoment- und Trittfrequenzsensoren.
-      </div>
+    <div class="tech-status-col">
+      <span class="tech-status-label">RENNSTRECKE & PRIVATGELÄNDE:</span>
+      <button id="btnQuickUnlock" class="btn btn-saga-outline btn-xs" onclick="switchTab('tab-pin')">
+        <span>🔓</span> PIN Freischaltung
+      </button>
     </div>
-    <div class="promise-card">
-      <div class="promise-title">„COCKPIT APP & PC-CONFIGURATOR“</div>
-      <div class="promise-desc">
-        Responsive Software für feinstes Setup & Android-/iOS-Web-App als Displayersatz oder Erweiterung. Erstelle unbegrenzte Profile (Pendler, Sport, Offroad Race).
-      </div>
-    </div>
-    <div class="promise-card">
-      <div class="promise-title">„HIGH-TECH, ALARM & SICHERHEIT“</div>
-      <div class="promise-desc">
-        Multi-Level PIN-Sicherheit mit Master-PIN 210286, ECE-R 50 Signalanlage mit 1,5 Hz Blinkern, Notbremslicht (ESS 3,5 Hz) und thermischer Hupenabschaltung.
-      </div>
+    <div class="tech-status-col">
+      <a href="unlock_portal.html" target="_blank" class="portal-badge-link" title="Offizielles Freischaltportal öffnen">
+        <span>🔑</span> Freischalt-Portal öffnen &rarr;
+      </a>
     </div>
   </section>
 
@@ -108,7 +88,7 @@
     <!-- Sidebar Navigation -->
     <nav class="sidebar-nav">
       <div class="nav-item active" data-tab="tab-system">
-        <span class="icon">🎯</span> System & Plattform
+        <span class="icon">⚙️</span> Allgemeine Einstellungen
       </div>
       <div class="nav-item" data-tab="tab-battery">
         <span class="icon">🔋</span> Akku & Leistung
@@ -123,7 +103,7 @@
         <span class="icon">✊</span> Gasgriff & Taster
       </div>
       <div class="nav-item" data-tab="tab-pin">
-        <span class="icon">🔒</span> PIN-Sicherheit
+        <span class="icon">🔒</span> Rennstrecke & Privatgelände
       </div>
       <div class="nav-item" data-tab="tab-lights">
         <span class="icon">💡</span> Licht & Signale
@@ -132,7 +112,7 @@
         <span class="icon">🖥️</span> Display & Funk
       </div>
       <div class="nav-item" data-tab="tab-live">
-        <span class="icon">📊</span> Live-Messung & Cockpit
+        <span class="icon">📊</span> Live-Messung & Diagnose
       </div>
     </nav>
 
@@ -148,48 +128,31 @@
           <span class="hotspot-pill" data-tab="tab-battery" data-card="card-battery">🔋 Akku & Shunt</span>
           <span class="hotspot-pill" data-tab="tab-motor" data-card="card-motor">⚡ Motor & ESC</span>
           <span class="hotspot-pill" data-tab="tab-pas" data-card="card-pas">🚴 Tretlager / PAS</span>
-          <span class="hotspot-pill" data-tab="tab-throttle" data-card="card-throttle">✊ Gasgriff & 6 km/h</span>
-          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-brakes">🛑 Bremse & ESS Flash</span>
-          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-signals">💡 ECE-R 50 Blinker</span>
+          <span class="hotspot-pill" data-tab="tab-throttle" data-card="card-throttle">✊ Gasgriff & Schiebehilfe</span>
+          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-brakes">🛑 Bremsen & Warnlicht</span>
+          <span class="hotspot-pill" data-tab="tab-lights" data-card="card-signals">💡 Fahrtrichtungsanzeiger</span>
           <span class="hotspot-pill" data-tab="tab-display" data-card="card-display">🖥️ Display ST7789</span>
-          <span class="hotspot-pill" data-tab="tab-pin" data-card="card-pin">🔒 Master-PIN 210286</span>
+          <span class="hotspot-pill" data-tab="tab-pin" data-card="card-pin">🔒 Rennstrecke & Privatgelände</span>
         </div>
       </section>
 
-      <!-- TAB 1: System & Plattform -->
+      <!-- TAB 1: Allgemeine Einstellungen & Profil -->
       <div id="tab-system" class="tab-pane">
         <div class="cards-grid">
           <div class="config-card" id="card-system">
             <div class="card-title">
-              <h3>🎯 „ZIEL-ARCHITEKTUR & MCU“</h3>
-              <span class="badge badge-metisa">Multi-Platform</span>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="target_mcu">Mikrocontroller-Plattform</label>
-              <select id="target_mcu" class="form-control">
-                <option value="esp32">ESP32 (Classic Dual-Core @ 240 MHz - Onboard BT + WiFi)</option>
-                <option value="esp32s3">ESP32-S3 (Dual-Core @ 240 MHz - WiFi)</option>
-                <option value="stm32_blackpill">STM32F401 BlackPill (Cortex-M4F @ 84 MHz)</option>
-                <option value="stm32_g4">STM32G431RB Motor-MCU (Cortex-M4F @ 170 MHz)</option>
-                <option value="pico">Raspberry Pi Pico (RP2040 Dual-Core @ 133 MHz)</option>
-                <option value="avr_mega">Atmel ATmega2560 (FC 2.x Trägerplatine)</option>
-                <option value="avr_nano">Atmel ATmega328P (FC 1.x Trägerplatine)</option>
-              </select>
-              <span class="form-hint">Wählt die HAL-Plattformtreiber und Pin-Mapping-Routinen in der Firmware aus.</span>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="nud_version">Historische FC-Revision (HARDWARE_REV)</label>
-              <select id="nud_version" class="form-control">
-                <option value="22">FC 2.2 (Standard 32-Bit / Riser-Board)</option>
-                <option value="21">FC 2.1 (Mega-Carrier mit Nokia Pegelwandler)</option>
-                <option value="20">FC 2.0 (Mega-Carrier Basis)</option>
-                <option value="15">FC 1.5 (Nano 328P Basis)</option>
-                <option value="13">FC 1.3 (Nano 328P Basis)</option>
-              </select>
+              <h3>⚙️ PROFIL & GERÄTE-IDENTIFIKATION</h3>
+              <span class="badge badge-metisa">Konfiguration</span>
             </div>
             <div class="form-group">
               <label class="form-label" for="profile_name">Profil-Name</label>
               <input type="text" id="profile_name" class="form-control" value="Saga-Trekking-36V">
+              <span class="form-hint">Bezeichnung für diesen Parametersatz im Speicher.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profile_serial">Controller-Seriennummer</label>
+              <input type="text" id="profile_serial" class="form-control" placeholder="z. B. MET-4091-88" value="MET-2026-001">
+              <span class="form-hint">Hardware-Seriennummer des Controllers für Autorisierungen und Freischaltungen.</span>
             </div>
           </div>
         </div>
@@ -265,14 +228,14 @@
         <div class="cards-grid">
           <div class="config-card" id="card-motor">
             <div class="card-title">
-              <h3>⚡ „MOTORLEISTUNG & DREHZAHLGRENZEN“</h3>
-              <span class="badge badge-legal">StVZO 250W</span>
+              <h3>⚡ MOTORLEISTUNG & DREHZAHLGRENZEN</h3>
+              <span class="badge badge-legal">250 W</span>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="nud_power_max">Nenndauerleistung <span class="unit">[W]</span></label>
                 <input type="number" id="nud_power_max" class="form-control" step="10" value="250">
-                <span class="form-hint">StVZO Legal: 250 Watt.</span>
+                <span class="form-hint">Standard-Nennleistung: 250 Watt.</span>
               </div>
               <div class="form-group">
                 <label class="form-label" for="nud_power_thermal">Thermische Grenze <span class="unit">[W]</span></label>
@@ -304,7 +267,7 @@
           <!-- Dynamic Power Curve Chart Card in Cyber-Orange -->
           <div class="config-card" id="card-powergraph">
             <div class="card-title">
-              <h3>📈 „DYNAMISCHE LEISTUNGSKENNLINIE“</h3>
+              <h3>📈 DYNAMISCHE LEISTUNGSKENNLINIE</h3>
               <span class="badge badge-metisa">Live Simulator</span>
             </div>
             <div style="position: relative; width: 100%; height: 180px; background: #050608; border-radius: 8px; border: 1px solid rgba(255,85,0,0.15);">
@@ -315,7 +278,7 @@
 
           <div class="config-card" id="card-pid">
             <div class="card-title">
-              <h3>🎛️ „PID-REGLER FEINABSTIMMUNG“</h3>
+              <h3>🎛️ PID-REGLER FEINABSTIMMUNG</h3>
               <span class="badge badge-metisa">Regelung</span>
             </div>
             <div class="form-row">
@@ -351,8 +314,8 @@
         <div class="cards-grid">
           <div class="config-card" id="card-pas">
             <div class="card-title">
-              <h3>🚴 „TRETLAGERSENSOR & DREHMOMENT“</h3>
-              <span class="badge badge-legal">EN 15194</span>
+              <h3>🚴 TRETLAGERSENSOR & DREHMOMENT</h3>
+              <span class="badge badge-legal">Pedal Assist</span>
             </div>
             <div class="form-group">
               <label class="form-label" for="cb_bottombracket">Sensortyp</label>
@@ -430,38 +393,89 @@
         </div>
       </div>
 
-      <!-- TAB 6: Metisa PIN-Sicherheit -->
+      <!-- TAB 6: Rennstrecke & Privatgelände -->
       <div id="tab-pin" class="tab-pane" style="display: none;">
         <div class="cards-grid">
           <div class="config-card" id="card-pin">
             <div class="card-title">
-              <h3>🔒 „MULTI-LEVEL PIN-SICHERHEIT“</h3>
-              <span class="badge badge-race">Master-PIN</span>
+              <h3>🔒 RENNSTRECKE & PRIVATGELÄNDE</h3>
+              <span class="badge badge-legal" id="raceLockBadge">GESPERRT</span>
             </div>
-            <p class="form-hint">Schützt höhere Leistungsmodi vor unberechtigtem Zugriff. Bei jedem Controller-Neustart wird automatisch Stufe 0 (StVZO-Legal) verriegelt.</p>
-            <div class="form-check">
-              <input type="checkbox" id="metisa_pin_enabled" checked>
-              <label class="form-check-label" for="metisa_pin_enabled">PIN-Sicherheitssystem aktivieren</label>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="metisa_master_pin">Master-PIN (Level 2 Race Entsperrung)</label>
-              <input type="text" id="metisa_master_pin" class="form-control" value="210286" maxlength="10">
-              <span class="form-hint">Default Master-PIN: 210286.</span>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="metisa_race_speed">Level 2 Race Max Speed <span class="unit">[km/h]</span></label>
-                <input type="number" id="metisa_race_speed" class="form-control" value="99">
+
+            <!-- Gesperrter Zustand: PIN-Eingabefeld ohne jegliche Pingenerierung -->
+            <div id="raceLockedContainer" class="race-locked-box">
+              <div class="lock-icon-hero">🔒</div>
+              <h4 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 0.5rem;">Offenes Menü ist geschützt</h4>
+              <p style="font-size: 0.85rem; color: var(--text-silver); margin-bottom: 1.25rem; line-height: 1.6;">
+                Die Parameter für Rennstrecken- und Privatgeländenutzung (Aufhebung aller Begrenzungen auf bis zu 99 km/h, 3000 W und reiner Handgasbetrieb ohne Pedalieren) sind werkseitig gesperrt. Geben Sie Ihre autorisierte Freischalt-PIN ein, um das vollständige Menü freizuschalten.
+              </p>
+
+              <div class="pin-entry-row">
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label" for="input_unlock_pin">Freischalt-PIN</label>
+                  <input type="password" id="input_unlock_pin" class="form-control" placeholder="PIN eingeben" autocomplete="off" maxlength="10">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label class="form-label" for="input_unlock_serial">Seriennummer (falls abweichend)</label>
+                  <input type="text" id="input_unlock_serial" class="form-control" placeholder="z. B. MET-2026-001">
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label" for="metisa_race_power">Level 2 Race Max Power <span class="unit">[W]</span></label>
-                <input type="number" id="metisa_race_power" class="form-control" value="1000">
+
+              <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 1rem;">
+                <button type="button" class="btn btn-saga-primary" onclick="verifyAndUnlockRaceMode()">
+                  <span>🔓</span> Offenes Menü freischalten
+                </button>
+                <a href="unlock_portal.html" target="_blank" class="btn btn-saga-outline" title="Neue PIN über Seriennummer anfordern">
+                  <span>🔑</span> PIN im Freischalt-Portal anfordern &rarr;
+                </a>
+              </div>
+              <div id="pinUnlockError" class="pin-error-msg" style="display: none; margin-top: 0.75rem; color: var(--accent-red); font-size: 0.85rem;"></div>
+            </div>
+
+            <!-- Freigeschalteter Zustand (voll offenes Menü) -->
+            <div id="raceUnlockedContainer" class="race-unlocked-box" style="display: none;">
+              <div class="unlocked-header-banner">
+                <div>
+                  <span style="color: var(--accent-green); font-weight: 700; font-family: var(--font-brand); font-size: 0.95rem;">
+                    🔓 OFFENES MENÜ AKTIV: RENNSTRECKE & PRIVATGELÄNDE FREIGESCHALTET
+                  </span>
+                  <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.25rem 0 0 0;">
+                    Nutzung ausschließlich auf abgesperrten Strecken und privatem Gelände gestattet.
+                  </p>
+                </div>
+                <button type="button" class="btn btn-secondary btn-xs" onclick="lockRaceMode()">
+                  <span>🔒</span> Wieder verriegeln
+                </button>
+              </div>
+
+              <div class="form-check" style="margin-top: 1.25rem;">
+                <input type="checkbox" id="metisa_pin_enabled" checked>
+                <label class="form-check-label" for="metisa_pin_enabled">PIN-Sicherheitssystem im Controller aktiv halten</label>
+              </div>
+
+              <input type="hidden" id="metisa_master_pin" value="210286">
+
+              <div class="form-row" style="margin-top: 1rem;">
+                <div class="form-group">
+                  <label class="form-label" for="metisa_race_speed">Maximalgeschwindigkeit (Rennstrecke) <span class="unit">[km/h]</span></label>
+                  <input type="number" id="metisa_race_speed" class="form-control" value="99" min="25" max="120">
+                  <span class="form-hint">Vollständig entdrosselt (Werkswert: 99 km/h).</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="metisa_race_power">Maximalleistung (Rennstrecke) <span class="unit">[W]</span></label>
+                  <input type="number" id="metisa_race_power" class="form-control" value="1000" min="250" max="3000" step="50">
+                  <span class="form-hint">Vollständig entdrosselt bis 3000 Watt.</span>
+                </div>
+              </div>
+
+              <div class="form-check" style="margin-top: 0.75rem;">
+                <input type="checkbox" id="metisa_race_pure_throttle" checked>
+                <label class="form-check-label" for="metisa_race_pure_throttle">
+                  Reinen Handgasbetrieb ohne Pedalieren auf Rennstrecke freigeben
+                </label>
               </div>
             </div>
-            <div class="form-check">
-              <input type="checkbox" id="metisa_race_pure_throttle" checked>
-              <label class="form-check-label" for="metisa_race_pure_throttle">Reiner Gasgriff-Betrieb ohne Pedalieren in Level 2 freigeben</label>
-            </div>
+
           </div>
         </div>
       </div>

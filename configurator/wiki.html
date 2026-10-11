@@ -124,6 +124,9 @@
     </div>
 
     <div class="header-actions">
+      <a href="unlock_portal.html" target="_blank" class="btn btn-saga-outline">
+        <span>🔑</span> Freischalt-Portal
+      </a>
       <a href="index.html" class="btn btn-saga-primary">
         <span>⬅️</span> Zurück zum Konfigurator
       </a>
@@ -142,7 +145,7 @@
       </p>
       <div class="quick-nav-pills">
         <a href="#verkabelung" class="hotspot-pill">🔌 Stecker & Kabel</a>
-        <a href="#pin-system" class="hotspot-pill">🔒 PIN 210286 & StVZO</a>
+        <a href="#pin-system" class="hotspot-pill">🔒 PIN & Rennstrecken-Modus</a>
         <a href="#handy-funk" class="hotspot-pill">📡 WLAN & Bluetooth</a>
         <a href="#faq-section" class="hotspot-pill">❓ Die 25 FAQ-Fragen</a>
       </div>
@@ -184,13 +187,13 @@
           <div class="wiring-title">✊ 3. Gasgriff / Daumengas</div>
           <p style="font-size: 0.85rem; color: var(--text-silver);">
             3 Adern: <strong>Rot (5V)</strong>, <strong>Schwarz (Masse)</strong>, <strong>Blau/Grün (Signal 0-5V)</strong>.<br>
-            Laut Gesetz ohne Treten bis max. 6 km/h als Schiebehilfe. Vollgas ohne Treten gibt es in Stufe 2 mit Master-PIN 210286.
+            Ohne Treten bis max. 6 km/h als Schiebehilfe. Vollgas ohne Treten gibt es im offenen Rennstrecken-Modus nach Freischaltung per PIN.
           </p>
         </div>
         <div class="wiring-card">
           <div class="wiring-title">🛑 4. Bremshebel mit Unterbrecher</div>
           <p style="font-size: 0.85rem; color: var(--text-silver);">
-            Schaltet bei leichtem Ziehen den Motor sofort aus und aktiviert hinten das Bremslicht. Bei Vollbremsung über 15 km/h blinkt das ESS-Notbremslicht mit 3,5 Hz!
+            Schaltet bei leichtem Ziehen den Motor sofort aus und aktiviert hinten das Bremslicht. Bei Vollbremsung über 15 km/h blinkt das Notbremslicht mit 3,5 Hz!
           </p>
         </div>
       </div>
@@ -199,27 +202,33 @@
     <!-- Section 2: PIN System -->
     <section id="pin-system">
       <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
-        🔒 2. DAS 3-STUFEN-PIN-SYSTEM (RECHTSSICHERHEIT)
+        🔒 2. BETRIEBSMODI & PIN-SCHUTZ (RENNSTRECKE & PRIVATGELÄNDE)
       </h2>
       <div class="promise-strip" style="margin: 0; padding: 0;">
         <div class="promise-card">
-          <div class="promise-title">STUFE 0: STVZO LEGAL (DEFAULT)</div>
+          <div class="promise-title">STANDARD-MODUS (WERKSEINSTELLUNG)</div>
           <div class="promise-desc">
-            <strong>25 km/h & 250 Watt</strong>. Strikte Treffpflicht (PAS). Gasgriff nur bis 6 km/h. Wird bei <em>jedem</em> Neustart automatisch aktiviert!
+            <strong>25 km/h & 250 Watt</strong>. Strikte Tretunterstützung (PAS). Gasgriff nur bis 6 km/h als Schiebehilfe. Wird bei <em>jedem</em> Neustart automatisch aktiv!
           </div>
         </div>
         <div class="promise-card">
           <div class="promise-title">STUFE 1: SPORT MODUS</div>
           <div class="promise-desc">
-            <strong>32 km/h & 500 Watt</strong>. US-Class 1 Standard für sportliche Ausfahrten.
+            <strong>32 km/h & 500 Watt</strong>. Erweiterte Leistungsstufe für sportlichen Einsatz.
           </div>
         </div>
         <div class="promise-card" style="border-left-color: var(--accent-red);">
-          <div class="promise-title" style="color: var(--accent-red);">STUFE 2: RACE / PRIVATGELÄNDE</div>
+          <div class="promise-title" style="color: var(--accent-red);">OFFENER MODUS (RENNSTRECKE & PRIVATGELÄNDE)</div>
           <div class="promise-desc">
-            <strong>99 km/h & 1000 Watt</strong>. Reines Handgas ohne Treten freigeschaltet! Freischaltung nur mit Master-PIN: <strong style="color: var(--brand-orange-bright);">210286</strong>.
+            <strong>Bis 99 km/h & 3000 Watt</strong>. Reines Handgas ohne Treten freigeschaltet! Freischaltung nur mit autorisierter PIN aus dem SAGA LABS Freischalt-Portal.
           </div>
         </div>
+      </div>
+      <div style="margin-top: 1rem; background: rgba(255, 85, 0, 0.08); border: 1px solid rgba(255, 85, 0, 0.25); border-radius: var(--radius-md); padding: 1rem;">
+        <p style="font-size: 0.85rem; color: var(--text-silver); margin: 0; line-height: 1.6;">
+          <strong>Wie erhalte ich die Freischalt-PIN?</strong><br>
+          Aus rechtlichen und sicherheitstechnischen Gründen wird die PIN <em>nicht</em> im Konfigurator generiert und steht dort nicht im Klartext. Um eine Freischalt-PIN zu erhalten, besuche das <a href="unlock_portal.html" target="_blank" style="color: var(--brand-orange-bright); font-weight: 700;">SAGA LABS Freischalt-Portal</a>. Dort gibst du deine Controller-Seriennummer und E-Mail-Adresse ein und bestätigst die gesetzlichen Bestimmungen sowie den vollständigen Garantieverzicht. Die PIN wird anschließend generiert und dir zugestellt.
+        </p>
       </div>
     </section>
 
@@ -303,7 +312,7 @@
             <span class="toggle-icon">+</span>
           </div>
           <div class="faq-body">
-            Im Standard-StVZO-Modus (Stufe 0) darf das Daumengas laut Gesetz nur bis 6 km/h als Schiebehilfe arbeiten oder nur dann, wenn du gleichzeitig pedalisierst. Für Vollgas ohne Treten musst du auf Privatgelände Stufe 2 mit PIN <code>210286</code> aktivieren.
+            Im Standard-Modus arbeitet das Daumengas nur bis 6 km/h als Schiebehilfe oder wenn du gleichzeitig in die Pedale trittst. Für Vollgas ohne Treten kannst du für Rennstrecken- und Privatgeländenutzung den offenen Modus mit deiner autorisierten Freischalt-PIN aktivieren.
           </div>
         </div>
 
@@ -429,11 +438,11 @@
 
         <div class="faq-item">
           <div class="faq-header">
-            <span>F18: Ich habe meine PIN für Stufe 2 vergessen!</span>
+            <span>F18: Ich habe meine PIN für den offenen Modus vergessen!</span>
             <span class="toggle-icon">+</span>
           </div>
           <div class="faq-body">
-            Die werkseitige Master-PIN lautet immer <code>210286</code>. Du kannst sie im Web-Konfigurator jederzeit ablesen oder ein neues Profil erstellen.
+            Öffne einfach das <a href="unlock_portal.html" target="_blank" style="color: var(--brand-orange-bright); font-weight: 700;">SAGA LABS Freischalt-Portal</a>, trage deine Controller-Seriennummer und E-Mail-Adresse ein und bestätige den Garantieverzicht. Die Freischalt-PIN wird für deine Seriennummer sofort neu ausgegeben und dir per E-Mail zugestellt.
           </div>
         </div>
 

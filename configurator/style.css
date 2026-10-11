@@ -814,3 +814,117 @@ body {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
+
+/* ==========================================================================
+   Technical Status Bar & Race Unlock Layout
+   ========================================================================== */
+.tech-status-bar {
+  margin: 1.25rem 1.5rem 0.5rem 1.5rem;
+  background: rgba(14, 17, 24, 0.95);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.tech-status-col {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.tech-status-label {
+  font-family: var(--font-brand);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tech-status-val {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-white);
+}
+
+.tech-status-val.status-locked {
+  color: var(--brand-orange-bright);
+}
+
+.tech-status-val.status-unlocked {
+  color: var(--accent-green);
+  text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+.portal-badge-link {
+  font-family: var(--font-brand);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand-orange-bright);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(255, 85, 0, 0.08);
+  border: 1px solid rgba(255, 85, 0, 0.35);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.portal-badge-link:hover {
+  background: rgba(255, 85, 0, 0.2);
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 15px rgba(255, 85, 0, 0.3);
+}
+
+.btn-xs {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+/* Locked & Unlocked Containers in Race Tab */
+.race-locked-box {
+  background: rgba(10, 12, 16, 0.85);
+  border: 1px solid rgba(255, 85, 0, 0.25);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  text-align: left;
+}
+
+.lock-icon-hero {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.pin-entry-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  max-width: 600px;
+}
+
+.race-unlocked-box {
+  background: rgba(14, 17, 24, 0.95);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.unlocked-header-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}

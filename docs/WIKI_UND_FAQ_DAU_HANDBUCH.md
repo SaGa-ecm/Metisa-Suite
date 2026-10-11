@@ -9,7 +9,7 @@
 1. [Teil 1: Was habe ich hier vor mir? (Einfach erklärt)](#teil-1-was-habe-ich-hier-vor-mir-einfach-erklärt)
 2. [Teil 2: Welches Kabel gehört wohin? (Schritt-für-Schritt)](#teil-2-welches-kabel-gehört-wohin-schritt-für-schritt)
 3. [Teil 3: Der Web-Konfigurator für Jedermann](#teil-3-der-web-konfigurator-für-jedermann)
-4. [Teil 4: Gesetz (StVZO) vs. Race – Das PIN-System (210286)](#teil-4-gesetz-stvzo-vs-race--das-pin-system-210286)
+4. [Teil 4: Betriebsmodi & PIN-Freischaltung für Rennstrecke](#teil-4-betriebsmodi--pin-freischaltung-für-rennstrecke)
 5. [Teil 5: Handy-Verbindung & Funk (Bluetooth & WLAN)](#teil-5-handy-verbindung--funk-bluetooth--wlan)
 6. [Teil 6: Die 25 häufigsten Fragen & Pannen (FAQ & Pannenhilfe)](#teil-6-die-25-häufigsten-fragen--pannen-faq--pannenhilfe)
 7. [Teil 7: Das kleine E-Bike-Wörterbuch (Glossar)](#teil-7-das-kleine-e-bike-wörterbuch-glossar)
@@ -95,20 +95,26 @@ Du musst **kein Programm installieren** und nichts programmieren!
 
 ---
 
-## Teil 4: Gesetz (StVZO) vs. Race – Das PIN-System (`210286`)
+## Teil 4: Betriebsmodi & PIN-Freischaltung für Rennstrecke
 
-Damit du im Straßenverkehr rechtlich auf der sicheren Seite bist, besitzt METISA ein intelligentes **3-Stufen-Sicherheitssystem**:
+METISA verfügt über ein mehrstufiges Sicherheitssystem für verschiedene Einsatzbereiche:
 
 | Stufe | Name | Höchsttempo | Motorleistung | Treten Pflicht? | Gasgriff erlaubt? |
 | :---: | :--- | :---: | :---: | :---: | :---: |
-| **0** | **StVZO Legal (Standard)** | **25 km/h** | **250 Watt** | **JA (strikte Pflicht)** | Nur bis 6 km/h (Schiebehilfe) |
+| **0** | **Standard (Werkseinstellung)** | **25 km/h** | **250 Watt** | **JA (strikte Pflicht)** | Nur bis 6 km/h (Schiebehilfe) |
 | **1** | **Sport** | **32 km/h** | **500 Watt** | JA | Nur bis 6 km/h |
-| **2** | **Race (Nur Privatgelände)** | **99 km/h** | **1000 Watt** | **NEIN** | **JA (Reines Vollgas)** |
+| **2** | **Race (Nur Rennstrecke & Privatgelände)** | **Bis 99 km/h** | **Bis 3000 Watt** | **NEIN** | **JA (Reines Vollgas)** |
 
 ### Wie funktioniert der Schutz?
-* **Automatischer Schutz bei jedem Start:** Jedes Mal, wenn du den Akku einschaltest oder das Bike neu startest, startet der Controller **ausnahmslos auf Stufe 0 (StVZO-Konform)**.
-* **Wie schalte ich Stufe 2 frei?** Stufe 2 lässt sich nur durch Eingabe der Master-PIN **`210286`** im Menü oder in der App aktivieren.
-* **Polizeikontrolle?** Sobald das E-Bike ausgeschaltet wird, ist Stufe 2 wieder gesperrt. Bei einer Überprüfung hält das Rad exakt 25 km/h und 250 Watt ein.
+* **Automatischer Schutz bei jedem Start:** Jedes Mal, wenn du den Akku einschaltest oder das Bike neu startest, startet der Controller **ausnahmslos auf Stufe 0 (Standard-Modus)**.
+* **Wie schalte ich den offenen Modus (Stufe 2) frei?** Stufe 2 lässt sich ausschließlich durch Eingabe einer gültigen Freischalt-PIN freischalten.
+* **Woher bekomme ich meine Freischalt-PIN?**  
+  Die PIN wird aus rechtlichen Gründen **nicht im Konfigurator generiert** und steht dort nicht im Klartext. Um eine Freischalt-PIN zu erhalten:
+  1. Öffne das separate **SAGA LABS Freischalt-Portal** (`configurator/unlock_portal.html`).
+  2. Gib deine Controller-Seriennummer und deine E-Mail-Adresse ein.
+  3. Bestätige die rechtlichen Vorschriften (Nutzung ausschließlich auf abgesperrten Rennstrecken und privatem Betriebsgelände) sowie den vollständigen Garantieverzicht.
+  4. Deine persönliche Freischalt-PIN wird generiert und dir zusammen mit dem Autorisierungszertifikat übermittelt.
+  5. Gib diese PIN im Konfigurator unter „Rennstrecke & Privatgelände“ ein, um alle offenen Menüpunkte freizuschalten.
 
 ---
 
@@ -150,7 +156,7 @@ Wenn dein Controller einen ESP32-Chip besitzt, hat er Bluetooth und WLAN schon f
 > **Antwort:** Das liegt am `pas_timeout`. Im Konfigurator steht er standardmäßig auf 500 ms (eine halbe Sekunde). Wenn du eine Magnetscheibe mit 12 Magneten hast, kannst du den Wert im Konfigurator auf `250` oder `300 ms` verkürzen – dann stoppt der Motor blitzschnell!
 
 ### ❓ F05: Mein Gasgriff reagiert gar nicht.
-> **Antwort:** Im Standard-StVZO-Modus (Stufe 0) darf der Gasgriff laut Gesetz **nur bis 6 km/h** als Schiebehilfe arbeiten oder nur dann, wenn du gleichzeitig pedalisierst. Wenn du vollen Daumengas-Betrieb ohne Treten willst, musst du auf Privatgelände Stufe 2 mit PIN `210286` entsperren.
+> **Antwort:** Im Standard-Modus (Stufe 0) darf der Gasgriff **nur bis 6 km/h** als Schiebehilfe arbeiten oder nur dann, wenn du gleichzeitig pedalisierst. Wenn du vollen Daumengas-Betrieb ohne Treten für Rennstrecken- oder Privatgeländenutzung willst, musst du das offene Menü mit deiner Freischalt-PIN freischalten.
 
 ### ❓ F06: Die Akkuanzeige springt beim Beschleunigen stark nach unten!
 > **Antwort:** Das ist völlig normal und nennt sich "Spannungseinbruch unter Last" (Voltage Sag). Wenn der Motor viel Strom zieht, sinkt die Akkuspannung kurzfristig ab. Sobald du rollst, erholt sie sich wieder.
@@ -191,8 +197,8 @@ Wenn dein Controller einen ESP32-Chip besitzt, hat er Bluetooth und WLAN schon f
 ### ❓ F17: Was passiert bei Regen und Nässe?
 > **Antwort:** Das Original METISA-Gehäuse ist nach Industriestandard IP67 geschützt. Achte beim Selberbauen darauf, dass alle Kabeldurchführungen nach unten zeigen (damit Tropfwasser ablaufen kann) und dichte Steckverbindungen mit Schrumpfschlauch oder Dichtmasse ab.
 
-### ❓ F18: Ich habe meine PIN für Stufe 2 vergessen!
-> **Antwort:** Die werkseitige Master-PIN lautet immer **`210286`**. Sie kann im Web-Konfigurator jederzeit eingesehen oder neu eingestellt werden.
+### ❓ F18: Ich habe meine PIN für den offenen Modus vergessen!
+> **Antwort:** Öffne einfach das separate **SAGA LABS Freischalt-Portal** (`configurator/unlock_portal.html`), trage deine Controller-Seriennummer und E-Mail-Adresse ein und bestätige den Garantieverzicht. Deine persönliche Freischalt-PIN wird dir sofort erneut angezeigt und per E-Mail zugestellt.
 
 ### ❓ F19: Warum geht das E-Bike nach 30 Minuten Nichtbenutzung von selbst aus?
 > **Antwort:** Das ist der `idle_shutdown_secs` (automatische Stromspar-Abschaltung). Wenn du dein Rad vor dem Supermarkt abstellst und vergisst auszuschalten, trennt METISA nach 30 Minuten das System, damit der Akku nicht leergesaugt wird.

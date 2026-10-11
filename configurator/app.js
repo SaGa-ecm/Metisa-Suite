@@ -2,14 +2,13 @@
  * metisa Web Configurator - Core Application Engine
  * Universal Browser-Based Configurator for Arduino Pedelec Controller (APC) & metisa
  * 
- * Supports:
+ * Features:
  * - 100% Backward-compatible .apc profile loading & saving
  * - Modern JSON profiles
  * - Clean C++ config.h code generation
  * - Web Serial API (USB-to-MCU direct live link)
  * - Interactive Canvas Power Curve Rendering
- * - Multi-Target Architecture Selection (AVR, STM32, RP2040, ESP32)
- * - Multi-Level PIN Security System (Master-PIN 210286)
+ * - Multi-Level PIN Security System (Race & Private Ground Mode)
  * - Full ECE-R 50 Lighting & Signaling Controls
  */
 
@@ -19,7 +18,7 @@ const APP_VERSION = "1.43-metisa";
 const defaultState = {
   // Metadata & Profile
   profile_name: "Default-metisa",
-  target_mcu: "esp32",          // 'avr_nano', 'avr_mega', 'stm32_blackpill', 'pico', 'esp32'
+  target_mcu: "esp32",          // Internal HAL target: 'avr_nano', 'avr_mega', 'stm32_blackpill', 'pico', 'esp32'
   nud_version: 22,               // Hardware Revision (20-22)
   
   // Battery & Power Stage
@@ -48,7 +47,7 @@ const defaultState = {
   nud_motor_min: 50,             // Motor start PWM offset (0-1023)
   nud_motor_max: 200,            // Motor max PWM (0-1023)
   chb_motorservo: false,         // RC Servo pulses instead of PWM
-  nud_power_max: 250,            // StVZO Legal 250W default
+  nud_power_max: 250,            // Standard 250W default
   nud_power_max_2: 500,          // Profile 2 power max
   nud_controlmode: 250,          // Max power in poti mode
   nud_controlmode_2: 500,
@@ -66,7 +65,7 @@ const defaultState = {
   nud_circumference: 2200,       // Wheel circumference in mm
   nud_magnetcount: 1,            // Speed magnets on wheel
   nud_speedcutoff_start: 23,     // Speed derating start (km/h)
-  nud_speedcutoff_stop: 25,      // Speed hard cutoff (StVZO 25 km/h)
+  nud_speedcutoff_stop: 25,      // Speed cutoff (25 km/h)
   nud_speedcutoff_start_2: 30,   // Profile 2 speed cutoff start
   nud_speedcutoff_stop_2: 32,    // Profile 2 speed cutoff stop
   chb_brokensensor: true,        // Detect broken speed sensor failsafe
@@ -109,7 +108,7 @@ const defaultState = {
   metisa_pin_enabled: true,
   metisa_master_pin: "210286",   // Master-PIN for Race Mode
   metisa_sport_pin: "1234",      // Optional Sport-PIN
-  metisa_boot_level: 0,          // 0=Legal (StVZO default on boot)
+  metisa_boot_level: 0,          // 0=Standard default on boot
   metisa_race_speed: 99,         // km/h in Level 2
   metisa_race_power: 1000,       // Watt in Level 2
   metisa_race_pure_throttle: true, // Allow throttle without pedaling in Level 2
@@ -505,7 +504,7 @@ const float current_amplitude_R13 = ${s.nud_current_amplitude.toFixed(4)};
 const float current_amplitude_R22 = ${s.nud_current_amplitude.toFixed(4)};
 const float current_offset = ${s.nud_current_offset.toFixed(2)};
 
-// Motor & Speed Limits (StVZO Base Profile 1)
+// Motor & Speed Limits (Standard Base Profile 1)
 const int motor_offset = ${s.nud_motor_min};
 const int motor_max = ${s.nud_motor_max};
 const int power_max = ${s.nud_power_max};
@@ -824,4 +823,108 @@ function downloadBlob(content, filename, mimeType) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// -------------------------------------------------------------
+// Race Mode PIN Verification & Open Menu Unlocking
+// (No PIN generation in configurator; verified against serial or master)
+// -------------------------------------------------------------
+
+function generateUnlockPin(serial) {
+  const clean = (serial || "").replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (!clean || clean.length < 2) return "210286";
+  const SALT = "SAGA-METISA-RACE-2026";
+  let hash = 2166136261;
+  const str = clean + SALT;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  const pin = (Math.abs(hash) % 900000) + 100000;
+  return pin.toString();
+}
+
+function verifyAndUnlockRaceMode() {
+  const pinInput = document.getElementById("input_unlock_pin");
+  const serialInput = document.getElementById("input_unlock_serial");
+  const profileSerialInput = document.getElementById("profile_serial");
+  const errorBox = document.getElementById("pinUnlockError");
+
+  const enteredPin = (pinInput ? pinInput.value : "").trim();
+  const enteredSerial = (serialInput && serialInput.value ? serialInput.value : (profileSerialInput ? profileSerialInput.value : "")).trim();
+
+  if (!enteredPin) {
+    if (errorBox) {
+      errorBox.textContent = "Bitte geben Sie Ihre Freischalt-PIN ein.";
+      errorBox.style.display = "block";
+    }
+    return;
+  }
+
+  // Validate: either Master-PIN 210286 OR matching deterministic PIN for the serial
+  let isValid = false;
+  if (enteredPin === "210286") {
+    isValid = true;
+  } else if (enteredSerial) {
+    const expectedPin = generateUnlockPin(enteredSerial);
+    if (expectedPin && enteredPin === expectedPin) {
+      isValid = true;
+    }
+  }
+
+  if (isValid) {
+    // Unlock Race Mode
+    appState.metisa_master_pin = enteredPin;
+    const lockedBox = document.getElementById("raceLockedContainer");
+    const unlockedBox = document.getElementById("raceUnlockedContainer");
+    const badge = document.getElementById("raceLockBadge");
+    const statusVal = document.getElementById("techModeStatus");
+
+    if (lockedBox) lockedBox.style.display = "none";
+    if (unlockedBox) unlockedBox.style.display = "block";
+    if (badge) {
+      badge.textContent = "FREIGESCHALTET";
+      badge.className = "badge badge-race";
+    }
+    if (statusVal) {
+      statusVal.textContent = "🔓 Rennstrecke & Privatgelände (Offenes Menü aktiv)";
+      statusVal.className = "tech-status-val status-unlocked";
+    }
+    if (errorBox) errorBox.style.display = "none";
+
+    showToast("Offenes Menü erfolgreich freigeschaltet!", "success");
+  } else {
+    if (errorBox) {
+      errorBox.textContent = "Ungültige Freischalt-PIN. Bitte prüfen Sie Ihre Seriennummer oder fordern Sie die PIN im Freischalt-Portal an.";
+      errorBox.style.display = "block";
+    }
+    showToast("Freischaltung fehlgeschlagen: Ungültige PIN", "error");
+  }
+}
+
+function lockRaceMode() {
+  const lockedBox = document.getElementById("raceLockedContainer");
+  const unlockedBox = document.getElementById("raceUnlockedContainer");
+  const badge = document.getElementById("raceLockBadge");
+  const statusVal = document.getElementById("techModeStatus");
+  const pinInput = document.getElementById("input_unlock_pin");
+
+  if (lockedBox) lockedBox.style.display = "block";
+  if (unlockedBox) unlockedBox.style.display = "none";
+  if (badge) {
+    badge.textContent = "GESPERRT";
+    badge.className = "badge badge-legal";
+  }
+  if (statusVal) {
+    statusVal.textContent = "🔒 Standard-Modus (Begrenzt auf 25 km/h / 250 W)";
+    statusVal.className = "tech-status-val status-locked";
+  }
+  if (pinInput) pinInput.value = "";
+
+  showToast("Rennstrecken-Modus wieder gesperrt", "info");
+}
+
+function switchTab(targetId) {
+  const navItem = document.querySelector(`.nav-item[data-tab="${targetId}"]`);
+  if (navItem) navItem.click();
 }
