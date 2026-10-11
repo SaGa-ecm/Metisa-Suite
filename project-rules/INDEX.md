@@ -12,6 +12,7 @@ These are the fixed, repository-wide project rules. Every human or AI contributo
 | [Modular development and checkpoints](modular-development.md) | Atomic changes, rollback, and selective integration. |
 | [Product surfaces and interfaces](product-surfaces-and-interfaces.md) | Firmware, Android, Apple, Windows configurator, and browser migration boundaries. |
 | [Secrets and remote operations](secrets-and-remote.md) | Credentials, GitHub, Git operations, and publication actions. |
+| [SaGa Labs Orbit standard](saga-labs-orbit.md) | Zero-emoji policy, Ecumaster motorsport visual standard, physical units, and factual engineering presentation. |
 
 ## Precedence
 

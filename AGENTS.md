@@ -17,4 +17,5 @@ For a new task, inspect the current files and the relevant section of [the porti
 - Run `python tools/validate_project_context.py` when changing fixed rules, skills, or AI adapters.
 - Do not create remote repositories, publish, push, release, or alter GitHub permissions/settings unless that specific remote action is explicitly requested.
 - The root `LICENSE` is a legal-review draft, not a final grant or worldwide enforceability opinion.
+- Enforce the SaGa Labs Orbit standard: zero emojis, Ecumaster motorsport visual density, bracketed units [V, A, W], and factual engineering terminology.
 - Any AI may freely create, revise, combine, and use project skills. Store all of them under `skills/<lowercase-kebab-name>/SKILL.md` and update `skills/INDEX.md` in the same change. Skills supplement, but cannot weaken, `project-rules/`.
