@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0; url=configurator/">
+  <title>SAGA LABS // METISA SUITE</title>
+  <link rel="stylesheet" href="configurator/style.css">
+  <style>
+    body {
+      background: #08090d;
+      color: #94a3b8;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1.5rem;
+    }
+    .launch-panel {
+      background: #121620;
+      border: 1px solid #1e2638;
+      border-left: 3px solid #ff6200;
+      border-radius: 4px;
+      padding: 2rem;
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
+    }
+    .launch-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    .launch-desc {
+      font-size: 0.78rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .launch-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .launch-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #151a26;
+      border: 1px solid #273248;
+      color: #f8fafc;
+      padding: 0.75rem 1rem;
+      border-radius: 3px;
+      text-decoration: none;
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      transition: all 0.15s ease;
+    }
+    .launch-btn:hover {
+      border-color: #ff6200;
+      background: #1b2232;
+      color: #ff6200;
+    }
+    .launch-btn.primary {
+      background: #ff6200;
+      color: #050608;
+      border-color: #ff6200;
+    }
+    .launch-btn.primary:hover {
+      background: #ff7700;
+      color: #000;
+    }
+  </style>
+  <script>
+    window.location.replace("configurator/");
+  </script>
+</head>
+<body>
+  <div class="launch-panel">
+    <div class="launch-title">SAGA LABS // METISA SUITE</div>
+    <div class="launch-desc">
+      Universal Drive Control & Power Electronics Calibration Platform. Weiterleitung zum Konfigurator Client...
+    </div>
+    <div class="launch-actions">
+      <a href="configurator/index.html" class="launch-btn primary">
+        <span>CONFIGURATOR CLIENT</span> <span>&rarr;</span>
+      </a>
+      <a href="configurator/unlock_portal.html" class="launch-btn">
+        <span>TRACK & DYNO AUTHORIZATION</span> <span>&rarr;</span>
+      </a>
+      <a href="configurator/wiki.html" class="launch-btn">
+        <span>FIELD INTEGRATION MANUAL</span> <span>&rarr;</span>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
