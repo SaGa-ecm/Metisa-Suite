@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAGA LABS | METISA Wiki & FAQ Handbuch</title>
+  <meta name="description" content="Verständliches Einsteiger-Handbuch, Verkabelungsanleitung und FAQ für den SAGA LABS METISA E-Bike Controller.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .wiki-container {
+      max-width: 1100px;
+      margin: 1.5rem auto 3rem auto;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .wiki-search-box {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      color: var(--text-white);
+      font-family: var(--font-body);
+      box-shadow: 0 0 20px rgba(255, 85, 0, 0.15);
+      transition: var(--transition);
+    }
+    .wiki-search-box:focus {
+      outline: none;
+      border-color: var(--brand-orange);
+      box-shadow: 0 0 25px rgba(255, 85, 0, 0.35);
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: var(--transition);
+      margin-bottom: 0.85rem;
+    }
+    .faq-item:hover {
+      border-color: var(--border-hover);
+    }
+    .faq-header {
+      padding: 1.1rem 1.4rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-brand);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-white);
+      user-select: none;
+    }
+    .faq-header .toggle-icon {
+      color: var(--brand-orange-bright);
+      font-size: 1.25rem;
+      transition: transform 0.2s ease;
+    }
+    .faq-body {
+      padding: 0 1.4rem 1.25rem 1.4rem;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text-silver);
+      display: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1rem;
+    }
+    .faq-item.open .faq-body {
+      display: block;
+    }
+    .faq-item.open .toggle-icon {
+      transform: rotate(45deg);
+    }
+
+    .wiring-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--brand-orange);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .wiring-title {
+      font-family: var(--font-brand);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--brand-orange-bright);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .quick-nav-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & Header Bar -->
+  <header class="app-header">
+    <div class="brand-group">
+      <svg class="logo-icon-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 26L18 8L23 10L13 28L8 26Z" fill="#ff5500"/>
+        <path d="M16 32L26 14L31 16L21 34L16 32Z" fill="#ff7700"/>
+        <path d="M11 28C11 28 17 22 25 22C31 22 35 27 35 27" stroke="#ff5500" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text-block">
+        <span class="saga-title">SAGA</span>
+        <span class="saga-labs-sub">LABS</span>
+        <div class="brand-divider"></div>
+        <span class="metisa-title">WIKI & FAQ</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <a href="index.html" class="btn btn-saga-primary">
+        <span>⬅️</span> Zurück zum Konfigurator
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Header -->
+  <section class="hero-saga-banner" style="margin-bottom: 0;">
+    <div class="hero-left-content">
+      <span class="hero-tagline">EINFACH ERKLÄRT &bull; SCHRITT FÜR SCHRITT</span>
+      <h1 class="hero-headline">
+        DAS METISA <span class="highlight-orange">EINSTEIGER-HANDBUCH</span>
+      </h1>
+      <p class="hero-description">
+        Keine Fachbegriffe, kein Kauderwelsch. Hier erfährst du kinderleicht, wie du dein E-Bike anschließt, per Handy steuerst und typische Probleme in wenigen Minuten selbst löst.
+      </p>
+      <div class="quick-nav-pills">
+        <a href="#verkabelung" class="hotspot-pill">🔌 Stecker & Kabel</a>
+        <a href="#pin-system" class="hotspot-pill">🔒 PIN 210286 & StVZO</a>
+        <a href="#handy-funk" class="hotspot-pill">📡 WLAN & Bluetooth</a>
+        <a href="#faq-section" class="hotspot-pill">❓ Die 25 FAQ-Fragen</a>
+      </div>
+    </div>
+    <div class="hero-right-badge">
+      <div class="hardware-spec-pill">100% Einsteigerfreundlich</div>
+      <div class="hardware-spec-pill">Pannenhilfe & Checklisten</div>
+    </div>
+  </section>
+
+  <!-- Main Wiki Content Container -->
+  <div class="wiki-container">
+
+    <!-- Interactive Search Box -->
+    <div>
+      <input type="text" id="faqSearchInput" class="wiki-search-box" placeholder="🔍 Suche nach einem Problem (z. B. 'Motor ruckelt', 'WLAN', 'PIN', 'Gasgriff', 'Akku')...">
+    </div>
+
+    <!-- Section 1: Verkabelung -->
+    <section id="verkabelung">
+      <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
+        🔌 1. WELCHES KABEL GEHÖRT WOHIN? (STECK-ANLEITUNG)
+      </h2>
+      <div class="cards-grid">
+        <div class="wiring-card">
+          <div class="wiring-title">🔋 1. Akku-Stromversorgung (Hauptleitung)</div>
+          <p style="font-size: 0.85rem; color: var(--text-silver);">
+            <strong>Rot = Plus (+)</strong> | <strong>Schwarz = Minus (-)</strong><br>
+            ⚠️ <em>ACHTUNG:</em> Niemals verpolen! Vor jedem Umstecken immer den Akku ausschalten oder den Hauptstecker trennen.
+          </p>
+        </div>
+        <div class="wiring-card">
+          <div class="wiring-title">🚴 2. PAS-Tretsensor (Magnetscheibe)</div>
+          <p style="font-size: 0.85rem; color: var(--text-silver);">
+            Sitzt am Tretlager. Der Sensor muss <strong>1 bis 2 mm</strong> nah an der Magnetscheibe sitzen. Dreht sich die Scheibe beim Treten, blinkt die rote LED am Sensor.
+          </p>
+        </div>
+        <div class="wiring-card">
+          <div class="wiring-title">✊ 3. Gasgriff / Daumengas</div>
+          <p style="font-size: 0.85rem; color: var(--text-silver);">
+            3 Adern: <strong>Rot (5V)</strong>, <strong>Schwarz (Masse)</strong>, <strong>Blau/Grün (Signal 0-5V)</strong>.<br>
+            Laut Gesetz ohne Treten bis max. 6 km/h als Schiebehilfe. Vollgas ohne Treten gibt es in Stufe 2 mit Master-PIN 210286.
+          </p>
+        </div>
+        <div class="wiring-card">
+          <div class="wiring-title">🛑 4. Bremshebel mit Unterbrecher</div>
+          <p style="font-size: 0.85rem; color: var(--text-silver);">
+            Schaltet bei leichtem Ziehen den Motor sofort aus und aktiviert hinten das Bremslicht. Bei Vollbremsung über 15 km/h blinkt das ESS-Notbremslicht mit 3,5 Hz!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: PIN System -->
+    <section id="pin-system">
+      <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
+        🔒 2. DAS 3-STUFEN-PIN-SYSTEM (RECHTSSICHERHEIT)
+      </h2>
+      <div class="promise-strip" style="margin: 0; padding: 0;">
+        <div class="promise-card">
+          <div class="promise-title">STUFE 0: STVZO LEGAL (DEFAULT)</div>
+          <div class="promise-desc">
+            <strong>25 km/h & 250 Watt</strong>. Strikte Treffpflicht (PAS). Gasgriff nur bis 6 km/h. Wird bei <em>jedem</em> Neustart automatisch aktiviert!
+          </div>
+        </div>
+        <div class="promise-card">
+          <div class="promise-title">STUFE 1: SPORT MODUS</div>
+          <div class="promise-desc">
+            <strong>32 km/h & 500 Watt</strong>. US-Class 1 Standard für sportliche Ausfahrten.
+          </div>
+        </div>
+        <div class="promise-card" style="border-left-color: var(--accent-red);">
+          <div class="promise-title" style="color: var(--accent-red);">STUFE 2: RACE / PRIVATGELÄNDE</div>
+          <div class="promise-desc">
+            <strong>99 km/h & 1000 Watt</strong>. Reines Handgas ohne Treten freigeschaltet! Freischaltung nur mit Master-PIN: <strong style="color: var(--brand-orange-bright);">210286</strong>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Handy & Funk -->
+    <section id="handy-funk">
+      <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
+        📡 3. SMARTPHONE-VERBINDUNG (OHNE APP-STORE ZWANG)
+      </h2>
+      <div class="cards-grid">
+        <div class="wiring-card">
+          <div class="wiring-title">📱 iPhone & alle Geräte (WLAN / WiFi)</div>
+          <p style="font-size: 0.85rem; color: var(--text-silver);">
+            1. Verbinde dein Handy mit dem WLAN: <strong>APC-Pedelec-WiFi</strong><br>
+            2. Passwort: <strong>21028600</strong><br>
+            3. Öffne im Safari/Chrome-Browser: <strong>http://192.168.4.1</strong><br>
+            Fertig! Sofort erscheint dein digitales Tacho-Cockpit.
+          </p>
+        </div>
+        <div class="wiring-card">
+          <div class="wiring-title">🤖 Android HMI (Bluetooth Classic)</div>
+          <p style="font-size: 0.85rem; color: var(--text-silver);">
+            1. Bluetooth am Android-Handy einschalten.<br>
+            2. Nach <strong>APC-Pedelec</strong> suchen und koppeln (Code: 1234).<br>
+            3. HMI-App starten – verbindet sich automatisch mit dem Controller.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Die 25 FAQ Fragen (Akkordeon) -->
+    <section id="faq-section">
+      <h2 style="font-family: var(--font-brand); color: var(--text-white); margin-bottom: 1rem; font-size: 1.3rem; letter-spacing: 0.05em;">
+        ❓ 4. DIE 25 HÄUFIGSTEN FRAGEN & ANTWORTEN (FAQ)
+      </h2>
+
+      <div id="faqList">
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F01: Mein Motor macht überhaupt keinen Mucks – was ist kaputt?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Prüfe 3 Dinge: 1. Ist der Akku eingeschaltet? 2. Klemmt ein Bremshebel? Wenn der Bremskontakt geschlossen ist, wird der Motor komplett gesperrt (Stecker testweise abziehen). 3. Trittst du in die Pedale? Im Standard-Modus dreht der Motor erst, wenn der PAS-Sensor Kurbeldrehungen registriert!
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F02: Der Motor stottert oder ruckelt beim Anfahren.</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Bei bürstenlosen Motoren (BLDC) sind meist zwei der drei dicken Motorkabel (Blau, Grün, Gelb) vertauscht oder haben schlechten Kontakt. Tausche zwei Phasen untereinander, um die richtige Kommutierung und Drehrichtung zu finden.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F03: Mein Tacho zeigt immer 0,0 km/h an, obwohl ich fahre!</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Der Speichenmagnet an der Felge hat sich verdreht. Er muss mit maximal 2 bis 3 mm Abstand am Sensor vorbeilaufen. Drehe das Rad von Hand und prüfe, ob der Magnet genau mittig am Sensor vorbeistreift.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F04: Wenn ich aufhöre zu treten, schiebt der Motor noch kurz weiter!</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Das liegt am Wert <code>pas_timeout</code> im Konfigurator (Standard: 500 ms = eine halbe Sekunde). Bei einer 12-Magnet-Scheibe kannst du den Wert im Konfigurator auf <code>250 ms</code> stellen, dann schaltet der Motor sofort ab.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F05: Mein Daumengas reagiert gar nicht.</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Im Standard-StVZO-Modus (Stufe 0) darf das Daumengas laut Gesetz nur bis 6 km/h als Schiebehilfe arbeiten oder nur dann, wenn du gleichzeitig pedalisierst. Für Vollgas ohne Treten musst du auf Privatgelände Stufe 2 mit PIN <code>210286</code> aktivieren.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F06: Die Akkuanzeige bricht beim Beschleunigen stark ein.</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Das ist normaler "Spannungseinbruch unter Last" (Voltage Sag). Zieht der Motor viel Strom, sinkt die Batteriespannung kurzfristig um 1 bis 3 Volt ab. Sobald du gleichmäßig rollst, steigt sie wieder an.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F07: Das Display bleibt komplett schwarz.</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Prüfe die Stromzufuhr am Displaystecker. Bei Nokia-5110-Displays muss im Konfigurator der Kontrastwert (Standard 190) passen. Bei ST7789-Farbdisplays prüfe die Hintergrundbeleuchtung (BL-Pin).
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F08: Mein Handy findet das WLAN "APC-Pedelec-WiFi" nicht.</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Hast du einen Controller mit ESP32-Chip? Ältere AVR-Nanos haben kein Funkmodul. Beim ESP32 prüfe im Konfigurator unter "Display & Funk", ob das Häkchen bei <code>wireless_wifi_softap</code> aktiv ist.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F09: Brauche ich am iPhone eine App aus dem App Store?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Nein! Verbinde dich einfach per WLAN mit <code>APC-Pedelec-WiFi</code> (Passwort <code>21028600</code>) und öffne im Safari-Browser <code>http://192.168.4.1</code>. Das Cockpit läuft komplett ohne App-Installation!
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F10: Was bedeutet „Reifenumfang in mm“ und wie messe ich ihn?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Das ist die Strecke, die dein Reifen bei einer vollen Umdrehung abrollt. Markiere Reifen und Boden mit Kreide, rolle eine Umdrehung geradeaus und miss die Distanz mit dem Meterstab (z. B. 2200 mm bei 28 Zoll).
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F11: Was ist ein „Shunt“?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Ein Shunt ist ein winziger Messwiderstand auf der Platine. Durch ihn fließt der Motorstrom. Aus dem Spannungsabfall daran berechnet METISA auf das Milliampere genau Stromstärke und Wattverbrauch.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F12: Was bedeutet „ECE-R 50 Blinker“?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Das ist die offizielle europäische Fahrzeugnorm für Blinker: Genau 1,5 Hertz (90 Mal pro Minute). METISA hält diese Frequenz exakt ein und schaltet die Blinker nach 20 Sekunden automatisch ab (Auto-Cancel).
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F13: Was ist das „ESS Notbremsblinken“?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Emergency Stop Signal: Wenn du bei mehr als 15 km/h eine Vollbremsung hinlegst, blinkt das Bremslicht blitzschnell mit 3,5 Hertz (ca. 4 Mal pro Sekunde), um nachfolgende Autos vor einem Auffahrunfall zu warnen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F14: Warum geht meine Hupe nach 3 Sekunden plötzlich aus?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Das ist der integrierte thermische Überlastschutz. Wenn der Hupentaster klemmt, würde die Spule der Hupe durchbrennen. METISA trennt die Stromzufuhr nach 3,0 Sekunden automatisch ab.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F15: Kann mein Akku tiefentladen und zerstört werden?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Nein! METISA hat zwei Schutzschwellen: Bei <code>vcutoff</code> (z. B. 33,0 V bei 36V-Akku) wird sanft abgeregelt. Bei <code>vemergency_shutdown</code> (28,0 V) schaltet der Controller den Motor komplett ab.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F16: Welchen Kabelquerschnitt brauche ich bei 1000 Watt?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Mindestens 2,5 mm², besser 4,0 mm² hochflexible Silikonkabel und XT60/XT90-Goldkontaktstecker. Zu dünne Kabel werden heiß und verursachen gefährliche Leistungsverluste.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F17: Was passiert bei Regen und Nässe?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Das METISA-Gehäuse ist nach IP67 geschützt. Achte beim Selberbauen darauf, dass alle Kabelausgänge nach unten zeigen (damit Tropfwasser abfließen kann) und dichte Steckverbindungen ab.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F18: Ich habe meine PIN für Stufe 2 vergessen!</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Die werkseitige Master-PIN lautet immer <code>210286</code>. Du kannst sie im Web-Konfigurator jederzeit ablesen oder ein neues Profil erstellen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F19: Warum geht das E-Bike nach 30 Minuten Stillstand aus?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Das ist die automatische Stromspar-Abschaltung (<code>idle_shutdown_secs</code>). Sie schützt deinen Akku vor dem schleichenden Entladen, falls du vergisst, das Fahrrad auszuschalten.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F20: Kann ich einen 48V-Akku an einem 36V-Motor betreiben?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Ja, viele Motoren vertragen das. Aber du musst im Konfigurator zwingend die Akkuspannung auf 48 V anpassen (Ladeschluss 54,6 V, Cutoff 42,0 V), damit die Schutzschaltung korrekt arbeitet.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F21: Brauche ich zwingend Bremshebel mit elektrischem Schalter?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Es wird dringend empfohlen! Bei einer Schreckbremsung schaltet der Bremshebel den Motor auf der Stelle stromlos, anstatt dass der Motor gegen die Bremsbeläge ankämpft.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F22: Wie stelle ich den Gasgriff ein, wenn er erst ab halbem Weg Gas gibt?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Gehe im Konfigurator auf "Live-Messung" und verbinde dich per USB. Lies den ADC-Wert im Ruhezustand (z. B. 185) und bei Vollgas (z. B. 860) ab und trage sie bei Min/Max ADC unter "Gasgriff" ein.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F23: Kann ich auf Werkseinstellungen zurücksetzen?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Ja, lade im Konfigurator einfach das Profil <code>Default-metisa</code>. Im Controller löscht der Befehl <code>clean_eeprom</code> im seriellen Monitor alle gespeicherten Werte.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F24: Warum schaltet mein Scheinwerfer nicht ein?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Prüfe, ob der Scheinwerfer am Lichtausgang des Controllers angeschlossen ist und ob im Menü oder am Schalter das Licht eingeschaltet ist (oft langer Druck auf die Pfeil-Oben-Taste am Display).
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>F25: Wo finde ich Hilfe, wenn ich gar nicht mehr weiterkomme?</span>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-body">
+            Besuche Deutschlands größte DIY-Pedelec-Community auf <strong>pedelecforum.de</strong> oder die offizielle Website auf <strong>sagalabs.de/metisa</strong>.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Accordion Toggle Logic
+    document.querySelectorAll('.faq-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const item = header.parentElement;
+        item.classList.toggle('open');
+      });
+    });
+
+    // Real-Time Search Filter
+    const searchInput = document.getElementById('faqSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('.faq-item').forEach(item => {
+          const text = item.textContent.toLowerCase();
+          if (text.includes(query)) {
+            item.style.display = 'block';
+            if (query.length > 2) item.classList.add('open');
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>

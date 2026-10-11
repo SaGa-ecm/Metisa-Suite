@@ -19,10 +19,14 @@ class WebConfiguratorContractTest(unittest.TestCase):
         html_path = os.path.join(CONFIGURATOR_DIR, "index.html")
         css_path = os.path.join(CONFIGURATOR_DIR, "style.css")
         js_path = os.path.join(CONFIGURATOR_DIR, "app.js")
+        wiki_path = os.path.join(CONFIGURATOR_DIR, "wiki.html")
+        handbook_path = os.path.join(os.path.dirname(__file__), "..", "docs", "WIKI_UND_FAQ_DAU_HANDBUCH.md")
 
         self.assertTrue(os.path.isfile(html_path), "index.html must exist")
         self.assertTrue(os.path.isfile(css_path), "style.css must exist")
         self.assertTrue(os.path.isfile(js_path), "app.js must exist")
+        self.assertTrue(os.path.isfile(wiki_path), "wiki.html must exist")
+        self.assertTrue(os.path.isfile(handbook_path), "WIKI_UND_FAQ_DAU_HANDBUCH.md must exist")
 
     def test_app_js_contains_apc_serializer_and_parser(self):
         js_path = os.path.join(CONFIGURATOR_DIR, "app.js")
