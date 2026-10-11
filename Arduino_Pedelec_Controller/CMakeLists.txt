@@ -67,6 +67,11 @@ add_executable(${FIRMWARE_NAME}
     switches.cpp
     switches.h
     switches_action.h
+    hal.cpp
+    wireless_manager.cpp
+    core/security_manager.cpp
+    core/safety_manager.cpp
+    core/motor_control.cpp
     )
 target_link_arduino_libraries(${FIRMWARE_NAME} PRIVATE AUTO_PUBLIC)
 
