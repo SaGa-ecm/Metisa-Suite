@@ -116,6 +116,14 @@
       <span class="tech-status-val" id="displayProfileName">Saga-Trekking-36V</span>
     </div>
     <div class="tech-status-col">
+      <span class="tech-status-label">HARDWARE:</span>
+      <span class="tech-status-val" id="detectedHardwareText">OFFLINE</span>
+    </div>
+    <div class="tech-status-col">
+      <span class="tech-status-label">FIRMWARE:</span>
+      <span class="tech-status-val" id="detectedFirmwareText">GETRENNT</span>
+    </div>
+    <div class="tech-status-col">
       <span class="tech-status-label">OPERATING MODE:</span>
       <span class="tech-status-val status-locked" id="techModeStatus">STANDARD CALIBRATION [RESTRICTED 250W / 25 km/h]</span>
     </div>
@@ -887,6 +895,33 @@
       </div>
       <div class="modal-body" style="background: var(--orbit-bg-subsurface); color: var(--orbit-text-secondary); font-family: var(--orbit-font-body);">
         
+        <!-- Hardware Model & Firmware Security Clearance Banner -->
+        <div id="flasherSecurityBanner" class="flasher-security-banner banner-neutral">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <span class="security-banner-title" id="flasherDetectedHardware">ERKANNTES MODELL: KEIN CONTROLLER VERBUNDEN</span>
+              <div class="security-banner-desc" id="flasherSecurityDesc">
+                Verbinden Sie den Controller über USB, um die Hardware-Architektur und den Firmware-Status automatisch zu ermitteln.
+              </div>
+            </div>
+            <span class="badge badge-legal" id="flasherSecurityBadge">OFFLINE</span>
+          </div>
+
+          <!-- Master PIN Gate for Uninitialized / Blank Controller -->
+          <div id="flasherMasterPinGate" style="display: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed rgba(255, 98, 0, 0.35);">
+            <div style="font-size: 0.76rem; color: var(--orbit-orange); font-weight: 600; margin-bottom: 0.35rem;">
+              ERSTINSTALLATION GESPERRT // MASTER-PIN 210286 ERFORDERLICH:
+            </div>
+            <div style="display: flex; gap: 0.5rem; max-width: 420px; align-items: center;">
+              <input type="password" id="flasherMasterPinInput" class="form-control" placeholder="Master-PIN (210286) eingeben" style="font-size: 0.75rem;">
+              <button type="button" class="btn btn-saga-primary btn-xs" onclick="verifyFlasherMasterPin()">
+                FREIGEBEN
+              </button>
+            </div>
+            <div id="flasherMasterPinFeedback" style="font-size: 0.7rem; margin-top: 0.35rem; display: none;"></div>
+          </div>
+        </div>
+
         <div style="font-size: 0.8rem; color: var(--orbit-text-secondary); margin-bottom: 0.75rem;">
           Wählen Sie die Ziel-Mikrocontroller-Architektur für das direkte Flashen über Web Serial oder den Download des vorkompilierten Firmware-Binaries:
         </div>

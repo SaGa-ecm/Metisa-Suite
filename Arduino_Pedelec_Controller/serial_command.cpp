@@ -47,7 +47,7 @@ serial_command serial_commands[] =
     {{"br"}},     //14: Blinker rechts (0=off, 1=on)
     {{"hz"}},     //15: Warnblinker (0=off, 1=on)
     {{"hn"}},     //16: Hupe (0=off, 1=on)
-
+    {{"id"}},     //17: Hardware- & Firmware-ID Probe
 };
 const byte n_commands = sizeof(serial_commands)/sizeof(serial_command); //number of commands that we have
 
@@ -165,6 +165,9 @@ static void handle_command()
                 break;
             case 16:             //Hupe query
                 active_serial_port->println(horn_active ? 1 : 0);
+                break;
+            case 17:             //Hardware- & Firmware-ID query
+                active_serial_port->println(MY_F("METISA:REV22:NANO:1.43"));
                 break;
         }
 

@@ -937,3 +937,47 @@ body {
   margin-top: 0.5rem;
 }
 
+/* Hardware Detection & Master PIN Security Clearance Banner */
+.flasher-security-banner {
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
+  transition: var(--orbit-transition);
+}
+
+.flasher-security-banner.banner-neutral {
+  border-left: 3px solid var(--orbit-border-medium);
+}
+
+.flasher-security-banner.banner-authorized {
+  border-left: 3px solid var(--orbit-status-green);
+  background: rgba(16, 185, 129, 0.05);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.1);
+}
+
+.flasher-security-banner.banner-locked {
+  border-left: 3px solid var(--orbit-orange);
+  background: rgba(255, 98, 0, 0.05);
+  box-shadow: 0 0 16px rgba(255, 98, 0, 0.1);
+}
+
+.security-banner-title {
+  font-family: var(--orbit-font-brand);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--orbit-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.security-banner-desc {
+  font-size: 0.74rem;
+  color: var(--orbit-text-secondary);
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+

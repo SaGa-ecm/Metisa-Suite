@@ -640,19 +640,178 @@ function setupSerialHandler() {
   });
 }
 
+// -------------------------------------------------------------
+// Controller Model Auto-Detection & Firmware State Probing
+// -------------------------------------------------------------
+
+let detectedMcuModel = "Kein Controller";
+let controllerFirmwareStatus = "OFFLINE"; // "OFFLINE", "PROBING", "METISA", "BLANK"
+let masterUnlockForFlashApproved = false;
+
+function detectControllerHardware(port) {
+  if (!port || !port.getInfo) return "Arduino Nano (ATmega328P)";
+  const info = port.getInfo();
+  const vid = info.usbVendorId;
+  const pid = info.usbProductId;
+
+  if (vid === 0x1A86 || (vid === 0x1a86 && pid === 0x7523)) {
+    return "Arduino Nano V3 [CH340 / ATmega328P]";
+  } else if (vid === 0x0403 || vid === 0x403) {
+    return "Arduino Nano V3 [FTDI / ATmega328P]";
+  } else if (vid === 0x10C4 || vid === 0x10c4) {
+    return "ESP32 Stage [CP2102 / Xtensa Dual-Core]";
+  } else if (vid === 0x303A || vid === 0x303a) {
+    return "ESP32 Native USB Target [Espressif]";
+  } else if (vid === 0x0483 || vid === 0x483) {
+    return "STM32 BlackPill [STM32F401 / DFU]";
+  } else if (vid === 0x2341) {
+    return "Arduino Official Stage [ATmega328P]";
+  } else if (vid === 0x2E8A || vid === 0x2e8a) {
+    return "Raspberry Pi Pico [RP2040 Dual-Core ARM]";
+  }
+  return "Arduino Nano (ATmega328P)";
+}
+
+function updateHardwareStatusUI(status, model) {
+  const lblHardware = document.getElementById("detectedHardwareText");
+  const lblFirmware = document.getElementById("detectedFirmwareText");
+  const banner = document.getElementById("flasherSecurityBanner");
+  const title = document.getElementById("flasherDetectedHardware");
+  const desc = document.getElementById("flasherSecurityDesc");
+  const badge = document.getElementById("flasherSecurityBadge");
+  const gate = document.getElementById("flasherMasterPinGate");
+  const btnFlash = document.getElementById("btnStartFlashSerial");
+
+  if (lblHardware) lblHardware.textContent = model;
+
+  if (status === "METISA") {
+    if (lblFirmware) {
+      lblFirmware.textContent = "METISA v1.43 [UPDATE BERECHTIGT]";
+      lblFirmware.className = "tech-status-val status-unlocked";
+    }
+    if (banner) banner.className = "flasher-security-banner banner-authorized";
+    if (title) title.textContent = `ERKANNT: ${model} // METISA FIRMWARE INSTALLIERT`;
+    if (desc) desc.textContent = "Bestehende Metisa-Firmware erkannt. Das Aktualisieren der Firmware ist ohne erneute Autorisierung direkt freigegeben.";
+    if (badge) {
+      badge.textContent = "UPDATE BERECHTIGT";
+      badge.className = "badge badge-race";
+    }
+    if (gate) gate.style.display = "none";
+    if (btnFlash) {
+      btnFlash.disabled = false;
+      btnFlash.textContent = "FIRMWARE UPDATEN (WEB SERIAL)";
+      btnFlash.title = "Firmware über Web Serial aktualisieren";
+    }
+  } else if (status === "BLANK") {
+    if (lblFirmware) {
+      lblFirmware.textContent = "UNINITIALISIERT [MASTER-PIN 210286 NÖTIG]";
+      lblFirmware.className = "tech-status-val status-locked";
+    }
+    if (masterUnlockForFlashApproved) {
+      if (banner) banner.className = "flasher-security-banner banner-authorized";
+      if (title) title.textContent = `ERKANNT: ${model} // MASTER-PIN VERIFIZIERT`;
+      if (desc) desc.textContent = "Master-PIN (210286) bestätigt. Erst-Upload der Firmware auf uninitialisierten Controller freigegeben.";
+      if (badge) {
+        badge.textContent = "ERST-UPLOAD FREIGEGEBEN";
+        badge.className = "badge badge-metisa";
+      }
+      if (gate) gate.style.display = "none";
+      if (btnFlash) {
+        btnFlash.disabled = false;
+        btnFlash.textContent = "FIRMWARE FLASHEN (WEB SERIAL)";
+        btnFlash.title = "Erst-Firmware flashen";
+      }
+    } else {
+      if (banner) banner.className = "flasher-security-banner banner-locked";
+      if (title) title.textContent = `ERKANNT: ${model} // KEINE METISA FIRMWARE`;
+      if (desc) desc.textContent = "Uninitialisierter Controller erkannt. Aus Schutzgründen ist der Erst-Upload nur nach Verifizierung des Master-PINs (210286) zulässig.";
+      if (badge) {
+        badge.textContent = "ERST-UPLOAD GESPERRT";
+        badge.className = "badge badge-legal";
+      }
+      if (gate) gate.style.display = "block";
+      if (btnFlash) {
+        btnFlash.disabled = true;
+        btnFlash.textContent = "FIRMWARE FLASHEN (GESPERRT)";
+        btnFlash.title = "Erst-Upload erfordert Master-PIN 210286";
+      }
+    }
+  } else if (status === "PROBING") {
+    if (lblFirmware) {
+      lblFirmware.textContent = "IDENTIFIZIERE...";
+      lblFirmware.className = "tech-status-val";
+    }
+    if (banner) banner.className = "flasher-security-banner banner-neutral";
+    if (title) title.textContent = `ERKANNT: ${model} // PRÜFE STATUS...`;
+    if (desc) desc.textContent = "Prüfe Controller-Signatur und Firmware-Version über Web Serial...";
+    if (badge) {
+      badge.textContent = "PRÜFUNG";
+      badge.className = "badge";
+    }
+  } else {
+    // OFFLINE
+    if (lblFirmware) {
+      lblFirmware.textContent = "GETRENNT";
+      lblFirmware.className = "tech-status-val";
+    }
+    if (banner) banner.className = "flasher-security-banner banner-neutral";
+    if (title) title.textContent = "ERKANNTES MODELL: KEIN CONTROLLER VERBUNDEN";
+    if (desc) desc.textContent = "Verbinden Sie den Controller über USB, um die Hardware-Architektur und den Firmware-Status automatisch zu ermitteln.";
+    if (badge) {
+      badge.textContent = "OFFLINE";
+      badge.className = "badge badge-legal";
+    }
+    if (gate) gate.style.display = "none";
+  }
+}
+
 async function connectSerial() {
   try {
     serialPort = await navigator.serial.requestPort();
     await serialPort.open({ baudRate: 115200 });
 
     isConnected = true;
+    detectedMcuModel = detectControllerHardware(serialPort);
+    controllerFirmwareStatus = "PROBING";
+    masterUnlockForFlashApproved = false;
+
     updateConnectionUI(true, "USB Verbunden");
+    updateHardwareStatusUI("PROBING", detectedMcuModel);
     readSerialStream();
-    showToast("USB Serial verbunden (115200 Baud)", "success");
+
+    // Select matching flasher target automatically based on hardware
+    if (detectedMcuModel.includes("STM32")) {
+      selectFlasherTarget('stm32');
+    } else if (detectedMcuModel.includes("ESP32")) {
+      selectFlasherTarget('esp32');
+    } else {
+      selectFlasherTarget('nano');
+    }
+
+    // Send identification query probes
+    setTimeout(async () => {
+      try {
+        await sendSerialCommand("id?");
+        await new Promise(r => setTimeout(r, 60));
+        await sendSerialCommand("pn?");
+      } catch (e) {}
+    }, 150);
+
+    // Timeout: If after 1400 ms no Metisa firmware response received, mark as BLANK
+    setTimeout(() => {
+      if (controllerFirmwareStatus === "PROBING") {
+        controllerFirmwareStatus = "BLANK";
+        updateHardwareStatusUI("BLANK", detectedMcuModel);
+        showToast(`Hardware erkannt: ${detectedMcuModel} [Uninitialisiert]`, "info");
+      }
+    }, 1400);
+
+    showToast(`USB Serial verbunden: ${detectedMcuModel}`, "success");
   } catch (err) {
     console.error("Serial error:", err);
     showToast("Verbindung fehlgeschlagen: " + err.message, "error");
     updateConnectionUI(false, "Getrennt");
+    updateHardwareStatusUI("OFFLINE", "Offline");
   }
 }
 
@@ -666,7 +825,12 @@ async function disconnectSerial() {
     serialPort = null;
   }
   isConnected = false;
+  controllerFirmwareStatus = "OFFLINE";
+  detectedMcuModel = "Getrennt";
+  masterUnlockForFlashApproved = false;
+
   updateConnectionUI(false, "Getrennt");
+  updateHardwareStatusUI("OFFLINE", "Offline");
   showToast("USB Serial getrennt", "info");
 }
 
@@ -700,6 +864,21 @@ async function readSerialStream() {
 
 function parseRawTelemetry(line) {
   if (!line) return;
+
+  // Controller / Firmware Identity Detection
+  if (line.includes("METISA:") || line.includes("metisa APC") || line.includes("---raw---")) {
+    if (controllerFirmwareStatus !== "METISA") {
+      controllerFirmwareStatus = "METISA";
+      if (line.includes("METISA:REV22:NANO")) {
+        detectedMcuModel = "Arduino Nano (ATmega328P)";
+      } else if (line.includes("METISA:STM32")) {
+        detectedMcuModel = "STM32 BlackPill (F401CC)";
+      } else if (line.includes("METISA:ESP32")) {
+        detectedMcuModel = "ESP32 DevKit Dual-Core";
+      }
+      updateHardwareStatusUI("METISA", detectedMcuModel);
+    }
+  }
 
   // 1. Controller Command Responses Parsing
   if (line.startsWith("pn") || line.startsWith("OK:LVL_")) {
@@ -1290,6 +1469,15 @@ async function sendStkCommand(writer, reader, cmdBytes, expectedRespLen = 2, tim
 }
 
 async function startFirmwareFlash() {
+  if (controllerFirmwareStatus === "BLANK" && !masterUnlockForFlashApproved) {
+    showToast("Erst-Upload gesperrt: Master-PIN 210286 erforderlich", "error");
+    const logView = document.getElementById("flashTerminalLog");
+    if (logView) {
+      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-PIN (210286) erforderlich.`;
+    }
+    return;
+  }
+
   if (currentFlasherTarget === 'stm32' || currentFlasherTarget === 'esp32') {
     downloadSelectedFirmwareBinary();
     const logView = document.getElementById("flashTerminalLog");
@@ -1452,6 +1640,30 @@ async function startFirmwareFlash() {
   }
 }
 
+function verifyFlasherMasterPin() {
+  const pinInput = document.getElementById("flasherMasterPinInput");
+  const pin = pinInput ? pinInput.value.trim() : "";
+  const logView = document.getElementById("flashTerminalLog");
+
+  if (pin === "210286") {
+    masterUnlockForFlashApproved = true;
+    updateHardwareStatusUI("BLANK", detectedMcuModel);
+    showToast("Master-PIN 210286 verifiziert: Erst-Upload autorisiert", "success");
+    if (logView) {
+      const time = new Date().toISOString().substring(11, 19);
+      logView.textContent += `\n[${time}] [AUTHORISIERUNG] Master-PIN (210286) bestätigt. Erst-Upload für ${detectedMcuModel} freigegeben.`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+  } else {
+    showToast("Ungültiger Master-PIN!", "error");
+    if (logView) {
+      const time = new Date().toISOString().substring(11, 19);
+      logView.textContent += `\n[${time}] [SICHERHEIT] Ungültiger Master-PIN. Erst-Upload bleibt gesperrt.`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+  }
+}
+
 // Global window exposure for HTML UI handlers
 window.readConfigFromController = readConfigFromController;
 window.writeConfigToController = writeConfigToController;
@@ -1463,4 +1675,6 @@ window.selectFlasherTarget = selectFlasherTarget;
 window.toggleFirmwareSourceType = toggleFirmwareSourceType;
 window.downloadSelectedFirmwareBinary = downloadSelectedFirmwareBinary;
 window.startFirmwareFlash = startFirmwareFlash;
+window.verifyFlasherMasterPin = verifyFlasherMasterPin;
+
 
