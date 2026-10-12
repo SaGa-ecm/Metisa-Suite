@@ -1034,15 +1034,15 @@
         </div>
 
         <!-- Target Hardware Architecture Cards -->
-        <div class="flasher-target-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-          <div class="flasher-target-card selected" id="flashCardNano" onclick="selectFlasherTarget('nano')">
+        <div class="flasher-target-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+          <div class="flasher-target-card selected" id="flashCardAuto" onclick="selectFlasherTarget('auto')">
             <div class="flasher-radio-header">
-              <input type="radio" name="flasherArchRadio" id="flasherArchNano" checked>
-              <label for="flasherArchNano" style="cursor: pointer;">Arduino Nano</label>
+              <input type="radio" name="flasherArchRadio" id="flasherArchAuto" checked>
+              <label for="flasherArchAuto" style="cursor: pointer;">Auto-Detect</label>
             </div>
-            <div class="flasher-mcu-sub">ATmega328P @ 16 MHz [AVR]</div>
+            <div class="flasher-mcu-sub">Automatische Erkennung</div>
             <div style="font-size: 0.7rem; color: var(--orbit-status-green); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
-              WEB SERIAL STK500v1 DIRECT FLASH
+              STM32 / AVR / ESP32 AUTO-PROBE
             </div>
           </div>
 
@@ -1054,6 +1054,17 @@
             <div class="flasher-mcu-sub">F407 / F405 / F401 / F411 / F103 / G431</div>
             <div style="font-size: 0.7rem; color: var(--orbit-status-green); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
               WEBUSB DFU & SERIAL BOOTLOADER
+            </div>
+          </div>
+
+          <div class="flasher-target-card" id="flashCardNano" onclick="selectFlasherTarget('nano')">
+            <div class="flasher-radio-header">
+              <input type="radio" name="flasherArchRadio" id="flasherArchNano">
+              <label for="flasherArchNano" style="cursor: pointer;">Arduino Nano</label>
+            </div>
+            <div class="flasher-mcu-sub">ATmega328P @ 16 MHz [AVR]</div>
+            <div style="font-size: 0.7rem; color: var(--orbit-status-green); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
+              WEB SERIAL STK500v1 DIRECT FLASH
             </div>
           </div>
 

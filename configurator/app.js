@@ -1858,12 +1858,32 @@ function switchTab(targetId) {
 // Binary Export for STM32 and ESP32 targets
 // -------------------------------------------------------------
 
-let currentFlasherTarget = 'nano';
+let currentFlasherTarget = 'auto';
 
 function openFirmwareModal() {
   const modal = document.getElementById("firmwareModal");
   if (modal) modal.classList.add("open");
-  selectFlasherTarget('nano');
+
+  if (isConnected && detectedMcuModel && detectedMcuModel !== "Kein Controller" && detectedMcuModel !== "Getrennt") {
+    if (detectedMcuModel.includes("STM32")) {
+      const sub = detectedMcuModel.includes("F407") ? 'stm32f407' :
+                  detectedMcuModel.includes("F405") ? 'stm32f405' :
+                  detectedMcuModel.includes("F411") ? 'stm32f411' :
+                  detectedMcuModel.includes("F103") ? 'stm32f103' :
+                  detectedMcuModel.includes("G431") ? 'stm32g431' : 'stm32f401';
+      selectFlasherTarget('auto', sub);
+    } else if (detectedMcuModel.includes("Mega")) {
+      selectFlasherTarget('auto', 'mega');
+    } else if (detectedMcuModel.includes("ESP32")) {
+      selectFlasherTarget('auto', 'esp32');
+    } else {
+      selectFlasherTarget('auto', 'nano');
+    }
+  } else {
+    selectFlasherTarget('auto');
+  }
+
+  updateHardwareStatusUI(controllerFirmwareStatus, detectedMcuModel);
 }
 
 function closeFirmwareModal() {
@@ -1918,6 +1938,7 @@ function updateStm32ModelSelection() {
 
 function selectFlasherTarget(target, subModel = null) {
   currentFlasherTarget = target;
+  const cardAuto = document.getElementById("flashCardAuto");
   const cardNano = document.getElementById("flashCardNano");
   const cardStm32 = document.getElementById("flashCardStm32");
   const cardMega = document.getElementById("flashCardMega");
@@ -1930,26 +1951,43 @@ function selectFlasherTarget(target, subModel = null) {
   const baudRateBox = document.getElementById("baudRateContainer");
   const flashBtnText = document.getElementById("btnStartFlashSerialText");
 
+  if (cardAuto) cardAuto.classList.toggle("selected", target === 'auto');
   if (cardNano) cardNano.classList.toggle("selected", target === 'nano');
   if (cardStm32) cardStm32.classList.toggle("selected", target === 'stm32');
   if (cardMega) cardMega.classList.toggle("selected", target === 'mega');
   if (cardEsp32) cardEsp32.classList.toggle("selected", target === 'esp32');
 
+  const radioAuto = document.getElementById("flasherArchAuto");
   const radioNano = document.getElementById("flasherArchNano");
   const radioStm32 = document.getElementById("flasherArchStm32");
   const radioMega = document.getElementById("flasherArchMega");
   const radioEsp32 = document.getElementById("flasherArchEsp32");
+  if (radioAuto) radioAuto.checked = (target === 'auto');
   if (radioNano) radioNano.checked = (target === 'nano');
   if (radioStm32) radioStm32.checked = (target === 'stm32');
   if (radioMega) radioMega.checked = (target === 'mega');
   if (radioEsp32) radioEsp32.checked = (target === 'esp32');
 
-  if (subModel && target === 'stm32') {
+  if (subModel && (target === 'stm32' || target === 'auto')) {
     const elModel = document.getElementById("flasherStm32Model");
     if (elModel) elModel.value = subModel;
   }
 
-  if (target === 'nano') {
+  if (target === 'auto') {
+    if (stm32SelectBox) stm32SelectBox.style.display = "none";
+    if (baudRateBox) baudRateBox.style.display = "none";
+    if (btnDfuFlash) btnDfuFlash.style.display = "inline-flex";
+    if (btnDown) btnDown.textContent = "DOWNLOAD FIRMWARE (.BIN / .HEX)";
+    if (targetNote) {
+      if (isConnected && detectedMcuModel && detectedMcuModel !== "Kein Controller" && detectedMcuModel !== "Getrennt") {
+        targetNote.textContent = `Auto-Detect aktiv: ${detectedMcuModel} erkannt [Automatisch bereit zum Flashen]`;
+      } else {
+        targetNote.textContent = "Auto-Detect aktiv: Hardware wird beim Flashen vollautomatisch ermittelt (STM32 / AVR / ESP32)";
+      }
+    }
+    if (btnFlash) btnFlash.style.display = "inline-flex";
+    if (flashBtnText) flashBtnText.textContent = "FIRMWARE FLASHEN (AUTO-DETECT)";
+  } else if (target === 'nano') {
     if (stm32SelectBox) stm32SelectBox.style.display = "none";
     if (baudRateBox) baudRateBox.style.display = "flex";
     if (btnDfuFlash) btnDfuFlash.style.display = "none";
@@ -1992,12 +2030,34 @@ function toggleFirmwareSourceType() {
 }
 
 function downloadSelectedFirmwareBinary() {
-  const target = currentFlasherTarget || 'nano';
+  const target = currentFlasherTarget || 'auto';
   let filename = 'metisa_nano_firmware.hex';
   let path = 'firmware/metisa_nano_firmware.hex';
   let mime = 'text/plain';
 
-  if (target === 'stm32') {
+  if (target === 'auto') {
+    if (detectedMcuModel && detectedMcuModel.includes("STM32F407")) {
+      filename = 'metisa_stm32f407_firmware.bin';
+      path = 'firmware/metisa_stm32f407_firmware.bin';
+      mime = 'application/octet-stream';
+    } else if (detectedMcuModel && detectedMcuModel.includes("STM32")) {
+      filename = 'metisa_stm32_firmware.bin';
+      path = 'firmware/metisa_stm32_firmware.bin';
+      mime = 'application/octet-stream';
+    } else if (detectedMcuModel && detectedMcuModel.includes("ESP32")) {
+      filename = 'metisa_esp32_firmware.bin';
+      path = 'firmware/metisa_esp32_firmware.bin';
+      mime = 'application/octet-stream';
+    } else if (detectedMcuModel && detectedMcuModel.includes("Mega")) {
+      filename = 'metisa_mega_firmware.hex';
+      path = 'firmware/metisa_nano_firmware.hex';
+      mime = 'text/plain';
+    } else {
+      filename = 'metisa_nano_firmware.hex';
+      path = 'firmware/metisa_nano_firmware.hex';
+      mime = 'text/plain';
+    }
+  } else if (target === 'stm32') {
     const sub = getSelectedStm32SubModel();
     if (sub === 'stm32f407') {
       filename = 'metisa_stm32f407_firmware.bin';
@@ -2343,7 +2403,7 @@ async function startDfuFirmwareFlash() {
 // Web Serial STM32 USART Bootloader Flasher (AN3155 Protocol)
 // -------------------------------------------------------------
 
-async function startStm32SerialBootloaderFlash() {
+async function startStm32SerialBootloaderFlash(subModelOverride = null) {
   if (controllerFirmwareStatus === "BLANK" && !masterUnlockForFlashApproved) {
     showToast("Erst-Upload gesperrt: Master-PIN 210286 erforderlich", "error");
     const logView = document.getElementById("flashTerminalLog");
@@ -2388,8 +2448,8 @@ async function startStm32SerialBootloaderFlash() {
     if (pText) pText.textContent = "INIT BOOTLOADER [10%]";
 
     // Prepare binary image
-    const subModel = getSelectedStm32SubModel();
-    const isF407 = (subModel === "stm32f407");
+    const subModel = subModelOverride || getSelectedStm32SubModel();
+    const isF407 = (subModel === "stm32f407" || subModel === "stm32f405");
     let binData = null;
     const customRadio = document.querySelector('input[name="firmwareSourceType"][value="custom"]');
     if (customRadio && customRadio.checked) {
@@ -2471,9 +2531,21 @@ async function startStm32SerialBootloaderFlash() {
         if (chipPid === 0x0413) {
           chipName = "STM32F407 / STM32F405 (ARM Cortex-M4 @ 168 MHz)";
           setTargetMcuSelect("stm32f407");
+          if (!customRadio || !customRadio.checked) {
+            if (typeof window !== "undefined" && window.METISA_BUNDLED_STM32F407_BIN_B64) {
+              binData = base64ToUint8Array(window.METISA_BUNDLED_STM32F407_BIN_B64);
+              logTerminal(`[AUTO-DETECT] Firmware-Image angepasst: STM32F407 Image (${binData.length} Bytes)`);
+            }
+          }
         } else if (chipPid === 0x0423) {
           chipName = "STM32F401 BlackPill (ARM Cortex-M4 @ 84 MHz)";
           setTargetMcuSelect("stm32_blackpill");
+          if (!customRadio || !customRadio.checked) {
+            if (typeof window !== "undefined" && window.METISA_BUNDLED_STM32F401_BIN_B64) {
+              binData = base64ToUint8Array(window.METISA_BUNDLED_STM32F401_BIN_B64);
+              logTerminal(`[AUTO-DETECT] Firmware-Image angepasst: STM32F401 Image (${binData.length} Bytes)`);
+            }
+          }
         } else if (chipPid === 0x0431) {
           chipName = "STM32F411 BlackPill (ARM Cortex-M4 @ 100 MHz)";
           setTargetMcuSelect("stm32f411");
@@ -2484,7 +2556,7 @@ async function startStm32SerialBootloaderFlash() {
           chipName = "STM32G431 / G474 Motor Stage (ARM Cortex-M4 @ 170 MHz)";
           setTargetMcuSelect("stm32g431");
         }
-        logTerminal(`[CHIP] Hardware verifiziert: ${chipName}`);
+        logTerminal(`[AUTO-DETECT] Hardware verifiziert: ${chipName}`);
         updateHardwareStatusUI("METISA", chipName);
       }
 
@@ -2647,51 +2719,12 @@ async function sendStkCommand(writer, reader, cmdBytes, expectedRespLen = 2, tim
   return resp;
 }
 
-async function startFirmwareFlash() {
-  if (controllerFirmwareStatus === "BLANK" && !masterUnlockForFlashApproved) {
-    showToast("Erst-Upload gesperrt: Master-PIN 210286 erforderlich", "error");
-    const logView = document.getElementById("flashTerminalLog");
-    if (logView) {
-      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-PIN (210286) erforderlich.`;
-    }
-    return;
-  }
-
-  if (flasherIsDecoySandbox) {
-    const logView = document.getElementById("flashTerminalLog");
-    const pText = document.getElementById("flashProgressText");
-    const pBar = document.getElementById("flashProgressBar");
-    if (pBar) pBar.style.width = "100%";
-    if (pText) pText.textContent = "SANDBOX PAYLOAD FLASHED [DEMO]";
-    if (logView) {
-      const time = new Date().toISOString().substring(11, 19);
-      logView.textContent += `\n[${time}] [FLASH] DECOY-SANDBOX PAYLOAD ERFOLGREICH ÜBERTRAGEN.`;
-      logView.textContent += `\n[${time}] [WARNUNG] Motor-Regelung im Sandbox-Modus dauerhaft verriegelt (0W).`;
-      logView.textContent += `\n[${time}] [SICHERHEIT] Für Hardware-Aktivierung echten Master-PIN (210286) eingeben.`;
-      logView.scrollTop = logView.scrollHeight;
-    }
-    showToast("Decoy-Firmware geflasht (Motor dauerhaft verriegelt)", "warning");
-    return;
-  }
-
-  if (currentFlasherTarget === 'stm32') {
-    return await startStm32SerialBootloaderFlash();
-  }
-
-  if (currentFlasherTarget === 'esp32') {
-    downloadSelectedFirmwareBinary();
-    const logView = document.getElementById("flashTerminalLog");
-    if (logView) {
-      logView.textContent += `\n[INFO] Firmware-Binary für ESP32 heruntergeladen.\nNutzen Sie esptool.py für das finale Flashen.`;
-    }
-    return;
-  }
-
+async function startNanoStk500Flash(baudRateOverride = null) {
   const logView = document.getElementById("flashTerminalLog");
   const pBar = document.getElementById("flashProgressBar");
   const pText = document.getElementById("flashProgressText");
   const baudSelect = document.getElementById("flasherBaudRate");
-  const baudRate = parseInt(baudSelect ? baudSelect.value : "115200", 10) || 115200;
+  const baudRate = baudRateOverride || parseInt(baudSelect ? baudSelect.value : "115200", 10) || 115200;
 
   function logTerminal(msg) {
     const time = new Date().toISOString().substring(11, 19);
@@ -2845,6 +2878,328 @@ async function startFirmwareFlash() {
   }
 }
 
+async function startAutoDetectFirmwareFlash() {
+  const logView = document.getElementById("flashTerminalLog");
+  const pBar = document.getElementById("flashProgressBar");
+  const pText = document.getElementById("flashProgressText");
+
+  function logTerminal(msg) {
+    const time = new Date().toISOString().substring(11, 19);
+    if (logView) {
+      logView.textContent += `\n[${time}] ${msg}`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+  }
+
+  logTerminal("[AUTO-DETECT] Starte automatische Hardware-Erkennung & Flash-Routing...");
+  if (pBar) pBar.style.width = "5%";
+  if (pText) pText.textContent = "HARDWARE ERKENNUNG [5%]";
+
+  // 1. Wenn Controller bereits verbunden und Modell bekannt ist:
+  if (isConnected && detectedMcuModel && detectedMcuModel !== "Kein Controller" && detectedMcuModel !== "Getrennt") {
+    logTerminal(`[AUTO-DETECT] Aktuell verbundener Controller: ${detectedMcuModel}`);
+
+    if (detectedMcuModel.includes("STM32")) {
+      const sub = detectedMcuModel.includes("F407") ? "stm32f407" :
+                  detectedMcuModel.includes("F405") ? "stm32f405" :
+                  detectedMcuModel.includes("F411") ? "stm32f411" :
+                  detectedMcuModel.includes("F103") ? "stm32f103" :
+                  detectedMcuModel.includes("G431") ? "stm32g431" : "stm32f401";
+      logTerminal(`[AUTO-DETECT] Ziel-Firmware: ${sub.toUpperCase()}. Starte STM32 Bootloader Flash...`);
+      return await startStm32SerialBootloaderFlash(sub);
+    } else if (detectedMcuModel.includes("Mega")) {
+      logTerminal("[AUTO-DETECT] Ziel-Firmware: Arduino Mega 2560.");
+      return await startNanoStk500Flash(115200);
+    } else if (detectedMcuModel.includes("ESP32")) {
+      logTerminal("[AUTO-DETECT] Ziel-Firmware: ESP32 DevKit.");
+      downloadSelectedFirmwareBinary();
+      return;
+    } else {
+      logTerminal("[AUTO-DETECT] Ziel-Firmware: Arduino Nano (ATmega328P). Starte STK500v1 Flash...");
+      return await startNanoStk500Flash();
+    }
+  }
+
+  // 2. Wenn Port noch nicht geöffnet ist, Port-Auswahl anfordern:
+  if (serialReader) {
+    try { await serialReader.cancel(); } catch (e) {}
+    serialReader = null;
+  }
+  if (serialPort && serialPort.readable) {
+    try { await serialPort.close(); } catch (e) {}
+  }
+  if (!serialPort) {
+    logTerminal("[PORT] Bitte USB-Schnittstelle im Browser-Dialog auswählen...");
+    try {
+      serialPort = await navigator.serial.requestPort();
+    } catch (e) {
+      logTerminal("[ABBRUCH] Keine USB-Schnittstelle ausgewählt.");
+      return;
+    }
+  }
+
+  // 3. USB VID & PID auslesen
+  let vid = 0;
+  let pid = 0;
+  try {
+    const info = serialPort.getInfo();
+    vid = info.usbVendorId || 0;
+    pid = info.usbProductId || 0;
+  } catch (e) {}
+
+  logTerminal(`[USB] Schnittstelle geprüft: VID 0x${vid.toString(16).padStart(4, '0').toUpperCase()}, PID 0x${pid.toString(16).padStart(4, '0').toUpperCase()}`);
+
+  // STMicroelectronics Family (VID 0x0483)
+  if (vid === 0x0483 || vid === 0x483) {
+    logTerminal("[AUTO-DETECT] STMicroelectronics Chip erkannt (VID 0x0483)");
+
+    if (pid === 0xDF11 || pid === 0xdf11) {
+      logTerminal("[AUTO-DETECT] Controller befindet sich im USB DFU-Bootloader-Modus.");
+      return await startDfuFirmwareFlash();
+    }
+
+    // Try AN3155 USART Bootloader handshake @ 115200 even parity
+    logTerminal("[AUTO-DETECT] Teste STM32 System Bootloader (AN3155 @ 115200 Even)...");
+    try {
+      await serialPort.open({ baudRate: 115200, parity: "even" });
+      isConnected = true;
+      const writer = serialPort.writable.getWriter();
+      const reader = serialPort.readable.getReader();
+      let ackOk = false;
+      try {
+        for (let i = 0; i < 4; i++) {
+          await writer.write(new Uint8Array([0x7F]));
+          try {
+            const resp = await readExactBytes(reader, 1, 100);
+            if (resp[0] === 0x79) {
+              ackOk = true;
+              break;
+            }
+          } catch (e) {
+            await sleep(30);
+          }
+        }
+
+        if (ackOk) {
+          // Read Chip PID via Command 0x02 + 0xFD
+          await writer.write(new Uint8Array([0x02, 0xFD]));
+          const pidAck = await readExactBytes(reader, 1, 300);
+          let detectedSub = "stm32f407";
+          if (pidAck[0] === 0x79) {
+            const lenBytes = await readExactBytes(reader, 1, 300);
+            const pidBytes = await readExactBytes(reader, lenBytes[0] + 1, 300);
+            await readExactBytes(reader, 1, 300);
+            const chipPid = (pidBytes[0] << 8) | pidBytes[1];
+
+            if (chipPid === 0x0413) {
+              detectedSub = "stm32f407";
+              detectedMcuModel = "STM32F407 High-Performance [ARM Cortex-M4 @ 168 MHz]";
+            } else if (chipPid === 0x0423) {
+              detectedSub = "stm32f401";
+              detectedMcuModel = "STM32 BlackPill [STM32F401CC @ 84 MHz]";
+            } else if (chipPid === 0x0431) {
+              detectedSub = "stm32f411";
+              detectedMcuModel = "STM32 BlackPill [STM32F411CE @ 100 MHz]";
+            } else if (chipPid === 0x0410 || chipPid === 0x0414) {
+              detectedSub = "stm32f103";
+              detectedMcuModel = "STM32 BluePill [STM32F103C8 @ 72 MHz]";
+            } else if (chipPid === 0x0468 || chipPid === 0x0469) {
+              detectedSub = "stm32g431";
+              detectedMcuModel = "STM32G431 Motor Stage [Cordic/FMAC @ 170 MHz]";
+            }
+            logTerminal(`[AUTO-DETECT] Chip PID 0x${chipPid.toString(16).toUpperCase()} verifiziert: ${detectedMcuModel}`);
+          }
+          setTargetMcuSelect(detectedSub);
+          updateHardwareStatusUI("METISA", detectedMcuModel);
+          return await startStm32SerialBootloaderFlash(detectedSub);
+        }
+      } finally {
+        try { reader.releaseLock(); } catch (e) {}
+        try { writer.releaseLock(); } catch (e) {}
+        try { await serialPort.close(); } catch (e) {}
+      }
+    } catch (e) {
+      try { await serialPort.close(); } catch (ce) {}
+    }
+
+    // Default STM32 flash
+    const fallbackSub = (appState.target_mcu === "stm32f407") ? "stm32f407" : "stm32f401";
+    logTerminal(`[AUTO-DETECT] Starte STM32 Bootloader Flasher mit ${fallbackSub.toUpperCase()}...`);
+    setTargetMcuSelect(fallbackSub);
+    return await startStm32SerialBootloaderFlash(fallbackSub);
+  }
+
+  // Arduino Nano (ATmega328P) via CH340 / FTDI / Uno
+  if (vid === 0x1A86 || vid === 0x1a86 || vid === 0x0403 || vid === 0x403 || (vid === 0x2341 && (pid === 0x0043 || pid === 0x7523))) {
+    detectedMcuModel = "Arduino Nano (ATmega328P @ 16 MHz AVR)";
+    logTerminal("[AUTO-DETECT] Arduino Nano Hardware erkannt (ATmega328P)");
+    setTargetMcuSelect("avr_nano");
+    updateHardwareStatusUI("METISA", detectedMcuModel);
+    return await startNanoStk500Flash(115200);
+  }
+
+  // Arduino Mega 2560 (ATmega2560)
+  if (vid === 0x2341 && (pid === 0x0010 || pid === 0x0042)) {
+    detectedMcuModel = "Arduino Mega 2560 (ATmega2560 @ 16 MHz AVR)";
+    logTerminal("[AUTO-DETECT] Arduino Mega 2560 Hardware erkannt (ATmega2560)");
+    setTargetMcuSelect("avr_mega");
+    updateHardwareStatusUI("METISA", detectedMcuModel);
+    return await startNanoStk500Flash(115200);
+  }
+
+  // ESP32 DevKit
+  if (vid === 0x10C4 || vid === 0x10c4 || vid === 0x303A || vid === 0x303a) {
+    detectedMcuModel = "ESP32 DevKit Dual-Core (Xtensa @ 240 MHz)";
+    logTerminal("[AUTO-DETECT] ESP32 DevKit Hardware erkannt (Xtensa @ 240 MHz)");
+    setTargetMcuSelect("esp32");
+    updateHardwareStatusUI("METISA", detectedMcuModel);
+    downloadSelectedFirmwareBinary();
+    logTerminal("[INFO] Firmware-Binary für ESP32 heruntergeladen.");
+    showToast("ESP32 Binary heruntergeladen [OK]", "success");
+    return;
+  }
+
+  // Unbekannte Hardware: Aktiver Probe-Handshake
+  logTerminal("[AUTO-DETECT] Unbekannte USB-ID. Führe Probe-Handshake durch...");
+
+  // Probe A: STM32 AN3155 @ 115200 Even
+  try {
+    await serialPort.open({ baudRate: 115200, parity: "even" });
+    const writer = serialPort.writable.getWriter();
+    const reader = serialPort.readable.getReader();
+    let isStm = false;
+    try {
+      await writer.write(new Uint8Array([0x7F]));
+      const r = await readExactBytes(reader, 1, 120);
+      if (r[0] === 0x79) isStm = true;
+    } catch (e) {}
+    try { reader.releaseLock(); } catch (e) {}
+    try { writer.releaseLock(); } catch (e) {}
+    try { await serialPort.close(); } catch (e) {}
+
+    if (isStm) {
+      logTerminal("[AUTO-DETECT] STM32 Bootloader antwortet mit 0x79 ACK!");
+      return await startStm32SerialBootloaderFlash();
+    }
+  } catch (e) {
+    try { await serialPort.close(); } catch (ce) {}
+  }
+
+  // Probe B: Optiboot STK500v1 @ 115200 None
+  logTerminal("[AUTO-DETECT] Teste Optiboot STK500v1 (Arduino Nano @ 115200 Baud)...");
+  try {
+    await serialPort.open({ baudRate: 115200, parity: "none" });
+    await serialPort.setSignals({ dataTerminalReady: false, requestToSend: true });
+    await sleep(80);
+    await serialPort.setSignals({ dataTerminalReady: true, requestToSend: false });
+    await sleep(250);
+    const writer = serialPort.writable.getWriter();
+    const reader = serialPort.readable.getReader();
+    let isNano = false;
+    try {
+      await writer.write(new Uint8Array([0x30, 0x20]));
+      const sync = await readExactBytes(reader, 2, 80);
+      if (sync[0] === 0x14 && sync[1] === 0x10) isNano = true;
+    } catch (e) {}
+    try { reader.releaseLock(); } catch (e) {}
+    try { writer.releaseLock(); } catch (e) {}
+    try { await serialPort.close(); } catch (e) {}
+
+    if (isNano) {
+      logTerminal("[AUTO-DETECT] Arduino Nano (Optiboot @ 115200) erfolgreich synchronisiert!");
+      setTargetMcuSelect("avr_nano");
+      return await startNanoStk500Flash(115200);
+    }
+  } catch (e) {
+    try { await serialPort.close(); } catch (ce) {}
+  }
+
+  // Probe C: Alter Bootloader 57600
+  logTerminal("[AUTO-DETECT] Teste Arduino Nano (Alter Bootloader @ 57600 Baud)...");
+  try {
+    await serialPort.open({ baudRate: 57600, parity: "none" });
+    await serialPort.setSignals({ dataTerminalReady: false, requestToSend: true });
+    await sleep(80);
+    await serialPort.setSignals({ dataTerminalReady: true, requestToSend: false });
+    await sleep(250);
+    const writer = serialPort.writable.getWriter();
+    const reader = serialPort.readable.getReader();
+    let isOldNano = false;
+    try {
+      await writer.write(new Uint8Array([0x30, 0x20]));
+      const sync = await readExactBytes(reader, 2, 80);
+      if (sync[0] === 0x14 && sync[1] === 0x10) isOldNano = true;
+    } catch (e) {}
+    try { reader.releaseLock(); } catch (e) {}
+    try { writer.releaseLock(); } catch (e) {}
+    try { await serialPort.close(); } catch (e) {}
+
+    if (isOldNano) {
+      logTerminal("[AUTO-DETECT] Arduino Nano (Alter Bootloader @ 57600) synchronisiert!");
+      setTargetMcuSelect("avr_nano");
+      return await startNanoStk500Flash(57600);
+    }
+  } catch (e) {
+    try { await serialPort.close(); } catch (ce) {}
+  }
+
+  // Standard-Fallback
+  logTerminal("[AUTO-DETECT] Standard-Fallback: Starte Arduino Nano Flasher.");
+  return await startNanoStk500Flash();
+}
+
+async function startFirmwareFlash() {
+  if (controllerFirmwareStatus === "BLANK" && !masterUnlockForFlashApproved) {
+    showToast("Erst-Upload gesperrt: Master-PIN 210286 erforderlich", "error");
+    const logView = document.getElementById("flashTerminalLog");
+    if (logView) {
+      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-PIN (210286) erforderlich.`;
+    }
+    return;
+  }
+
+  if (flasherIsDecoySandbox) {
+    const logView = document.getElementById("flashTerminalLog");
+    const pText = document.getElementById("flashProgressText");
+    const pBar = document.getElementById("flashProgressBar");
+    if (pBar) pBar.style.width = "100%";
+    if (pText) pText.textContent = "SANDBOX PAYLOAD FLASHED [DEMO]";
+    if (logView) {
+      const time = new Date().toISOString().substring(11, 19);
+      logView.textContent += `\n[${time}] [FLASH] DECOY-SANDBOX PAYLOAD ERFOLGREICH ÜBERTRAGEN.`;
+      logView.textContent += `\n[${time}] [WARNUNG] Motor-Regelung im Sandbox-Modus dauerhaft verriegelt (0W).`;
+      logView.textContent += `\n[${time}] [SICHERHEIT] Für Hardware-Aktivierung echten Master-PIN (210286) eingeben.`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+    showToast("Decoy-Firmware geflasht (Motor dauerhaft verriegelt)", "warning");
+    return;
+  }
+
+  if (currentFlasherTarget === 'stm32') {
+    return await startStm32SerialBootloaderFlash();
+  }
+
+  if (currentFlasherTarget === 'mega') {
+    return await startNanoStk500Flash(115200);
+  }
+
+  if (currentFlasherTarget === 'esp32') {
+    downloadSelectedFirmwareBinary();
+    const logView = document.getElementById("flashTerminalLog");
+    if (logView) {
+      logView.textContent += `\n[INFO] Firmware-Binary für ESP32 heruntergeladen.\nNutzen Sie esptool.py für das finale Flashen.`;
+    }
+    return;
+  }
+
+  if (currentFlasherTarget === 'nano') {
+    return await startNanoStk500Flash();
+  }
+
+  // currentFlasherTarget === 'auto'
+  return await startAutoDetectFirmwareFlash();
+}
+
 async function verifyFlasherMasterPin() {
   const pinInput = document.getElementById("flasherMasterPinInput");
   const pin = pinInput ? pinInput.value.trim() : "";
@@ -2952,6 +3307,7 @@ window.startStm32SerialBootloaderFlash = startStm32SerialBootloaderFlash;
 window.updateStm32ModelSelection = updateStm32ModelSelection;
 window.verifyFlasherMasterPin = verifyFlasherMasterPin;
 window.copyAssignedSerialToClipboard = copyAssignedSerialToClipboard;
-
+window.startAutoDetectFirmwareFlash = startAutoDetectFirmwareFlash;
+window.startNanoStk500Flash = startNanoStk500Flash;
 
 
