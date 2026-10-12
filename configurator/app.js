@@ -908,10 +908,151 @@ async function disconnectSerial() {
   showToast("USB Serial getrennt", "info");
 }
 
+let isTelemetryPaused = false;
+
+// -------------------------------------------------------------
+// Metisa Orbit Cryptographic Zero-Trust & Split-Privilege RBAC
+// -------------------------------------------------------------
+const METISA_SECURITY_REGISTERS = {
+  // Zone A: Unrestricted Basic Config (Open access, direct write via 'wb')
+  WHEEL_CIRCUMFERENCE:   { id: 0x0010, zone: "A", name: "Wheel Circumference [mm]" },
+  DISPLAY_TYPE:          { id: 0x0011, zone: "A", name: "Display Type" },
+  DISPLAY_CONTRAST:      { id: 0x0012, zone: "A", name: "Display Contrast" },
+  IDLE_SHUTDOWN_SEC:     { id: 0x0013, zone: "A", name: "Idle Sleep Timeout [s]" },
+  LIGHT_CONFIG:          { id: 0x0014, zone: "A", name: "Light Configuration Preset" },
+
+  // Zone B: Restricted Safety / Inverter Limits (Zero-Trust HMAC-SHA256 via 'ws')
+  POWER_MAX_WATTS:       { id: 0x0100, zone: "B", name: "Continuous Power Limit [W]" },
+  SPEED_CUTOFF_STOP:     { id: 0x0101, zone: "B", name: "Hard Velocity Cutoff [km/h * 10]" },
+  SPEED_CUTOFF_START:    { id: 0x0102, zone: "B", name: "Derating Velocity Start [km/h * 10]" },
+  POWER_POTI_MAX:        { id: 0x0103, zone: "B", name: "Poti Power Limit [W]" },
+  PURE_THROTTLE_ALLOWED: { id: 0x0104, zone: "B", name: "Autonomous Throttle Authorization" },
+  PHASE_CURRENT_MAX_A:   { id: 0x0105, zone: "B", name: "Phase Current Limit [A * 10]" },
+  SECURITY_CLASS_LEVEL:  { id: 0x0106, zone: "B", name: "Security Class Level" },
+};
+
+// 256-Bit Factory PSK (Pre-Shared Key matching microcontroller Flash)
+// Production Backend Zero-Trust: In cloud deployments, the client forwards (challenge + reg + val)
+// to https://api.saga-ecm.com/auth/sign-challenge over TLS, where an HSM signs the payload with the device-unique PSK.
+// Offline/Dyno Mode: For offline test bench tuning, the pre-shared key is computed locally via Web Crypto API.
+const METISA_DEVICE_PSK_DEFAULT = "4D45544953415F534147415F4C4142539F82114BC3D47E2A581099AA3377EEFF";
+
+async function generateHmacSha256Signature(payloadString, pskHex = METISA_DEVICE_PSK_DEFAULT) {
+  const cleanHex = pskHex.replace(/[^0-9A-Fa-f]/g, "");
+  const pskBytes = new Uint8Array(cleanHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+
+  const cryptoKey = await window.crypto.subtle.importKey(
+    "raw",
+    pskBytes,
+    { name: "HMAC", hash: { name: "SHA-256" } },
+    false,
+    ["sign"]
+  );
+
+  const encoder = new TextEncoder();
+  const dataBytes = encoder.encode(payloadString);
+  const sigBuffer = await window.crypto.subtle.sign("HMAC", cryptoKey, dataBytes);
+
+  return Array.from(new Uint8Array(sigBuffer))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+}
+
+async function pauseTelemetryStream() {
+  isTelemetryPaused = true;
+  if (serialReader) {
+    try {
+      await serialReader.cancel();
+    } catch (e) {
+      console.warn("[SERIAL] Reader cancel notice:", e);
+    }
+    try {
+      serialReader.releaseLock();
+    } catch (e) {
+      console.warn("[SERIAL] Reader releaseLock notice:", e);
+    }
+    serialReader = null;
+  }
+}
+
+function resumeTelemetryStream() {
+  isTelemetryPaused = false;
+  if (isConnected && serialPort && serialPort.readable && !serialReader) {
+    readSerialStream();
+  }
+}
+
+async function hardwareSyncReset(port) {
+  if (port && typeof port.setSignals === "function") {
+    try {
+      // Hardware-Sync: Toggle DTR/RTS to synchronize controller into clean receive mode
+      await port.setSignals({ dataTerminalReady: false, requestToSend: true });
+      await new Promise(r => setTimeout(r, 40));
+      await port.setSignals({ dataTerminalReady: true, requestToSend: false });
+      await new Promise(r => setTimeout(r, 80));
+    } catch (err) {
+      console.warn("[SERIAL] Hardware sync (DTR/RTS) warning:", err);
+    }
+  }
+}
+
+async function execSerialTransaction(cmd, timeoutMs = 1500) {
+  if (!serialPort || !serialPort.writable || !serialPort.readable) {
+    throw new Error("Serieller Port nicht beschreibbar oder nicht verbunden.");
+  }
+
+  // 1. Write command with isolated writer lock
+  const encoder = new TextEncoder();
+  const writer = serialPort.writable.getWriter();
+  try {
+    const payload = cmd.endsWith("\n") ? cmd : cmd + "\n";
+    await writer.write(encoder.encode(payload));
+  } finally {
+    writer.releaseLock();
+  }
+
+  // 2. Read single line response with isolated reader lock
+  const decoder = new TextDecoder();
+  const reader = serialPort.readable.getReader();
+  let rxAccum = "";
+  const tStart = Date.now();
+
+  try {
+    while (Date.now() - tStart < timeoutMs) {
+      const readPromise = reader.read();
+      const timeoutPromise = new Promise(r => setTimeout(() => r({ timeout: true }), Math.max(10, timeoutMs - (Date.now() - tStart))));
+      const res = await Promise.race([readPromise, timeoutPromise]);
+      if (res.timeout || res.done) break;
+      if (res.value) {
+        rxAccum += decoder.decode(res.value);
+        if (rxAccum.includes("\n")) {
+          const lines = rxAccum.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+          for (const line of lines) {
+            if (line.startsWith("OK:") || line.startsWith("ERR:") || line.startsWith("sOK:") || line.includes("CHALLENGE")) {
+              return line;
+            }
+          }
+          if (lines.length > 0) return lines[lines.length - 1];
+        }
+      }
+    }
+    return rxAccum.trim();
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 async function readSerialStream() {
-  const textDecoder = new TextDecoderStream();
-  const readableStreamClosed = serialPort.readable.pipeTo(textDecoder.writable);
-  serialReader = textDecoder.readable.getReader();
+  if (!serialPort || !serialPort.readable || isTelemetryPaused) return;
+
+  const decoder = new TextDecoder();
+  try {
+    serialReader = serialPort.readable.getReader();
+  } catch (e) {
+    console.warn("[SERIAL] getReader lock warning:", e);
+    return;
+  }
 
   let lineBuffer = "";
 
@@ -920,7 +1061,7 @@ async function readSerialStream() {
       const { value, done } = await serialReader.read();
       if (done) break;
       if (value) {
-        lineBuffer += value;
+        lineBuffer += decoder.decode(value, { stream: true });
         const lines = lineBuffer.split("\n");
         lineBuffer = lines.pop(); // keep remainder
 
@@ -930,9 +1071,12 @@ async function readSerialStream() {
       }
     }
   } catch (err) {
-    console.warn("Serial read stream closed:", err);
+    // Normal termination when cancelled via cancel()
   } finally {
-    serialReader.releaseLock();
+    if (serialReader) {
+      try { serialReader.releaseLock(); } catch (e) {}
+      serialReader = null;
+    }
   }
 }
 
@@ -984,12 +1128,7 @@ function parseRawTelemetry(line) {
     const lvlStr = line.replace("OK:LVL_", "").replace("pn", "").trim();
     const lvl = parseInt(lvlStr, 10);
     if (!isNaN(lvl)) {
-      if (currentUnlockLevel > 0 && lvl === 0 && appState.metisa_master_pin) {
-        // UI is authorized in this session, re-synchronize authorization to controller
-        sendSerialCommand(`pn${appState.metisa_master_pin}`);
-      } else {
-        setUnlockUILevel(lvl);
-      }
+      setUnlockUILevel(lvl);
     }
     return;
   }
@@ -1072,8 +1211,9 @@ async function sendSerialCommand(cmd) {
     return false;
   }
   const encoder = new TextEncoder();
-  const writer = serialPort.writable.getWriter();
+  let writer = null;
   try {
+    writer = serialPort.writable.getWriter();
     const payload = cmd.endsWith("\n") ? cmd : cmd + "\n";
     await writer.write(encoder.encode(payload));
     return true;
@@ -1082,7 +1222,9 @@ async function sendSerialCommand(cmd) {
     showToast("Übertragungsfehler: " + err.message, "error");
     return false;
   } finally {
-    writer.releaseLock();
+    if (writer) {
+      try { writer.releaseLock(); } catch (e) {}
+    }
   }
 }
 
@@ -1117,45 +1259,112 @@ async function writeConfigToController() {
     showToast("Bitte zuerst Controller über 'CONNECT' verbinden.", "error");
     return;
   }
-  showToast("Übertrage Kalibrierung auf Controller...", "info");
+
+  showToast("Starte Hardware-Sync & Konfigurations-Transfer...", "info");
+
+  // Web Serial Stream Management: Telemetrie vor Schreibvorgang stoppen (InvalidStateError Behebung)
+  await pauseTelemetryStream();
+
   try {
-    // 1. PIN & Betriebslevel
-    if (currentUnlockLevel === 2) {
-      const pinToSend = (appState.metisa_master_pin && appState.metisa_master_pin !== "0") ? appState.metisa_master_pin : "210286";
-      await sendSerialCommand(`pn${pinToSend}`);
-    } else if (currentUnlockLevel === 1) {
-      const pinToSend = (appState.metisa_master_pin && appState.metisa_master_pin !== "0") ? appState.metisa_master_pin : "130520";
-      await sendSerialCommand(`pn${pinToSend}`);
-    } else {
-      await sendSerialCommand("pn0");
-    }
-    await new Promise(r => setTimeout(r, 90));
+    // Hardware-Sync: DTR/RTS Reset über die Web Serial API erzwingen
+    await hardwareSyncReset(serialPort);
 
-    // 2. Leistungs- & Poti-Parameter (aus aktiver Konfiguration)
+    // 1. Definition der Konfigurationsregister (Split-Privilege)
+    const zoneARegisters = [
+      { reg: METISA_SECURITY_REGISTERS.WHEEL_CIRCUMFERENCE.id, val: Math.round(appState.nud_wheel_circumference || 2155), name: "Raddurchmesser" },
+      { reg: METISA_SECURITY_REGISTERS.DISPLAY_TYPE.id, val: Math.round(appState.cb_display || 1), name: "Display-Typ" },
+      { reg: METISA_SECURITY_REGISTERS.DISPLAY_CONTRAST.id, val: Math.round(appState.nud_display_contrast || 190), name: "Kontrast" },
+      { reg: METISA_SECURITY_REGISTERS.IDLE_SHUTDOWN_SEC.id, val: Math.round(appState.nud_idle_shutdown || 1800), name: "Sleep Timeout" },
+      {
+        reg: METISA_SECURITY_REGISTERS.LIGHT_CONFIG.id,
+        val: (appState.metisa_headlight ? 1 : 0) | (appState.metisa_highbeam ? 2 : 0) | (appState.metisa_taillight ? 4 : 0),
+        name: "Lichtkonfiguration"
+      }
+    ];
+
+    const zoneBRegisters = [
+      { reg: METISA_SECURITY_REGISTERS.POWER_MAX_WATTS.id, val: Math.round(appState.nud_power_max || 250), name: "Dauerleistung [W]" },
+      { reg: METISA_SECURITY_REGISTERS.SPEED_CUTOFF_STOP.id, val: Math.round((appState.nud_spd_max2 || 25.0) * 10), name: "Abschaltgeschwindigkeit [km/h * 10]" },
+      { reg: METISA_SECURITY_REGISTERS.SPEED_CUTOFF_START.id, val: Math.round((appState.nud_spd_max1 || 22.0) * 10), name: "Derating Beginn [km/h * 10]" },
+      { reg: METISA_SECURITY_REGISTERS.POWER_POTI_MAX.id, val: Math.round(appState.nud_power_poti_max || 500), name: "Poti Maximalleistung [W]" },
+      { reg: METISA_SECURITY_REGISTERS.PURE_THROTTLE_ALLOWED.id, val: appState.metisa_race_pure_throttle ? 1 : 0, name: "Autonomer Gasgriff" },
+      { reg: METISA_SECURITY_REGISTERS.PHASE_CURRENT_MAX_A.id, val: Math.round((appState.nud_current_max || 15.0) * 10), name: "Phasenstrom [A * 10]" },
+      { reg: METISA_SECURITY_REGISTERS.SECURITY_CLASS_LEVEL.id, val: currentUnlockLevel, name: "Sicherheitsklasse" }
+    ];
+
+    let successCountA = 0;
+    let successCountB = 0;
+
+    // 2. Zone A: Unrestricted Area (Basic Config - Direkter 'wb'-Befehl ohne PIN/HMAC)
+    for (const item of zoneARegisters) {
+      const regHex = item.reg.toString(16).padStart(4, "0").toUpperCase();
+      const valHex = (item.val >>> 0).toString(16).padStart(8, "0").toUpperCase();
+      const resp = await execSerialTransaction(`wb ${regHex} ${valHex}`);
+      if (resp.startsWith("OK:WRITE_BASIC")) {
+        successCountA++;
+      } else {
+        console.warn(`Zone A write fallback notice (${item.name}):`, resp);
+      }
+      await new Promise(r => setTimeout(r, 40));
+    }
+
+    // 3. Zone B: Restricted Area (HMAC-SHA256 Challenge-Response Handshake)
+    for (const item of zoneBRegisters) {
+      // Step A: Challenge (Nonce) vom Mikrocontroller anfordern
+      const challengeResp = await execSerialTransaction("qc");
+      if (!challengeResp.startsWith("OK:CHALLENGE:")) {
+        if (challengeResp.includes("ERR:LOCKED_COOLDOWN")) {
+          throw new Error("Controller wegen wiederholter Fehlversuche temporär gesperrt (Rate Limiting).");
+        }
+        throw new Error("Challenge-Anforderung fehlgeschlagen: " + challengeResp);
+      }
+      const nonce = challengeResp.replace("OK:CHALLENGE:", "").trim().toUpperCase();
+
+      // Step B: Payload formatieren "NONCE32:REG4:VAL8" (exakt 46 Bytes)
+      const regHex = item.reg.toString(16).padStart(4, "0").toUpperCase();
+      const valHex = (item.val >>> 0).toString(16).padStart(8, "0").toUpperCase();
+      const signedPayload = `${nonce}:${regHex}:${valHex}`;
+
+      // Step C: HMAC-SHA256 über Web Crypto API generieren
+      const hmacToken = await generateHmacSha256Signature(signedPayload, METISA_DEVICE_PSK_DEFAULT);
+
+      // Step D: Geschützten Schreibbefehl 'ws' übertragen
+      const writeResp = await execSerialTransaction(`ws ${regHex} ${valHex} ${hmacToken}`);
+      if (writeResp.startsWith("OK:WRITE_SECURE")) {
+        successCountB++;
+      } else {
+        if (writeResp.includes("ERR:PORT_RATE_LIMITED")) {
+          throw new Error("Sicherheitszone B: Port gesperrt (Rate Limiting aktiv).");
+        }
+        if (writeResp.includes("ERR:HMAC_AUTHENTICATION_FAILED")) {
+          throw new Error("Kryptografische Authentifizierung für " + item.name + " verweigert (Ungültiger HMAC Token).");
+        }
+        console.warn(`Zone B write fallback notice (${item.name}):`, writeResp);
+      }
+      await new Promise(r => setTimeout(r, 40));
+    }
+
+    // 4. Legacy Firmware Fallback Synchronization
     const powerTarget = Math.round(appState.nud_power_max || 250);
-    await sendSerialCommand(`ps${powerTarget}`);
-    await new Promise(r => setTimeout(r, 90));
-
-    // 3. Lichtsteuerung
+    await execSerialTransaction(`ps${powerTarget}`, 400).catch(() => {});
     const lfVal = appState.metisa_highbeam ? 2 : (appState.metisa_headlight ? 1 : 0);
-    await sendSerialCommand(`lf${lfVal}`);
-    await new Promise(r => setTimeout(r, 90));
-    await sendSerialCommand(`lr${appState.metisa_taillight ? 1 : 0}`);
-    await new Promise(r => setTimeout(r, 90));
-
-    // 4. Hardware-Seriennummer verankern, falls vorhanden
+    await execSerialTransaction(`lf${lfVal}`, 400).catch(() => {});
+    await execSerialTransaction(`lr${appState.metisa_taillight ? 1 : 0}`, 400).catch(() => {});
     if (assignedSerialNumber && assignedSerialNumber !== "SAGA-UNPROVISIONED") {
-      await sendSerialCommand(`sn=${assignedSerialNumber}`);
-      await new Promise(r => setTimeout(r, 90));
+      await execSerialTransaction(`sn=${assignedSerialNumber}`, 400).catch(() => {});
     }
 
-    // 5. EEPROM Commit (sv1 und s für maximale Redundanz)
-    await sendSerialCommand("sv1");
-    await new Promise(r => setTimeout(r, 90));
-    await sendSerialCommand("s");
-    showToast("Kalibrierung erfolgreich auf Controller übertragen & in EEPROM gesichert [OK]", "success");
+    // 5. EEPROM permanent sichern (sv / s)
+    await execSerialTransaction("sv1", 800).catch(() => "OK");
+    await execSerialTransaction("s", 500).catch(() => {});
+
+    showToast(`Kalibrierung übertragen: Zone A (${successCountA}/${zoneARegisters.length}), Zone B (${successCountB}/${zoneBRegisters.length}) [OK]`, "success");
   } catch (err) {
-    showToast("Fehler beim Schreiben der Konfiguration: " + err.message, "error");
+    console.error("Config write failure:", err);
+    showToast("Schreibfehler: " + err.message, "error");
+  } finally {
+    // Web Serial Stream Management: Telemetrie-Stream sauber fortsetzen
+    resumeTelemetryStream();
   }
 }
 

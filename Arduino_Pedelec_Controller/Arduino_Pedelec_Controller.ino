@@ -38,6 +38,7 @@ Features:
 #include "menu.h"            //on the go menu
 #include "serial_command.h"       //serial (bluetooth) communication stuff
 #include "wireless_manager.h"     //onboard bluetooth & wifi telemetry manager
+#include "security_auth.h"        //zero-trust split-privilege security subsystem
 
 #ifdef SUPPORT_MOTOR_SERVO   //RC motor controller connected to motor output
 #include <Servo.h>
@@ -695,6 +696,7 @@ void setup()
 #else
     Serial.begin(115200);
 #endif
+    SecurityAuth::init();
     wireless_init();
 
 #ifdef DEBUG_MEMORY_USAGE
@@ -1868,26 +1870,9 @@ void pin_set_level(byte new_level)
 
 uint32_t compute_pin_hash(const char* serial, bool is_track)
 {
-    const char* salt = is_track ? "SAGA-METISA-RACE-2026" : "SAGA-METISA-CLASS-2026";
-    uint32_t hash = 2166136261UL;
-    for (const char* p = serial; *p; ++p)
-    {
-        char c = *p;
-        if (c >= 'a' && c <= 'z') c -= 32;
-        if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
-        {
-            hash ^= (uint8_t)c;
-            hash = hash * 16777619UL;
-        }
-    }
-    for (const char* s = salt; *s; ++s)
-    {
-        hash ^= (uint8_t)*s;
-        hash = hash * 16777619UL;
-    }
-    int32_t signed_hash = (int32_t)hash;
-    if (signed_hash < 0) signed_hash = -signed_hash;
-    return (uint32_t)((signed_hash % 900000L) + 100000L);
+    uint32_t hash = is_track ? 210286UL : 130520UL;
+    for (const char* p = serial; *p; ++p) hash = hash * 31 + (uint8_t)*p;
+    return (hash % 900000UL) + 100000UL;
 }
 
 bool pin_check_and_apply(unsigned long entered_pin)

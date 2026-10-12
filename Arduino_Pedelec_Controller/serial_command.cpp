@@ -19,6 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 #include "config.h"
 #include "serial_command.h"
+#include "security_auth.h"
 #include "wireless_manager.h"
 #include "globals.h"
 #include "switches.h"
@@ -50,6 +51,9 @@ serial_command serial_commands[] =
     {{"id"}},     //17: Hardware- & Firmware-ID Probe
     {{"sn"}},     //18: Hardware-Seriennummer (get: sn?, set: sn=...)
     {{"sv"}},     //19: Save to EEPROM (get: sv?, set: sv1 or sv)
+    {{"wb"}},     //20: write basic register (Zone A Unrestricted)
+    {{"qc"}},     //21: query cryptographic challenge (Zero-Trust Nonce)
+    {{"ws"}},     //22: write secure register (Zone B HMAC-SHA256 authenticated)
 };
 const byte n_commands = sizeof(serial_commands)/sizeof(serial_command); //number of commands that we have
 
@@ -70,7 +74,7 @@ struct serial_struct
   parse_states parse_state;
   char cmdbuf[2];
   byte cmd_index;
-  char numberstring[28];
+  char numberstring[84];
   byte number_pos;
 };
 
@@ -103,6 +107,30 @@ static bool find_commands()
     return false;
 }
 
+static bool parseHexDword(char*& p, uint32_t& outDw) {
+    while (*p == ' ' || *p == '\t') p++;
+    if (!*p) return false;
+    uint32_t acc = 0; int cnt = 0;
+    while (*p) {
+        char c = *p; int d = -1;
+        if (c >= '0' && c <= '9') d = c - '0';
+        else if (c >= 'a' && c <= 'f') d = c - 'a' + 10;
+        else if (c >= 'A' && c <= 'F') d = c - 'A' + 10;
+        else break;
+        acc = (acc << 4) | (uint32_t)d;
+        cnt++; p++;
+    }
+    if (cnt == 0) return false;
+    outDw = acc; return true;
+}
+
+static bool parseHexWord(char*& p, uint16_t& outW) {
+    uint32_t dw = 0;
+    if (!parseHexDword(p, dw)) return false;
+    outW = (uint16_t)dw;
+    return true;
+}
+
 static void handle_command()
 {
     // sanity check
@@ -121,6 +149,24 @@ static void handle_command()
             active_serial_port->println(MY_F("OK:EEPROM_SAVED"));
             return;
         }
+        if (active_serial->cmd_index == 21) // "qc" without arguments
+        {
+            if (SecurityAuth::isLockedOut())
+            {
+                active_serial_port->print(MY_F("ERR:LOCKED_COOLDOWN:"));
+                active_serial_port->println(SecurityAuth::getRemainingLockoutMs() / 1000);
+                return;
+            }
+            char challengeHex[CHALLENGE_HEX_STR_LEN];
+            if (SecurityAuth::generateChallenge(challengeHex))
+            {
+                active_serial_port->print(MY_F("OK:CHALLENGE:"));
+                active_serial_port->println(challengeHex);
+                return;
+            }
+            active_serial_port->println(MY_F("ERR:CHALLENGE_GEN_FAILED"));
+            return;
+        }
         active_serial_port->println(MY_F("ERROR"));
         return;
     }
@@ -135,7 +181,7 @@ static void handle_command()
                 active_serial_port->println(poti_stat);
                 break;
             case 1:             //total kilometers
-                active_serial_port->println(odo/1000.0*wheel_circumference,0);
+                active_serial_port->println((unsigned long)(odo / 1000.0 * wheel_circumference));
                 break;
             case 4:              //hours read
 #ifdef SUPPORT_RTC
@@ -274,7 +320,7 @@ static void handle_command()
             break;
         case 8:              //PIN code write/unlock
             {
-                unsigned long pin = strtoul(active_serial->numberstring, NULL, 10);
+                unsigned long pin = (unsigned long)atol(active_serial->numberstring);
                 if (pin == 847291UL || pin == 994102UL)
                 {
                     // Honeypot Decoy Trap: Deceptively confirm but lock motor in demo sandbox
@@ -340,6 +386,95 @@ static void handle_command()
             {
                 save_eeprom();
                 active_serial_port->println(MY_F("OK:EEPROM_SAVED"));
+                return;
+            }
+        case 20: // wb: write basic (Zone A unrestricted)
+            {
+                uint16_t reg = 0;
+                uint32_t val = 0;
+                char* str = active_serial->numberstring;
+                while (*str == ' ' || *str == '=') str++;
+
+                if (parseHexWord(str, reg) && parseHexDword(str, val))
+                {
+                    if (SecurityAuth::writeBasic(reg, (int32_t)val))
+                    {
+                        active_serial_port->print(MY_F("OK:WRITE_BASIC:"));
+                        active_serial_port->println(reg, HEX);
+                        return;
+                    }
+                    else
+                    {
+                        active_serial_port->println(MY_F("ERR:RESTRICTED_REGISTER_ACCESS_DENIED"));
+                        return;
+                    }
+                }
+                active_serial_port->println(MY_F("ERR:SYNTAX_WB"));
+                return;
+            }
+        case 21: // qc: query challenge
+            {
+                if (SecurityAuth::isLockedOut())
+                {
+                    active_serial_port->print(MY_F("ERR:LOCKED_COOLDOWN:"));
+                    active_serial_port->println(SecurityAuth::getRemainingLockoutMs() / 1000);
+                    return;
+                }
+                char challengeHex[CHALLENGE_HEX_STR_LEN];
+                if (SecurityAuth::generateChallenge(challengeHex))
+                {
+                    active_serial_port->print(MY_F("OK:CHALLENGE:"));
+                    active_serial_port->println(challengeHex);
+                    return;
+                }
+                active_serial_port->println(MY_F("ERR:CHALLENGE_GEN_FAILED"));
+                return;
+            }
+        case 22: // ws: write secure (Zone B with HMAC-SHA256)
+            {
+                uint16_t reg = 0;
+                uint32_t val = 0;
+                char hmacBuf[65] = {0};
+                char* str = active_serial->numberstring;
+                while (*str == ' ' || *str == '=') str++;
+
+                if (parseHexWord(str, reg) && parseHexDword(str, val))
+                {
+                    while (*str == ' ' || *str == '\t') str++;
+                    size_t hLen = 0;
+                    while (*str && *str != ' ' && *str != '\t' && *str != '\r' && *str != '\n') {
+                        if (hLen < 64) {
+                            hmacBuf[hLen++] = *str;
+                        }
+                        str++;
+                    }
+                    hmacBuf[hLen] = '\0';
+
+                    if (hLen == 64)
+                    {
+                        AuthResult res = SecurityAuth::writeSecure(reg, (int32_t)val, hmacBuf);
+                        switch (res)
+                        {
+                            case AUTH_OK:
+                                active_serial_port->print(MY_F("OK:WRITE_SECURE:"));
+                                active_serial_port->println(reg, HEX);
+                                return;
+                            case AUTH_ERR_PORT_LOCKED:
+                                active_serial_port->println(MY_F("ERR:PORT_RATE_LIMITED"));
+                                return;
+                            case AUTH_ERR_CHALLENGE_EXPIRED:
+                                active_serial_port->println(MY_F("ERR:CHALLENGE_TIMEOUT"));
+                                return;
+                            case AUTH_ERR_INVALID_HMAC:
+                                active_serial_port->println(MY_F("ERR:HMAC_AUTHENTICATION_FAILED"));
+                                return;
+                            default:
+                                active_serial_port->println(MY_F("ERR:SECURE_WRITE_FAILED"));
+                                return;
+                        }
+                    }
+                }
+                active_serial_port->println(MY_F("ERR:SYNTAX_WS"));
                 return;
             }
     }

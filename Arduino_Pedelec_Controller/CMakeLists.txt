@@ -69,6 +69,8 @@ add_executable(${FIRMWARE_NAME}
     switches_action.h
     hal.cpp
     wireless_manager.cpp
+    security_auth.cpp
+    security_auth.h
     core/security_manager.cpp
     core/safety_manager.cpp
     core/motor_control.cpp

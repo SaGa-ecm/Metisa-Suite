@@ -48,12 +48,14 @@
 
 
 //Selection of available display views: comment out any view that you do not want. Can save much programming space!
+#define DV_BATTERY
+#define DV_ODOMETER
+#if HARDWARE_REV >= 20
 #define DV_GRAPHIC
 #define DV_TIME
-#define DV_BATTERY
 #define DV_ENVIRONMENT
 #define DV_HUMAN
-#define DV_ODOMETER
+#endif
 
 // If using a New Haven serial 16x2 display: The pin the display is connected to
 #if HARDWARE_REV < 20
