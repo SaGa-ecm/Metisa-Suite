@@ -244,10 +244,16 @@
             <div class="form-group">
               <label class="form-label" for="target_mcu">Target Microcontroller Architecture</label>
               <select id="target_mcu" class="form-control">
-                <option value="avr_nano">Arduino Nano (ATmega328P @ 16 MHz AVR)</option>
-                <option value="stm32_blackpill">STM32 BlackPill (ARM Cortex-M4 @ 84 MHz)</option>
+                <option value="stm32f407">STM32F407 High-Performance (ARM Cortex-M4 @ 168 MHz, 1MB/512KB Flash)</option>
+                <option value="stm32f405">STM32F405 FOC Inverter Stage (ARM Cortex-M4 @ 168 MHz, 1MB Flash)</option>
+                <option value="stm32_blackpill">STM32 BlackPill F401 (ARM Cortex-M4 @ 84 MHz, 256KB Flash)</option>
+                <option value="stm32f411">STM32 BlackPill F411 (ARM Cortex-M4 @ 100 MHz, 512KB Flash)</option>
+                <option value="stm32f103">STM32 BluePill F103 (ARM Cortex-M3 @ 72 MHz, 64/128KB Flash)</option>
+                <option value="stm32g431">STM32G431 Motor Stage (ARM Cortex-M4 @ 170 MHz, Cordic/FMAC FOC)</option>
                 <option value="esp32" selected>ESP32 DevKit (Xtensa Dual-Core @ 240 MHz + BLE/Wi-Fi)</option>
-                <option value="pico">Raspberry Pi Pico (RP2040 Dual ARM Cortex-M0+)</option>
+                <option value="avr_nano">Arduino Nano (ATmega328P @ 16 MHz AVR)</option>
+                <option value="avr_mega">Arduino Mega 2560 (ATmega2560 @ 16 MHz AVR)</option>
+                <option value="pico">Raspberry Pi Pico (RP2040 Dual ARM Cortex-M0+ @ 133 MHz)</option>
               </select>
               <span class="form-hint">Firmware compilation target and register abstraction layer.</span>
             </div>
@@ -1028,7 +1034,7 @@
         </div>
 
         <!-- Target Hardware Architecture Cards -->
-        <div class="flasher-target-grid">
+        <div class="flasher-target-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
           <div class="flasher-target-card selected" id="flashCardNano" onclick="selectFlasherTarget('nano')">
             <div class="flasher-radio-header">
               <input type="radio" name="flasherArchRadio" id="flasherArchNano" checked>
@@ -1043,11 +1049,22 @@
           <div class="flasher-target-card" id="flashCardStm32" onclick="selectFlasherTarget('stm32')">
             <div class="flasher-radio-header">
               <input type="radio" name="flasherArchRadio" id="flasherArchStm32">
-              <label for="flasherArchStm32" style="cursor: pointer;">STM32 BlackPill</label>
+              <label for="flasherArchStm32" style="cursor: pointer;">STM32 Familie</label>
             </div>
-            <div class="flasher-mcu-sub">STM32F401CC @ 84 MHz [ARM]</div>
-            <div style="font-size: 0.7rem; color: var(--orbit-orange); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
-              BINARY DOWNLOAD (.BIN)
+            <div class="flasher-mcu-sub">F407 / F405 / F401 / F411 / F103 / G431</div>
+            <div style="font-size: 0.7rem; color: var(--orbit-status-green); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
+              WEBUSB DFU & SERIAL BOOTLOADER
+            </div>
+          </div>
+
+          <div class="flasher-target-card" id="flashCardMega" onclick="selectFlasherTarget('mega')">
+            <div class="flasher-radio-header">
+              <input type="radio" name="flasherArchRadio" id="flasherArchMega">
+              <label for="flasherArchMega" style="cursor: pointer;">Arduino Mega</label>
+            </div>
+            <div class="flasher-mcu-sub">ATmega2560 @ 16 MHz [AVR]</div>
+            <div style="font-size: 0.7rem; color: var(--orbit-status-green); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
+              WEB SERIAL STK500v2 DIRECT FLASH
             </div>
           </div>
 
@@ -1089,11 +1106,23 @@
           </div>
 
           <div style="display: flex; gap: 1rem; margin-top: 0.65rem; align-items: center; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 0.4rem; font-family: var(--orbit-font-mono); font-size: 0.72rem;">
+            <div id="baudRateContainer" style="display: flex; align-items: center; gap: 0.4rem; font-family: var(--orbit-font-mono); font-size: 0.72rem;">
               <span>BOOTLOADER BAUDRATE:</span>
               <select id="flasherBaudRate" class="form-control" style="width: auto; padding: 0.2rem 0.5rem; font-size: 0.72rem;">
-                <option value="115200" selected>115200 Baud (Optiboot / Neuer Bootloader)</option>
+                <option value="115200" selected>115200 Baud (Optiboot / Neuer Bootloader / STM32)</option>
                 <option value="57600">57600 Baud (Alter Nano-Bootloader)</option>
+              </select>
+            </div>
+            <div id="stm32ModelSelectContainer" style="display: none; align-items: center; gap: 0.4rem; font-family: var(--orbit-font-mono); font-size: 0.72rem;">
+              <span>STM32 CHIP:</span>
+              <select id="flasherStm32Model" class="form-control" style="width: auto; padding: 0.2rem 0.5rem; font-size: 0.72rem;" onchange="updateStm32ModelSelection()">
+                <option value="auto" selected>Auto-Detect (DFU / Bootloader)</option>
+                <option value="stm32f407">STM32F407 High-Performance (168 MHz, 1MB/512KB)</option>
+                <option value="stm32f405">STM32F405 FOC Inverter (168 MHz, 1MB)</option>
+                <option value="stm32f401">STM32F401 BlackPill (84 MHz, 256KB)</option>
+                <option value="stm32f411">STM32F411 BlackPill (100 MHz, 512KB)</option>
+                <option value="stm32f103">STM32F103 BluePill (72 MHz, 64/128KB)</option>
+                <option value="stm32g431">STM32G431 Motor Stage (170 MHz)</option>
               </select>
             </div>
             <div id="flasherTargetNote" style="font-family: var(--orbit-font-mono); font-size: 0.72rem; color: var(--orbit-text-muted);">
@@ -1110,7 +1139,7 @@
 
         <!-- Terminal Log Console -->
         <pre id="flashTerminalLog" class="terminal-log-view">[METISA BOOTLOADER SUBSYSTEM BEREIT]
-Wählen Sie 'FIRMWARE FLASHEN (WEB SERIAL)' um den Flash-Vorgang zu starten.</pre>
+Wählen Sie 'FIRMWARE FLASHEN' um den Flash-Vorgang zu starten.</pre>
 
       </div>
       <div class="modal-footer">
@@ -1123,9 +1152,13 @@ Wählen Sie 'FIRMWARE FLASHEN (WEB SERIAL)' um den Flash-Vorgang zu starten.</pr
           <svg class="svg-icon"><use href="#icon-code"/></svg>
           <span>CONFIG.H</span>
         </button>
-        <button id="btnStartFlashSerial" class="btn btn-saga-primary" onclick="startFirmwareFlash()" title="Startet den STK500v1 Flash-Vorgang über Web Serial">
+        <button id="btnStartDfuFlash" class="btn btn-primary" onclick="startDfuFirmwareFlash()" style="display: none;" title="Startet das direkte Flashen über WebUSB DFU 1.1">
           <svg class="svg-icon"><use href="#icon-flash"/></svg>
-          <span>FIRMWARE FLASHEN (WEB SERIAL)</span>
+          <span>WEBUSB DFU FLASHEN</span>
+        </button>
+        <button id="btnStartFlashSerial" class="btn btn-saga-primary" onclick="startFirmwareFlash()" title="Startet den Firmware-Flash über Web Serial">
+          <svg class="svg-icon"><use href="#icon-flash"/></svg>
+          <span id="btnStartFlashSerialText">FIRMWARE FLASHEN (WEB SERIAL)</span>
         </button>
       </div>
     </div>
@@ -1138,6 +1171,7 @@ Wählen Sie 'FIRMWARE FLASHEN (WEB SERIAL)' um den Flash-Vorgang zu starten.</pr
   </footer>
 
   <script src="firmware/embedded_nano_hex.js"></script>
+  <script src="firmware/embedded_stm32_bin.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -231,7 +231,29 @@ static void handle_command()
                 active_serial_port->println(horn_active ? 1 : 0);
                 break;
             case 17:             //Hardware- & Firmware-ID query
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
+                active_serial_port->print(MY_F("METISA:REV22:ESP32:1.43:SN="));
+#elif defined(STM32F407xx) || defined(TARGET_STM32F407)
+                active_serial_port->print(MY_F("METISA:REV22:STM32F407:1.43:SN="));
+#elif defined(STM32F405xx) || defined(TARGET_STM32F405)
+                active_serial_port->print(MY_F("METISA:REV22:STM32F405:1.43:SN="));
+#elif defined(STM32F401xC)
+                active_serial_port->print(MY_F("METISA:REV22:STM32F401:1.43:SN="));
+#elif defined(STM32F411xE)
+                active_serial_port->print(MY_F("METISA:REV22:STM32F411:1.43:SN="));
+#elif defined(STM32F103xB)
+                active_serial_port->print(MY_F("METISA:REV22:STM32F103:1.43:SN="));
+#elif defined(STM32G431xx)
+                active_serial_port->print(MY_F("METISA:REV22:STM32G431:1.43:SN="));
+#elif defined(ARDUINO_ARCH_STM32)
+                active_serial_port->print(MY_F("METISA:REV22:STM32:1.43:SN="));
+#elif defined(__AVR_ATmega2560__)
+                active_serial_port->print(MY_F("METISA:REV22:MEGA2560:1.43:SN="));
+#elif defined(ARDUINO_ARCH_RP2040)
+                active_serial_port->print(MY_F("METISA:REV22:RP2040:1.43:SN="));
+#else
                 active_serial_port->print(MY_F("METISA:REV22:NANO:1.43:SN="));
+#endif
                 active_serial_port->println(metisa_serial_number);
                 break;
             case 18:             //Hardware-Seriennummer query
