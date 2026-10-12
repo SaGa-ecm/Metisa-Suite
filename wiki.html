@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAGA LABS METISA // OPERATION & INTEGRATION MANUAL</title>
+  <meta name="description" content="DIN/ISO-konformes technisches Betriebshandbuch, Pinbelegung, Busspezifikationen und Felddiagnose für metisa E-Bike Controller.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .wiki-shell {
+      max-width: 1100px;
+      margin: 1.5rem auto 3.5rem auto;
+      padding: 0 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .manual-hero {
+      background: var(--orbit-bg-card);
+      border: 1px solid var(--orbit-border-subtle);
+      border-left: 3px solid var(--orbit-orange);
+      border-radius: var(--orbit-radius-sm);
+      padding: 1.5rem 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+
+    .manual-hero-title {
+      font-family: var(--orbit-font-brand);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--orbit-text-primary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .manual-hero-sub {
+      font-size: 0.8rem;
+      color: var(--orbit-text-muted);
+      line-height: 1.6;
+      max-width: 720px;
+    }
+
+    .manual-meta-block {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .manual-meta-pill {
+      font-family: var(--orbit-font-mono);
+      font-size: 0.68rem;
+      color: var(--orbit-text-secondary);
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-medium);
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--orbit-radius-xs);
+      text-transform: uppercase;
+    }
+
+    .quick-jump-bar {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      margin-top: 0.85rem;
+    }
+
+    .quick-jump-link {
+      font-family: var(--orbit-font-mono);
+      font-size: 0.7rem;
+      color: var(--orbit-text-secondary);
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-subtle);
+      padding: 0.3rem 0.65rem;
+      border-radius: var(--orbit-radius-xs);
+      text-decoration: none;
+      transition: var(--orbit-transition);
+    }
+    .quick-jump-link:hover {
+      color: var(--orbit-orange);
+      border-color: var(--orbit-orange);
+      background: var(--orbit-bg-input-focus);
+    }
+
+    .wiki-search-field {
+      width: 100%;
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-medium);
+      border-radius: var(--orbit-radius-xs);
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      color: var(--orbit-text-primary);
+      font-family: var(--orbit-font-mono);
+      transition: var(--orbit-transition);
+    }
+    .wiki-search-field:focus {
+      outline: none;
+      border-color: var(--orbit-orange);
+      box-shadow: 0 0 8px var(--orbit-orange-glow);
+    }
+
+    .section-headline {
+      font-family: var(--orbit-font-brand);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--orbit-text-primary);
+      margin-bottom: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .harness-card {
+      background: var(--orbit-bg-card);
+      border: 1px solid var(--orbit-border-subtle);
+      border-left: 2px solid var(--orbit-orange);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .harness-card-title {
+      font-family: var(--orbit-font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--orbit-text-primary);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .harness-card-title span.tag {
+      color: var(--orbit-orange);
+      font-size: 0.68rem;
+    }
+
+    .harness-card p {
+      font-size: 0.76rem;
+      color: var(--orbit-text-secondary);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .faq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .faq-item {
+      background: var(--orbit-bg-card);
+      border: 1px solid var(--orbit-border-subtle);
+      border-radius: var(--orbit-radius-xs);
+      overflow: hidden;
+      transition: var(--orbit-transition);
+    }
+    .faq-item:hover {
+      border-color: var(--orbit-border-medium);
+    }
+
+    .faq-header {
+      padding: 0.75rem 1.15rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--orbit-font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--orbit-text-primary);
+      user-select: none;
+    }
+
+    .faq-header .toggle-symbol {
+      color: var(--orbit-orange);
+      font-family: var(--orbit-font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      transition: transform 0.15s ease;
+    }
+
+    .faq-body {
+      padding: 0 1.15rem 0.85rem 1.15rem;
+      font-size: 0.75rem;
+      line-height: 1.65;
+      color: var(--orbit-text-secondary);
+      display: none;
+      border-top: 1px solid var(--orbit-border-subtle);
+      padding-top: 0.75rem;
+    }
+
+    .faq-item.open .faq-body {
+      display: block;
+    }
+
+    .faq-item.open .toggle-symbol {
+      transform: rotate(45deg);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG Sprite Collection -->
+  <svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </symbol>
+    <symbol id="icon-manual" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </symbol>
+    <symbol id="icon-telemetry" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </symbol>
+  </svg>
+
+  <!-- Client Header Toolbar -->
+  <header class="app-header">
+    <div class="brand-group" onclick="window.location.href='index.html'" style="cursor: pointer;" title="Zurück zum Metisa Konfigurator">
+      <img src="assets/logo_full.png" alt="SAGA LABS // METISA" class="app-brand-logo">
+      <div class="brand-divider"></div>
+      <span class="suite-badge">MANUAL</span>
+    </div>
+
+    <div class="header-actions">
+      <a href="unlock_portal.html" class="btn btn-secondary">
+        <svg class="icon-svg"><use href="#icon-shield"/></svg> AUTH PORTAL
+      </a>
+      <a href="index.html" class="btn btn-primary">
+        <svg class="icon-svg"><use href="#icon-gear"/></svg> CONFIGURATOR CLIENT
+      </a>
+    </div>
+  </header>
+
+  <!-- Wiki Shell Container -->
+  <div class="wiki-shell">
+
+    <!-- Manual Hero Banner -->
+    <div class="manual-hero">
+      <div>
+        <div class="manual-hero-title">SYSTEM OPERATION & INTEGRATION MANUAL</div>
+        <div class="manual-hero-sub">
+          DIN/ISO-konforme technische Dokumentation für Leitungsstrang-Konfektionierung, Signalpegel, kryptografische PIN-Sicherheitsstufen und systematische Felddiagnose.
+        </div>
+        <div class="quick-jump-bar">
+          <a href="#pinout" class="quick-jump-link">HARNESS PINOUT</a>
+          <a href="#profiles" class="quick-jump-link">CALIBRATION HIERARCHY</a>
+          <a href="#telemetry" class="quick-jump-link">TELEMETRY & WIRELESS</a>
+          <a href="#faq" class="quick-jump-link">FIELD DIAGNOSTICS (25 CASES)</a>
+        </div>
+      </div>
+      <div class="manual-meta-block">
+        <span class="manual-meta-pill">REVISION 1.43-METISA</span>
+        <span class="manual-meta-pill">IP67 SPECIFICATION</span>
+        <span class="manual-meta-pill">ECE-R 50 COMPLIANT</span>
+      </div>
+    </div>
+
+    <!-- Diagnostic Search Input -->
+    <div>
+      <input type="text" id="faqSearchInput" class="wiki-search-field" placeholder="FILTER DIAGNOSTICS (E.G. 'BUS TIMING', 'PAS JITTER', 'ADC OFFSET', 'THROTTLE', 'BLDC PHASE')...">
+    </div>
+
+    <!-- Section 1: Electrical Pinout -->
+    <section id="pinout">
+      <div class="section-headline">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-telemetry"/></svg>
+        1. ELECTRICAL INTERFACES & HARNESS PINOUT
+      </div>
+      <div class="cards-grid">
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>DC BUS PRIMARY FEED</span>
+            <span class="tag">[VBAT / GND]</span>
+          </div>
+          <p>
+            <strong>Rot = DC Bus (+)</strong> | <strong>Schwarz = Power GND (-)</strong><br>
+            Nennspannung 24 V bis 48 V (Absolute Max. 60 V). Vor Leitungsänderungen stets Hauptschütz trennen. Verpolung führt zur Zerstörung der TVS-Schutzdioden.
+          </p>
+        </div>
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>PAS CADENCE SENSOR</span>
+            <span class="tag">[DIGITAL INT]</span>
+          </div>
+          <p>
+            Montage an Tretlagerachse. Luftspalt 1,0 bis 2,0 mm zum Hall-Array. Signalflanke triggert Pin-Change-Interrupt (ISR). Integrierte LED signalisiert Flankenerkennung.
+          </p>
+        </div>
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>ANALOG THROTTLE (HALL)</span>
+            <span class="tag">[0-5V ADC]</span>
+          </div>
+          <p>
+            3-polige Schnittstelle: <strong>5V AUX</strong>, <strong>GND</strong>, <strong>SIGNAL (0,8V - 4,2V)</strong>.<br>
+            Totband (Deadband) parametrierbar über <code>nud_throttle_min</code> und <code>nud_throttle_max</code> zur Leitungsbruch-Plausibilisierung.
+          </p>
+        </div>
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>SOLID-STATE BRAKE SWITCH</span>
+            <span class="tag">[SAFETY INTERLOCK]</span>
+          </div>
+          <p>
+            Öffner/Schließer-Logik softwareseitig invertierbar. Triggert sofortigen PWM-Zero-Output (&lt; 2 ms Latenz) und schaltet ECE-R 50 Bremslichtstufe aktiv.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Calibration Profiles -->
+    <section id="profiles">
+      <div class="section-headline">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-shield"/></svg>
+        2. CALIBRATION PROFILES & AUTHORIZATION HIERARCHY
+      </div>
+      <div class="cards-grid">
+        <div class="harness-card" style="border-left-color: var(--orbit-status-green);">
+          <div class="harness-card-title">
+            <span>LEVEL 0: STANDARD REGULATORY DERATING</span>
+            <span class="tag" style="color: var(--orbit-status-green);">[ACTIVE ON BOOT]</span>
+          </div>
+          <p>
+            Striktes Derating nach EN 15194: 25 km/h Cutoff, 250 W Nenndauerleistung, Pflicht der Kurbelbetätigung (PAS Interlock), Schiebehilfe bis maximal 6 km/h. Wird bei jedem MCU-Reset autark geladen.
+          </p>
+        </div>
+        <div class="harness-card" style="border-left-color: var(--orbit-status-amber);">
+          <div class="harness-card-title">
+            <span>LEVEL 1: SPORT CALIBRATION</span>
+            <span class="tag" style="color: var(--orbit-status-amber);">[INTERMEDIATE]</span>
+          </div>
+          <p>
+            Erweiterte Fahrdynamik: 32 km/h Cutoff, 500 W Peak-Leistungsfreigabe. Parametrierbar für geschlossene Sportstrecken.
+          </p>
+        </div>
+        <div class="harness-card" style="border-left-color: var(--orbit-status-red);">
+          <div class="harness-card-title">
+            <span>LEVEL 2: TRACK & DYNO CALIBRATION</span>
+            <span class="tag" style="color: var(--orbit-status-red);">[PIN PROTECTED]</span>
+          </div>
+          <p>
+            Vollständige Freigabe: Bis 99 km/h, 3000 W Spitzenleistung, Direkt-Daumengas ohne PAS-Bindung. Autorisierung ausschließlich nach Signatur im SaGa Labs Freischalt-Portal.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Telemetry & Wireless -->
+    <section id="telemetry">
+      <div class="section-headline">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-telemetry"/></svg>
+        3. TELEMETRY & WIRELESS TRANSPORTS (TCP/IP & BT SERIAL)
+      </div>
+      <div class="cards-grid">
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>ONBOARD IEEE 802.11 SOFTAP (HTML5 COCKPIT)</span>
+            <span class="tag">[PORT 80]</span>
+          </div>
+          <p>
+            SSID: <code>APC-Pedelec-WiFi</code> | WPA2 Key: <code>21028600</code><br>
+            Autarker Webserver liefert Low-Latency WebSocket/HTTP Telemetrie-Dashboard direkt an WebKit/Blink Clients unter <code>http://192.168.4.1</code>.
+          </p>
+        </div>
+        <div class="harness-card">
+          <div class="harness-card-title">
+            <span>BLUETOOTH RFCOMM / SPP PROTOCOL</span>
+            <span class="tag">[115200 BAUD]</span>
+          </div>
+          <p>
+            Device ID: <code>APC-Pedelec</code> | PIN: <code>1234</code><br>
+            Serielles Kommunikationsprotokoll für Android HMI und externe Telemetrie-Logger (z. B. LogView, MMC).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: System Diagnostics FAQ -->
+    <section id="faq">
+      <div class="section-headline">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-manual"/></svg>
+        4. SYSTEM DIAGNOSTICS & FIELD FAQ (25 DIAGNOSTIC CASES)
+      </div>
+
+      <div class="faq-container" id="faqList">
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 01: Null-Leistungsabgabe trotz aktivem Systemstatus.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Diagnoseschritte: 1. DC-Busspannung am Eingang prüfen (min. 28,0 V). 2. Bremshebel-Schaltzustand prüfen (geschlossener Kontakt forciert 0 W Notabschaltung). 3. PAS-Signalflanken im Live-Monitor verifizieren; im Standardprofil wird Leistung erst bei registrierter Kurbeldrehzahl freigegeben.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 02: Drehmoment-Ruckeln oder Kommutierungsfehler beim Anlauf.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            BLDC-Phasensequenz inkonsistent. Bei sensorlosen oder Block-Kommutierungs-Invertern zwei der drei Motorphasenleitungen (U, V, W) tauschen, um korrekte Phasenlage und Drehrichtung herzustellen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 03: Raddrehzahl-Signal verharrt statisch auf 0,0 km/h.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Reed- bzw. Hall-Sensor dejustiert. Der Speichenmagnet muss einen radialen Abstand von maximal 2,0 bis 3,0 mm zur Sensorstirnfläche aufweisen. Flankenerkennung im Live-Monitor gegenprüfen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 04: Motorischer Nachlauf nach Kurbelstillstand.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Der Parameter <code>pas_timeout</code> definiert die Latenz bis zur Abschaltung (Standard: 500 ms). Bei PAS-Scheiben mit 12 Magneten kann der Wert im Konfigurator auf <code>200 - 250 ms</code> herabgesetzt werden.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 05: Gasgriff ohne Sollwertausgabe bei Null-Trittfrequenz.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Im Standard-Profil (Level 0) ist die reine Gasgriff-Funktion gesetzlich auf 6 km/h Anfahrhilfe limitiert. Für ungedrosselten Betrieb auf abgesperrten Strecken muss Level 2 über das Autorisierungsportal freigeschaltet werden.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 06: DC-Bus-Spannungseinbruch unter Beschleunigungslast.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Physikalischer Spannungseinbruch (Voltage Sag) durch Innenwiderstand der Akkuzellen und Zuleitungsimpedanz. Bei hohem Innenwiderstand Zuleitungsquerschnitte (min. 2,5 - 4,0 mm²) und Zellgesundheit prüfen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 07: Display-Interface initialisiert nicht / Display bleibt dunkel.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Versorgungsspannung am Display-Port prüfen. Bei ST7789 Color TFT SPI-Signale (DC, CS, BL) und Hintergrundbeleuchtungs-Treiberstufe prüfen. Bei PCD8544 Monochrom-Displays Kontrast-Register im Konfigurator anpassen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 08: WLAN-SoftAP-Beacon "APC-Pedelec-WiFi" nicht auffindbar.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Controller-Chip prüfen. Ältere AVR-Targets verfügen über keinen Onboard-Transceiver. Bei ESP32-Targets sicherstellen, dass <code>wireless_wifi_softap</code> in der Konfiguration gesetzt und 2,4 GHz aktiviert ist.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 09: Browser-Cockpit auf iOS- oder Desktop-Clients ohne App-Installation.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Keine native Applikation erforderlich. Nach Verbindung mit <code>APC-Pedelec-WiFi</code> (WPA2 Key <code>21028600</code>) im Browser <code>http://192.168.4.1</code> aufrufen; der autarke Webserver hostet das Cockpit plattformunabhängig.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 10: Radumfangskalibrierung in Millimetern.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Der Parameter <code>nud_circumference</code> erfordert das exakte Abrollmaß in mm unter Fahrergewicht (z. B. 2200 mm bei 28 Zoll / 700x38C). Fehlerhafte Werte verfälschen Geschwindigkeits- und Odometrie-Berechnungen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 11: Stromerfassung und Shunt-Kalibrierfaktor.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Die Stromerfassung erfolgt über einen Low-Side-Messshunt. Der Parameter <code>nud_current_amplitude</code> [A/ADC] skaliert die ADC-Werte präzise in Ampere für Watt- und Kapazitätsintegratoren.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 12: Fahrtrichtungsanzeiger nach ECE-R 50 Spezifikation.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Die integrierte Blinkgeber-Logik taktet mit exakt 1,5 Hz (90 Zyklen/min) bei 50% Tastverhältnis. Die automatische Abschaltung (Auto-Cancel) deaktiviert das Signal nach 20 Sekunden Fahrtzeit.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 13: Emergency Stop Signal (ESS) Notbrems-Stroboskop.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Bei Bremsbetätigung oberhalb von 15 km/h und starker Verzögerung taktet die Bremslicht-Endstufe mit 3,5 Hz Hochfrequenz-Stroboskop, um Folgeverkehr vor drohender Kollision zu warnen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 14: Thermische Sicherheitsabschaltung der Signalhupe.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Zum Schutz der Spulenwicklung vor Überhitzung begrenzt metisa die kontinuierliche Bestromung der Hupe auf maximal 3,0 Sekunden. Nach Tasterentlastung erfolgt sofortige Reaktivierung.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 15: Tiefentladeschutz und Notabschalt-Schwellen.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Zwei Sicherheitsstufen: 1. <code>vcutoff</code> (z. B. 33,0 V bei 10S) bewirkt kontinuierliches Leistungsderating. 2. <code>vemergency_shutdown</code> (28,0 V) forciert komplette Endstufen-Abschaltung.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 16: Leiterquerschnitte und Steckverbinder für Hochstrom-Anwendungen.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Für Dauerströme bis 25 A mindestens 2,5 mm², oberhalb 25 A min. 4,0 mm² hochflexible Silikonleitung (AWG 12/AWG 10) und korrosionsfeste Goldkontakte (XT60 / XT90-S mit Anti-Spark) verwenden.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 17: Umgebungsbedingungen und IP-Schutzklasse.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Gehäuse und Kabeldurchführungen sind nach Schutzart IP67 ausgeführt. Bei individueller Integration Kabelverschraubungen nach unten ausrichten und Kondenswasserbildung durch Druckausgleichselemente verhindern.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 18: Verlust des Track-Kalibrierungs-PIN-Codes.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Der Autorisierungs-PIN-Code wird kryptografisch aus der Hardware-Seriennummer und einem geschützten Salt abgeleitet. Er kann jederzeit im offiziellen Autorisierungsportal unter Angabe der Seriennummer erneut abgerufen werden.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 19: Automatisches Sleep-Timeout nach Inaktivität.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Der Parameter <code>idle_shutdown_secs</code> versetzt den Controller nach programmierter Inaktivität (Standard: 1800 s = 30 min) in den Ruhezustand, um Ruhestromverluste am Akku zu eliminieren.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 20: Adaption abweichender DC-Bus-Spannungsniveaus (z. B. 48V / 13S).</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Hardwarekompatibilität vorausgesetzt, müssen im Konfigurator Ladeschlussspannung (54,6 V), Derating-Start (42,0 V) und Notabschalt-Schwelle (39,0 V) exakt an die Zellchemie angepasst werden.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 21: Notwendigkeit elektrischer Bremskontaktschalter.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Elektrische Unterbrecherkontakte sind sicherheitskritisch. Sie garantieren die unverzügliche Endstufen-Abschaltung unabhängig von I-Anteilen des PID-Reglers und verhindern Gegenmoment-Überlastungen.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 22: Hall-Gasgriff Kalibrierung und Totband-Justage.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Über den Live-Monitor den Ruhewert (z. B. ADC 185) und den Vollausschlag (z. B. ADC 860) erfassen. Diese Werte als <code>nud_throttle_min</code> und <code>nud_throttle_max</code> eintragen; Signale außerhalb dieses Bereichs werden als Sensorfehler gewertet.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 23: Wiederherstellung der Werkseinstellungen (EEPROM Reset).</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Profil <code>Default-metisa</code> im Konfigurator laden. Über die serielle Diagnoseschnittstelle kann das EEPROM mittels des Kommandos <code>clean_eeprom</code> vollständig auf Werkszustand bereinigt werden.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 24: Fehlende Bestromung des Scheinwerfer-Ausgangs.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Solid-State-Lichtschalterstufe prüfen. Im Konfigurator prüfen, ob <code>metisa_headlight</code> aktiviert ist. Zustand im HMI-Displaymenü oder über dedizierten Lenkertaster toggeln.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>CASE 25: Technischer Eskalationssupport und Firmware-Archiv.</span>
+            <span class="toggle-symbol">+</span>
+          </div>
+          <div class="faq-body">
+            Dokumentation, Schaltpläne und Firmware-Quellcodes stehen im offiziellen SaGa Labs Metisa Orbit Repository bereit. Für technische Audits und Laborprüfungen stehen die automatisierten Testbench-Harnesses zur Verfügung.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Client Legal & Copyright Footer -->
+    <footer style="margin: 2.5rem 0 1rem 0; text-align: center; font-size: 0.68rem; color: var(--orbit-text-dim); font-family: var(--orbit-font-mono); border-top: 1px solid var(--orbit-border-subtle); padding-top: 1rem;">
+      <div>Copyright &copy; 2026 Benjamin Everts, Bielefeld / SaGa Labs. Alle Rechte vorbehalten.</div>
+      <div style="margin-top: 0.25rem;">Trademarks: SaGa Labs&reg;, metisa&trade;, Metisa Suite&trade;. All contents are proprietary intellectual property.</div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Accordion Toggle
+    document.querySelectorAll('.faq-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const item = header.parentElement;
+        item.classList.toggle('open');
+      });
+    });
+
+    // Real-Time Search Filter
+    const searchInput = document.getElementById('faqSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('.faq-item').forEach(item => {
+          const text = item.textContent.toLowerCase();
+          if (text.includes(query)) {
+            item.style.display = 'block';
+            if (query.length > 2) item.classList.add('open');
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>

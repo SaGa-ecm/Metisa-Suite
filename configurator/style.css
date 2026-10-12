@@ -66,9 +66,14 @@ body {
   font-family: var(--orbit-font-body);
   background-color: var(--orbit-bg-base);
   background-image: 
+    linear-gradient(rgba(8, 9, 13, 0.94), rgba(8, 9, 13, 0.97)),
+    url('assets/hero_bg_with_owl.jpg'),
     linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 32px 32px;
+  background-position: center top, right 40px top 40px, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, repeat, repeat;
+  background-size: cover, auto 85%, 32px 32px, 32px 32px;
+  background-attachment: fixed, fixed, scroll, scroll;
   color: var(--orbit-text-secondary);
   line-height: 1.45;
   min-height: 100vh;
@@ -134,6 +139,14 @@ body {
   width: 26px;
   height: 26px;
   filter: drop-shadow(0 0 6px rgba(255, 98, 0, 0.4));
+}
+
+.app-brand-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(255, 98, 0, 0.35));
 }
 
 .brand-text-block {
@@ -306,8 +319,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.85rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 1rem;
 }
 
 .tech-status-col {
@@ -779,12 +793,15 @@ body {
 .modal-body {
   padding: 1rem 1.25rem;
   overflow-y: auto;
+  line-height: 1.5;
+}
+
+pre.modal-body {
   font-family: var(--orbit-font-mono);
   font-size: 0.76rem;
   white-space: pre-wrap;
   background: #06080d;
   color: #ffaa55;
-  line-height: 1.5;
 }
 
 .modal-footer {

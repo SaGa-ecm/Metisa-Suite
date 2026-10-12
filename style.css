@@ -1,0 +1,1000 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ==========================================================================
+   SaGa Labs METISA Orbit // Professional Embedded Calibration Suite
+   Design Language Standard: High-Density Motorsport & Automotive Architecture
+   ========================================================================== */
+
+:root {
+  /* Aerospace & Motorsport Dark Titanium Palette */
+  --orbit-bg-base: #08090d;
+  --orbit-bg-subsurface: #0d1017;
+  --orbit-bg-panel: #121620;
+  --orbit-bg-card: #151a26;
+  --orbit-bg-card-hover: #1b2232;
+  --orbit-bg-input: #090c12;
+  --orbit-bg-input-focus: #0f1420;
+
+  /* Precision Engineering Hairline Borders */
+  --orbit-border-subtle: #1e2638;
+  --orbit-border-medium: #273248;
+  --orbit-border-focus: #ff6200;
+  --orbit-border-highlight: rgba(255, 98, 0, 0.45);
+
+  /* High-Precision Accent: SaGa Cyber-Orange & Telemetry Accents */
+  --orbit-orange: #ff6200;
+  --orbit-orange-bright: #ff771a;
+  --orbit-orange-glow: rgba(255, 98, 0, 0.25);
+  --orbit-orange-subtle: rgba(255, 98, 0, 0.08);
+
+  /* Telemetry Status Signals */
+  --orbit-status-green: #10b981;
+  --orbit-status-green-glow: rgba(16, 185, 129, 0.3);
+  --orbit-status-amber: #f59e0b;
+  --orbit-status-amber-glow: rgba(245, 158, 11, 0.3);
+  --orbit-status-red: #ef4444;
+  --orbit-status-red-glow: rgba(239, 68, 68, 0.3);
+  --orbit-status-cyan: #0ea5e9;
+
+  /* Typography Colors */
+  --orbit-text-primary: #f8fafc;
+  --orbit-text-secondary: #cbd5e1;
+  --orbit-text-muted: #64748b;
+  --orbit-text-dim: #475569;
+
+  /* Radii - Precise, Angular, Technical */
+  --orbit-radius-xs: 3px;
+  --orbit-radius-sm: 4px;
+  --orbit-radius-md: 6px;
+  --orbit-radius-lg: 8px;
+
+  /* Fonts */
+  --orbit-font-brand: 'Chakra Petch', system-ui, sans-serif;
+  --orbit-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --orbit-font-mono: 'JetBrains Mono', Consolas, monospace;
+
+  --orbit-transition: all 0.16s ease-in-out;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--orbit-font-body);
+  background-color: var(--orbit-bg-base);
+  background-image: 
+    linear-gradient(rgba(8, 9, 13, 0.94), rgba(8, 9, 13, 0.97)),
+    url('assets/hero_bg_with_owl.jpg'),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-position: center top, right 40px top 40px, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, repeat, repeat;
+  background-size: cover, auto 85%, 32px 32px, 32px 32px;
+  background-attachment: fixed, fixed, scroll, scroll;
+  color: var(--orbit-text-secondary);
+  line-height: 1.45;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  font-size: 13.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Precision Vector Icons (Clean 1.5px Hairline Strokes)
+   ========================================================================== */
+.svg-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  stroke-width: 1.6;
+  stroke: currentColor;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.svg-icon-md {
+  width: 16px;
+  height: 16px;
+}
+
+.svg-icon-lg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ==========================================================================
+   Header & Top Navigation Toolbar (Automotive ECU Client Standard)
+   ========================================================================== */
+.app-header {
+  background: var(--orbit-bg-subsurface);
+  border-bottom: 1px solid var(--orbit-border-subtle);
+  padding: 0.5rem 1.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.logo-icon-svg {
+  width: 26px;
+  height: 26px;
+  filter: drop-shadow(0 0 6px rgba(255, 98, 0, 0.4));
+}
+
+.app-brand-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(255, 98, 0, 0.35));
+}
+
+.brand-text-block {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.saga-title {
+  font-family: var(--orbit-font-brand);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  color: var(--orbit-text-primary);
+  line-height: 1;
+}
+
+.saga-labs-sub {
+  font-family: var(--orbit-font-brand);
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  color: var(--orbit-text-muted);
+  line-height: 1;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--orbit-border-medium);
+  margin: 0 0.15rem;
+}
+
+.metisa-title {
+  font-family: var(--orbit-font-brand);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.14em;
+  color: var(--orbit-orange);
+  line-height: 1;
+}
+
+.suite-badge {
+  font-family: var(--orbit-font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--orbit-text-dim);
+  text-transform: uppercase;
+  padding: 0.15rem 0.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  margin-left: 0.25rem;
+}
+
+/* Header Toolbar Buttons */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+/* Hardware Link Status Beacon */
+.connection-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--orbit-bg-panel);
+  border: 1px solid var(--orbit-border-subtle);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--orbit-radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: var(--orbit-font-mono);
+  letter-spacing: 0.04em;
+  color: var(--orbit-text-secondary);
+}
+
+.connection-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--orbit-status-red);
+  box-shadow: 0 0 6px var(--orbit-status-red);
+  transition: var(--orbit-transition);
+}
+
+.connection-dot.connected {
+  background: var(--orbit-status-green);
+  box-shadow: 0 0 8px var(--orbit-status-green);
+}
+
+/* Technical Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-family: var(--orbit-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--orbit-radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--orbit-transition);
+  user-select: none;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.btn-saga-primary {
+  background: var(--orbit-orange);
+  color: #fff;
+  border-color: #ff771a;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.btn-saga-primary:hover {
+  background: var(--orbit-orange-bright);
+  box-shadow: 0 0 12px var(--orbit-orange-glow);
+}
+
+.btn-saga-outline {
+  background: var(--orbit-orange-subtle);
+  color: var(--orbit-orange-bright);
+  border-color: rgba(255, 98, 0, 0.35);
+}
+
+.btn-saga-outline:hover {
+  background: rgba(255, 98, 0, 0.16);
+  border-color: var(--orbit-orange);
+}
+
+.btn-secondary {
+  background: var(--orbit-bg-panel);
+  color: var(--orbit-text-secondary);
+  border-color: var(--orbit-border-subtle);
+}
+
+.btn-secondary:hover {
+  background: #182030;
+  border-color: var(--orbit-border-medium);
+  color: var(--orbit-text-primary);
+}
+
+.btn-xs {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.btn-danger {
+  background: var(--orbit-status-red);
+  color: #fff;
+  border-color: #f87171;
+}
+
+/* ==========================================================================
+   Technical Status & Telemetry Ribbon
+   ========================================================================== */
+.tech-status-bar {
+  margin: 0.75rem 1.25rem 0.25rem 1.25rem;
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-sm);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 1rem;
+}
+
+.tech-status-col {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tech-status-label {
+  font-family: var(--orbit-font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--orbit-text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tech-status-val {
+  font-family: var(--orbit-font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--orbit-text-primary);
+}
+
+.tech-status-val.status-locked {
+  color: var(--orbit-status-amber);
+}
+
+.tech-status-val.status-unlocked {
+  color: var(--orbit-status-green);
+  text-shadow: 0 0 8px var(--orbit-status-green-glow);
+}
+
+.portal-badge-link {
+  font-family: var(--orbit-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--orbit-orange);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  background: var(--orbit-orange-subtle);
+  border: 1px solid rgba(255, 98, 0, 0.3);
+  border-radius: var(--orbit-radius-xs);
+  transition: var(--orbit-transition);
+}
+
+.portal-badge-link:hover {
+  background: rgba(255, 98, 0, 0.18);
+  border-color: var(--orbit-orange);
+}
+
+/* ==========================================================================
+   Main Grid Layout (Sidebar Navigation + Parameter Matrix)
+   ========================================================================== */
+.main-container {
+  display: flex;
+  flex: 1;
+  padding: 0.75rem 1.25rem 1.5rem 1.25rem;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+/* Sidebar Navigation (Ecumaster Client Module Tree) */
+.sidebar-nav {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-sm);
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.nav-category-header {
+  font-family: var(--orbit-font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--orbit-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.45rem 0.6rem 0.25rem 0.6rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--orbit-radius-xs);
+  cursor: pointer;
+  font-family: var(--orbit-font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--orbit-text-muted);
+  border: 1px solid transparent;
+  transition: var(--orbit-transition);
+  user-select: none;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--orbit-text-primary);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-item.active {
+  background: var(--orbit-bg-card);
+  color: var(--orbit-orange);
+  font-weight: 600;
+  border-color: var(--orbit-border-medium);
+  border-left: 2px solid var(--orbit-orange);
+}
+
+.nav-item .svg-icon {
+  color: var(--orbit-text-dim);
+}
+
+.nav-item.active .svg-icon {
+  color: var(--orbit-orange);
+}
+
+/* Content Area */
+.content-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Hotspots Quick Jump Strip */
+.hotspots-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.hotspot-pill {
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-subtle);
+  color: var(--orbit-text-muted);
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--orbit-radius-xs);
+  font-family: var(--orbit-font-mono);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: var(--orbit-transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hotspot-pill:hover {
+  border-color: var(--orbit-border-medium);
+  color: var(--orbit-text-primary);
+  background: var(--orbit-bg-panel);
+}
+
+/* Parameter Cards Matrix */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 0.85rem;
+}
+
+.config-card {
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-sm);
+  padding: 1.15rem;
+  transition: var(--orbit-transition);
+}
+
+.config-card:hover {
+  border-color: var(--orbit-border-medium);
+}
+
+.config-card.active-highlight {
+  border-color: var(--orbit-orange);
+  box-shadow: 0 0 16px var(--orbit-orange-glow);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--orbit-border-subtle);
+}
+
+.card-title h3 {
+  font-family: var(--orbit-font-brand);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--orbit-text-primary);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.badge {
+  font-family: var(--orbit-font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--orbit-radius-xs);
+  text-transform: uppercase;
+}
+
+.badge-metisa {
+  background: var(--orbit-orange-subtle);
+  color: var(--orbit-orange);
+  border: 1px solid rgba(255, 98, 0, 0.3);
+}
+
+.badge-legal {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--orbit-status-green);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.badge-race {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--orbit-status-red);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ==========================================================================
+   Form Controls (High-Precision Calibration Layout)
+   ========================================================================== */
+.form-group {
+  margin-bottom: 0.75rem;
+}
+
+.form-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--orbit-font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--orbit-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.form-label .unit {
+  color: var(--orbit-orange);
+  font-weight: 600;
+}
+
+.form-control {
+  width: 100%;
+  background: var(--orbit-bg-input);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.4rem 0.65rem;
+  font-size: 0.82rem;
+  color: var(--orbit-text-primary);
+  font-family: var(--orbit-font-mono);
+  transition: var(--orbit-transition);
+}
+
+.form-control:focus {
+  outline: none;
+  background: var(--orbit-bg-input-focus);
+  border-color: var(--orbit-orange);
+  box-shadow: 0 0 6px var(--orbit-orange-glow);
+}
+
+.form-hint {
+  font-size: 0.68rem;
+  color: var(--orbit-text-dim);
+  margin-top: 0.2rem;
+  display: block;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.form-check input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--orbit-orange);
+  background: var(--orbit-bg-input);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  cursor: pointer;
+}
+
+.form-check-label {
+  font-size: 0.76rem;
+  color: var(--orbit-text-secondary);
+  user-select: none;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Race & Dyno Mode Lock/Unlock Architecture
+   ========================================================================== */
+.race-locked-box {
+  background: rgba(9, 12, 18, 0.85);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-sm);
+  padding: 1.25rem;
+}
+
+.lock-icon-hero {
+  color: var(--orbit-orange);
+  margin-bottom: 0.35rem;
+}
+
+.pin-entry-row {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  max-width: 520px;
+}
+
+.race-unlocked-box {
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--orbit-radius-sm);
+  padding: 1.25rem;
+}
+
+.unlocked-header-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--orbit-border-subtle);
+}
+
+/* ==========================================================================
+   Oscilloscope / Dyno Canvas Curve Display
+   ========================================================================== */
+.dyno-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background: #06080d;
+  border-radius: var(--orbit-radius-xs);
+  border: 1px solid var(--orbit-border-subtle);
+  overflow: hidden;
+}
+
+.dyno-canvas-wrapper canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.dyno-readout-bar {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--orbit-font-mono);
+  font-size: 0.68rem;
+  color: var(--orbit-text-dim);
+  padding: 0.25rem 0.2rem;
+}
+
+/* ==========================================================================
+   Live Diagnostic Meters & Gauge Rails
+   ========================================================================== */
+.gauge-rail {
+  background: var(--orbit-bg-input);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  height: 16px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 0.25rem;
+}
+
+.gauge-rail-fill {
+  height: 100%;
+  background: var(--orbit-orange);
+  width: 0%;
+  transition: width 0.08s linear;
+}
+
+.gauge-rail-fill.fill-green { background: var(--orbit-status-green); }
+.gauge-rail-fill.fill-amber { background: var(--orbit-status-amber); }
+.gauge-rail-fill.fill-cyan  { background: var(--orbit-status-cyan); }
+
+/* ==========================================================================
+   Modal Dialogs & Technical Inspect Windows
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1.5rem;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-window {
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-medium);
+  border-radius: var(--orbit-radius-md);
+  max-width: 800px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
+}
+
+.modal-header {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--orbit-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h4 {
+  font-family: var(--orbit-font-brand);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--orbit-text-primary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--orbit-text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.modal-close:hover {
+  color: var(--orbit-text-primary);
+}
+
+.modal-body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+pre.modal-body {
+  font-family: var(--orbit-font-mono);
+  font-size: 0.76rem;
+  white-space: pre-wrap;
+  background: #06080d;
+  color: #ffaa55;
+}
+
+.modal-footer {
+  padding: 0.65rem 1.25rem;
+  border-top: 1px solid var(--orbit-border-subtle);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+/* ==========================================================================
+   Toast Notifications
+   ========================================================================== */
+.toast-container {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  z-index: 3000;
+}
+
+.toast {
+  background: var(--orbit-bg-panel);
+  border: 1px solid var(--orbit-border-medium);
+  border-left: 3px solid var(--orbit-orange);
+  padding: 0.6rem 1rem;
+  border-radius: var(--orbit-radius-xs);
+  color: var(--orbit-text-primary);
+  font-family: var(--orbit-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  animation: slideIn 0.2s ease-out;
+}
+
+.toast.success { border-left-color: var(--orbit-status-green); }
+.toast.error   { border-left-color: var(--orbit-status-red); }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* ==========================================================================
+   Firmware Flasher, Bootloader Terminal & Progress Bar Architecture
+   ========================================================================== */
+.flasher-target-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.65rem;
+  margin: 0.65rem 0 1rem 0;
+}
+
+.flasher-target-card {
+  background: var(--orbit-bg-card);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: var(--orbit-transition);
+}
+
+.flasher-target-card:hover {
+  border-color: var(--orbit-border-medium);
+  background: var(--orbit-bg-card-hover);
+}
+
+.flasher-target-card.selected {
+  border-color: var(--orbit-orange);
+  background: rgba(255, 98, 0, 0.08);
+  box-shadow: 0 0 12px rgba(255, 98, 0, 0.15);
+}
+
+.flasher-radio-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--orbit-font-brand);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--orbit-text-primary);
+}
+
+.flasher-mcu-sub {
+  font-size: 0.72rem;
+  color: var(--orbit-text-muted);
+  font-family: var(--orbit-font-mono);
+  margin-top: 0.25rem;
+}
+
+.flasher-source-box {
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.progress-bar-container {
+  background: var(--orbit-bg-input);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  height: 22px;
+  overflow: hidden;
+  position: relative;
+  margin: 0.6rem 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6200, #ff8533);
+  width: 0%;
+  transition: width 0.08s linear;
+}
+
+.progress-bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--orbit-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  letter-spacing: 0.05em;
+}
+
+.terminal-log-view {
+  background: #050608;
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.75rem;
+  font-family: var(--orbit-font-mono);
+  font-size: 0.72rem;
+  color: #94a3b8;
+  max-height: 160px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.45;
+  margin-top: 0.5rem;
+}
+
+/* Hardware Detection & Master PIN Security Clearance Banner */
+.flasher-security-banner {
+  background: var(--orbit-bg-subsurface);
+  border: 1px solid var(--orbit-border-subtle);
+  border-radius: var(--orbit-radius-xs);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
+  transition: var(--orbit-transition);
+}
+
+.flasher-security-banner.banner-neutral {
+  border-left: 3px solid var(--orbit-border-medium);
+}
+
+.flasher-security-banner.banner-authorized {
+  border-left: 3px solid var(--orbit-status-green);
+  background: rgba(16, 185, 129, 0.05);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.1);
+}
+
+.flasher-security-banner.banner-locked {
+  border-left: 3px solid var(--orbit-orange);
+  background: rgba(255, 98, 0, 0.05);
+  box-shadow: 0 0 16px rgba(255, 98, 0, 0.1);
+}
+
+.security-banner-title {
+  font-family: var(--orbit-font-brand);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--orbit-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.security-banner-desc {
+  font-size: 0.74rem;
+  color: var(--orbit-text-secondary);
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+

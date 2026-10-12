@@ -20,7 +20,7 @@ const APP_VERSION = "1.43-metisa";
 // Default State matching Form1.cs defaults
 const defaultState = {
   // Metadata & Profile
-  profile_name: "Default-metisa",
+  profile_name: "Saga-Trekking-36V",
   target_mcu: "esp32",          // Internal HAL target: 'avr_nano', 'avr_mega', 'stm32_blackpill', 'pico', 'esp32'
   nud_version: 22,               // Hardware Revision (20-22)
   
@@ -213,10 +213,19 @@ function setupFormBindings() {
       });
     }
   }
+
+  const disp = document.getElementById("displayProfileName");
+  if (disp && appState.profile_name) {
+    disp.innerText = appState.profile_name;
+  }
 }
 
 // React to State Changes
 function onStateChanged(changedKey) {
+  if (changedKey === "profile_name") {
+    const disp = document.getElementById("displayProfileName");
+    if (disp) disp.innerText = appState.profile_name || "Saga-Trekking-36V";
+  }
   if (changedKey === "nud_power_max" || changedKey === "nud_speedcutoff_start" || changedKey === "nud_speedcutoff_stop" || changedKey === "nud_power_thermal") {
     renderCanvasGraph();
   }

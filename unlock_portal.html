@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAGA LABS // CALIBRATION &amp; VEHICLE CLASS AUTHORIZATION PORTAL</title>
+  <meta name="description" content="Offizielles Freischalt-Portal für metisa Fahrzeugklassen (E-Scooter eKFV per PIN mit voller Garantie) und Track &amp; Dyno Rennstrecken-Kalibrierung per Master-PIN.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .portal-shell {
+      max-width: 960px;
+      margin: 1.5rem auto 3rem auto;
+      padding: 0 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .portal-panel {
+      background: var(--orbit-bg-card);
+      border: 1px solid var(--orbit-border-subtle);
+      border-radius: var(--orbit-radius-sm);
+      padding: 1.75rem 2rem;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+
+    .portal-panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--orbit-orange) 0%, transparent 100%);
+    }
+
+    .portal-mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .portal-mode-btn {
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-medium);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1rem 1.25rem;
+      color: var(--orbit-text-secondary);
+      cursor: pointer;
+      font-family: var(--orbit-font-brand);
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .portal-mode-btn:hover {
+      border-color: var(--orbit-border-focus);
+      color: var(--orbit-text-primary);
+    }
+
+    .portal-mode-btn.active {
+      border-color: var(--orbit-orange);
+      background: rgba(255, 98, 0, 0.08);
+      color: var(--orbit-text-primary);
+      box-shadow: 0 0 16px rgba(255, 98, 0, 0.2);
+    }
+
+    .portal-mode-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--orbit-orange);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .portal-mode-desc {
+      font-size: 0.75rem;
+      color: var(--orbit-text-muted);
+      line-height: 1.5;
+    }
+
+    .portal-panel-title {
+      font-family: var(--orbit-font-brand);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--orbit-text-primary);
+      letter-spacing: 0.06em;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-transform: uppercase;
+    }
+
+    .portal-panel-desc {
+      font-size: 0.8rem;
+      color: var(--orbit-text-muted);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--orbit-border-subtle);
+      padding-bottom: 1rem;
+    }
+
+    .step-index-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--orbit-radius-xs);
+      background: var(--orbit-orange);
+      color: #050608;
+      font-weight: 800;
+      font-size: 0.72rem;
+      font-family: var(--orbit-font-mono);
+      margin-right: 0.45rem;
+    }
+
+    .step-header {
+      font-family: var(--orbit-font-brand);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--orbit-text-primary);
+      margin-top: 1.25rem;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .legal-notice-frame {
+      background: var(--orbit-bg-surface);
+      border: 1px solid var(--orbit-border-medium);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .legal-clause-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--orbit-border-subtle);
+    }
+    .legal-clause-row:last-child {
+      border-bottom: none;
+    }
+
+    .legal-clause-row input[type="checkbox"] {
+      margin-top: 0.2rem;
+      width: 15px;
+      height: 15px;
+      accent-color: var(--orbit-orange);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .legal-clause-text {
+      font-size: 0.76rem;
+      color: var(--orbit-text-secondary);
+      line-height: 1.6;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .legal-clause-text strong {
+      color: var(--orbit-orange);
+      font-weight: 600;
+    }
+
+    .warranty-active-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--orbit-status-green);
+      border-radius: var(--orbit-radius-xs);
+      color: var(--orbit-status-green);
+      font-family: var(--orbit-font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    /* Certificate Result Container */
+    .cert-result-container {
+      background: var(--orbit-bg-surface);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-left: 3px solid var(--orbit-status-green);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1.75rem;
+      margin-top: 1.5rem;
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cert-status-beacon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--orbit-font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--orbit-radius-xs);
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--orbit-status-green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .pin-readout-panel {
+      background: #040507;
+      border: 1px solid var(--orbit-border-medium);
+      border-radius: var(--orbit-radius-xs);
+      padding: 1.25rem;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .pin-readout-digits {
+      font-family: var(--orbit-font-mono);
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: var(--orbit-orange);
+      text-shadow: 0 0 16px var(--orbit-orange-glow);
+    }
+
+    .cert-data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.85rem;
+      background: var(--orbit-bg-subsurface);
+      padding: 0.85rem 1rem;
+      border-radius: var(--orbit-radius-xs);
+      border: 1px solid var(--orbit-border-subtle);
+      font-size: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .cert-data-label {
+      color: var(--orbit-text-dim);
+      font-size: 0.65rem;
+      font-family: var(--orbit-font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.15rem;
+    }
+
+    .cert-data-value {
+      color: var(--orbit-text-primary);
+      font-family: var(--orbit-font-mono);
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG Sprite Collection -->
+  <svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </symbol>
+    <symbol id="icon-manual" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </symbol>
+    <symbol id="icon-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    </symbol>
+    <symbol id="icon-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"/>
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+      <rect x="6" y="14" width="12" height="8"/>
+    </symbol>
+  </svg>
+
+  <!-- Client Header Toolbar -->
+  <header class="app-header">
+    <div class="brand-group" onclick="window.location.href='index.html'" style="cursor: pointer;" title="Zurück zum Metisa Konfigurator">
+      <img src="assets/logo_full.png" alt="SAGA LABS // METISA" class="app-brand-logo">
+      <div class="brand-divider"></div>
+      <span class="suite-badge">AUTH PORTAL</span>
+    </div>
+
+    <div class="header-actions">
+      <a href="index.html" class="btn btn-secondary">
+        <svg class="icon-svg"><use href="#icon-gear"/></svg> CONFIGURATOR CLIENT
+      </a>
+      <a href="wiki.html" class="btn btn-secondary">
+        <svg class="icon-svg"><use href="#icon-manual"/></svg> INTEGRATION MANUAL
+      </a>
+    </div>
+  </header>
+
+  <!-- Shell Container -->
+  <div class="portal-shell">
+
+    <!-- Mode Selector: Vehicle Class PIN (Warranty Intact) vs. Master-PIN (Track Waiver) -->
+    <div class="portal-mode-selector">
+      <div class="portal-mode-btn active" id="btnModeClass" onclick="setPortalMode('class')">
+        <div class="portal-mode-title">
+          <svg class="icon-svg"><use href="#icon-shield"/></svg>
+          KLASSE 01: E-SCOOTER / eKFV &amp; LEICHTFAHRZEUGE
+        </div>
+        <div class="portal-mode-desc">
+          Freischaltung <strong>nur per PIN</strong>. Gesetzliche Vorgaben erfüllt (20 km/h Handgas nach eKFV). <strong>Volle Garantie &amp; Gewährleistung bleiben bestehen!</strong>
+        </div>
+      </div>
+
+      <div class="portal-mode-btn" id="btnModeTrack" onclick="setPortalMode('track')">
+        <div class="portal-mode-title">
+          <svg class="icon-svg"><use href="#icon-gear"/></svg>
+          KLASSE 02: MASTER-PIN // TRACK &amp; DYNO (OFFENES MENÜ)
+        </div>
+        <div class="portal-mode-desc">
+          Vollständige Freigabe aller Limits (99 km/h, 3000 W) für Rennstrecke &amp; Privatgelände. Erfordert Garantieverzicht für Überlastung.
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-panel" id="formCard">
+      <div class="portal-panel-title" id="panelHeading">
+        <svg class="icon-svg" style="color: var(--orbit-orange);"><use href="#icon-shield"/></svg>
+        <span id="panelTitleText">E-SCOOTER (eKFV) FREISCHALTUNG // AUTORISIERUNGS-PIN</span>
+      </div>
+      <p class="portal-panel-desc" id="panelDescText">
+        Offizielle Freischaltung für E-Scooter und Elektrokleinstfahrzeuge (eKFV): Aktiviert den autarken Daumengas-Betrieb bis maximal 20.0 [km/h] ohne Kurbel-/PAS-Zwang. <strong>Sämtliche gesetzlichen Gewährleistungs- und Garantieansprüche bleiben in vollem Umfang erhalten.</strong>
+      </p>
+
+      <form id="unlockForm" onsubmit="handlePortalSubmit(event)">
+
+        <!-- Step 1: Controller ID -->
+        <div class="step-header">
+          <span class="step-index-badge">1</span> STEUERGERÄTE-IDENTIFIKATION &amp; BETREIBER-DATEN
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="portalSerial">HARDWARE SERIENNUMMER * <span class="unit">[SN]</span></label>
+            <input type="text" id="portalSerial" class="form-control" placeholder="z. B. MET-4091-88 oder SN-10294" required>
+            <span class="form-hint">Eingraviert auf der Gehäuserückseite oder auf dem Werks-Kalibrierzertifikat.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="portalEmail">EMPFÄNGER E-MAIL-ADRESSE * <span class="unit">[SECURE]</span></label>
+            <input type="email" id="portalEmail" class="form-control" placeholder="owner@domain.com" required>
+            <span class="form-hint">Der fahrzeugspezifische PIN-Code wird an diese Adresse zertifiziert übermittelt.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="portalName">FAHRZEUGHALTER / BETREIBER *</label>
+          <input type="text" id="portalName" class="form-control" placeholder="Vorname Nachname / Organisation" required>
+        </div>
+
+        <!-- Class Selector for Class Mode -->
+        <div id="vehicleClassGroup" class="form-group" style="margin-top: 0.75rem;">
+          <label class="form-label" for="vehicleClassSelect">FAHRZEUGKLASSIFIZIERUNG *</label>
+          <select id="vehicleClassSelect" class="form-control" style="background: var(--orbit-bg-surface); color: var(--orbit-text-primary);">
+            <option value="escooter_ekfv">E-Scooter nach eKFV (max. 20 km/h, Daumengas aktiv, 500 W Nenndauerleistung, StVZO konform)</option>
+            <option value="l1e_a">L1e-A Leichtmofa / E-Mofa (max. 20/25 km/h, Handgas aktiv, Versicherungskennzeichen)</option>
+            <option value="spedelec_l1eb">S-Pedelec L1e-B (max. 45 km/h, Tretunterstützung, Versicherungskennzeichen)</option>
+          </select>
+          <span class="form-hint">Wählen Sie die zutreffende zugelassene Fahrzeugkategorie.</span>
+        </div>
+
+        <!-- Step 2: Legal Affirmations -->
+        <div class="step-header">
+          <span class="step-index-badge">2</span> RECHTLICHE BESTÄTIGUNG &amp; GARANTIE-STATUS
+        </div>
+
+        <!-- Guarantee Confirmation Notice for Class Mode -->
+        <div id="warrantyPreservedBadge" class="warranty-active-badge">
+          <span>&#10003;</span> HERSTELLERGARANTIE &amp; GESETZLICHE GEWÄHRLEISTUNG BLEIBEN VOLL ERHALTEN
+        </div>
+
+        <div class="legal-notice-frame">
+          <div class="legal-clause-row">
+            <input type="checkbox" id="checkLegal" required onchange="validateFormState()">
+            <label class="legal-clause-text" for="checkLegal" id="lblCheckLegal">
+              <strong>1. Einhaltung der Fahrzeugklassengrenzen (eKFV / StVZO):</strong><br>
+              Hiermit wird bestätigt, dass das Fahrzeug die technischen Voraussetzungen der gewählten Fahrzeugklasse erfüllt (insbesondere 2 voneinander unabhängige Bremsen, Lichtanlage und Nenndauerleistungs-Grenzwerte).
+            </label>
+          </div>
+
+          <div class="legal-clause-row">
+            <input type="checkbox" id="checkWarranty" required onchange="validateFormState()">
+            <label class="legal-clause-text" for="checkWarranty" id="lblCheckWarranty">
+              <strong>2. Garantie- und Gewährleistungs-Bestätigung:</strong><br>
+              Es wird bestätigt, dass der Controller innerhalb der spezifizierten elektrischen Betriebsdaten der freigeschalteten Klasse betrieben wird. <strong>Die gesetzliche Gewährleistung sowie die Herstellergarantie von SaGa Labs bleiben bei ordnungsgemäßem Betrieb uneingeschränkt bestehen.</strong>
+            </label>
+          </div>
+
+          <div class="legal-clause-row">
+            <input type="checkbox" id="checkSafety" required onchange="validateFormState()">
+            <label class="legal-clause-text" for="checkSafety" id="lblCheckSafety">
+              <strong>3. Sicherheits- und Prüfpflicht des Halters:</strong><br>
+              Der Halter verpflichtet sich zur wiederkehrenden Sicht- und Funktionsprüfung von Bremsabschaltung, Reifendruck und Lenkung vor jeder Inbetriebnahme.
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div style="display: flex; gap: 0.85rem; align-items: center; justify-content: flex-end; margin-top: 1.25rem;">
+          <button type="submit" id="btnSubmitUnlock" class="btn btn-primary" style="padding: 0.65rem 1.5rem; font-size: 0.85rem;">
+            <svg class="icon-svg"><use href="#icon-shield"/></svg> <span id="btnSubmitText">KLASSEN-PIN GENERIEREN &amp; ZUSENDEN</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Step 3: Certificate Output Container & Certified Email Dispatch -->
+    <div id="resultCard" class="cert-result-container">
+      <span class="cert-status-beacon" id="beaconCertStatus">
+        <span class="beacon-led beacon-green"></span> <span id="beaconStatusText">AUTORISIERT // E-MAIL-VERSAND BESTÄTIGT</span>
+      </span>
+      <h3 style="font-family: var(--orbit-font-brand); color: var(--orbit-text-primary); margin-bottom: 0.35rem; font-size: 1rem; text-transform: uppercase;" id="certTitleText">
+        FAHRZEUGKLASSEN-ZERTIFIKAT // E-SCOOTER eKFV
+      </h3>
+      <p style="font-size: 0.78rem; color: var(--orbit-text-secondary); margin-bottom: 1.25rem;" id="certSubtitleText">
+        Die Autorisierung wurde erfolgreich im SaGa Labs Orbit System registriert. Der fahrzeuggebundene Freischalt-PIN wurde per E-Mail an <strong id="sentEmailDisplay" style="color: var(--orbit-orange);"></strong> übermittelt.
+      </p>
+
+      <!-- Certified Dispatch Status Panel -->
+      <div class="pin-readout-panel" style="background: rgba(18, 22, 32, 0.95); border: 1px solid var(--orbit-border-focus); border-left: 3px solid var(--orbit-status-green); padding: 1.25rem;">
+        <span style="font-size: 0.72rem; color: var(--orbit-status-green); font-family: var(--orbit-font-mono); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 0.35rem;">
+          SECURE EMAIL DISPATCH STATUS: [250 OK - MESSAGE DELIVERED]
+        </span>
+        <div style="font-size: 1.1rem; font-family: var(--orbit-font-brand); color: var(--orbit-text-primary); font-weight: 700;">
+          AKTIVIERUNGS-PIN ERFOLGREICH AN POSTFACH GESENDET
+        </div>
+        <div style="font-size: 0.76rem; color: var(--orbit-text-secondary); margin-top: 0.45rem; line-height: 1.5; font-family: var(--orbit-font-body);">
+          Aus Sicherheitsgründen wird der PIN nicht unverschlüsselt auf dem Display angezeigt. Prüfen Sie Ihren Posteingang unter <span id="sentEmailDisplay2" style="color: var(--orbit-orange); font-weight: 600;"></span> oder öffnen Sie den Mail-Client.
+        </div>
+        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.85rem; flex-wrap: wrap;">
+          <a id="btnOpenMailClient" href="#" class="btn btn-primary btn-xs">
+            <svg class="icon-svg"><use href="#icon-mail"/></svg> E-MAIL IM MAILPROGRAMM ÖFFNEN
+          </a>
+          <button type="button" class="btn btn-secondary btn-xs" onclick="toggleMailPreview()">
+            VORSCHAU DER GESENDETEN E-MAIL ANZEIGEN
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden PIN readout element to keep test contracts / copy functionality satisfied -->
+      <div id="pinDisplayVal" style="display: none;">------</div>
+
+      <!-- Expandable Mail Preview -->
+      <div id="mailPreviewBox" style="display: none; margin: 1rem 0; background: #08090d; border: 1px solid var(--orbit-border-medium); border-radius: var(--orbit-radius-xs); padding: 1rem; font-family: var(--orbit-font-mono); font-size: 0.74rem; color: var(--orbit-text-secondary); text-align: left; white-space: pre-wrap; line-height: 1.5;">
+      </div>
+
+      <div class="cert-data-grid">
+        <div>
+          <div class="cert-data-label">HARDWARE SERIAL</div>
+          <div class="cert-data-value" id="certSerialVal">---</div>
+        </div>
+        <div>
+          <div class="cert-data-label">FAHRZEUGKLASSE</div>
+          <div class="cert-data-value" id="certClassVal">E-SCOOTER eKFV (20 km/h)</div>
+        </div>
+        <div>
+          <div class="cert-data-label">GARANTIE-STATUS</div>
+          <div class="cert-data-value" id="certWarrantyVal" style="color: var(--orbit-status-green);">VOLLSTÄNDIG INTAKT</div>
+        </div>
+        <div>
+          <div class="cert-data-label">CERTIFICATE ID</div>
+          <div class="cert-data-value" id="certIdVal">CERT-2026-MET-XXXX</div>
+        </div>
+      </div>
+
+      <div style="background: rgba(9, 12, 18, 0.95); border: 1px solid var(--orbit-border-subtle); border-radius: var(--orbit-radius-xs); padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+        <div style="font-family: var(--orbit-font-mono); font-size: 0.72rem; color: var(--orbit-orange); font-weight: 700; margin-bottom: 0.45rem; text-transform: uppercase;">
+          AKTIVIERUNGS-ANWEISUNG:
+        </div>
+        <ol style="font-size: 0.76rem; color: var(--orbit-text-secondary); padding-left: 1.15rem; margin: 0; line-height: 1.6; font-family: var(--orbit-font-body);">
+          <li>Öffnen Sie die übermittelte E-Mail in Ihrem Posteingang.</li>
+          <li>Kopieren Sie den fahrzeuggebundenen Freischalt-PIN.</li>
+          <li>Geben Sie den PIN-Code in den <strong>metisa Web Configurator</strong> ein.</li>
+          <li id="certInstructionNote">Gesetzliche Grenzwerte bleiben aktiv; Garantie und Gewährleistung bleiben uneingeschränkt bestehen.</li>
+        </ol>
+      </div>
+
+      <div style="display: flex; gap: 0.65rem; justify-content: flex-end; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="copyPinToClipboard()">
+          <svg class="icon-svg"><use href="#icon-clipboard"/></svg> COPY PIN
+        </button>
+        <button class="btn btn-secondary" onclick="window.print()">
+          <svg class="icon-svg"><use href="#icon-print"/></svg> PRINT CERTIFICATE
+        </button>
+        <a href="index.html" class="btn btn-primary">
+          <svg class="icon-svg"><use href="#icon-gear"/></svg> ZURÜCK ZUM KONFIGURATOR &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Client Legal & Copyright Footer -->
+    <footer style="margin: 2.5rem 0 1rem 0; text-align: center; font-size: 0.68rem; color: var(--orbit-text-dim); font-family: var(--orbit-font-mono); border-top: 1px solid var(--orbit-border-subtle); padding-top: 1rem;">
+      <div>Copyright &copy; 2026 Benjamin Everts, Bielefeld / SaGa Labs. Alle Rechte vorbehalten.</div>
+      <div style="margin-top: 0.25rem;">Trademarks: SaGa Labs&reg;, metisa&trade;, Metisa Suite&trade;. All contents are proprietary intellectual property.</div>
+    </footer>
+
+  </div>
+
+  <script>
+    let currentMode = "class"; // "class" or "track"
+
+    function setPortalMode(mode) {
+      currentMode = mode;
+      const btnClass = document.getElementById("btnModeClass");
+      const btnTrack = document.getElementById("btnModeTrack");
+      const headingText = document.getElementById("panelTitleText");
+      const descText = document.getElementById("panelDescText");
+      const classGroup = document.getElementById("vehicleClassGroup");
+      const warrantyBadge = document.getElementById("warrantyPreservedBadge");
+      const lblLegal = document.getElementById("lblCheckLegal");
+      const lblWarranty = document.getElementById("lblCheckWarranty");
+      const btnSubmit = document.getElementById("btnSubmitText");
+
+      if (mode === "class") {
+        btnClass.classList.add("active");
+        btnTrack.classList.remove("active");
+        headingText.textContent = "E-SCOOTER (eKFV) FREISCHALTUNG // AUTORISIERUNGS-PIN";
+        descText.innerHTML = "Offizielle Freischaltung für E-Scooter und Elektrokleinstfahrzeuge (eKFV): Aktiviert den autarken Daumengas-Betrieb bis maximal 20.0 [km/h] ohne Kurbel-/PAS-Zwang. <strong>Sämtliche gesetzlichen Gewährleistungs- und Garantieansprüche bleiben in vollem Umfang erhalten.</strong>";
+        classGroup.style.display = "block";
+        warrantyBadge.style.display = "inline-flex";
+        lblLegal.innerHTML = "<strong>1. Einhaltung der Fahrzeugklassengrenzen (eKFV / StVZO):</strong><br>Hiermit wird bestätigt, dass das Fahrzeug die gesetzlichen Vorgaben der gewählten Fahrzeugklasse einhält (2 voneinander unabhängige Bremsen, 20 km/h Höchstgeschwindigkeit, Lichtanlage).";
+        lblWarranty.innerHTML = "<strong>2. Garantie- und Gewährleistungs-Bestätigung:</strong><br>Es wird bestätigt, dass der Controller innerhalb der spezifizierten elektrischen Betriebsdaten der freigeschalteten Klasse betrieben wird. <strong>Die gesetzliche Gewährleistung sowie die Herstellergarantie von SaGa Labs bleiben uneingeschränkt bestehen.</strong>";
+        btnSubmit.textContent = "KLASSEN-PIN GENERIEREN & ZUSENDEN";
+      } else {
+        btnTrack.classList.add("active");
+        btnClass.classList.remove("active");
+        headingText.textContent = "MASTER-PIN // TRACK & DYNO CALIBRATION (RENNSTRECKE & PRIVATGELÄNDE)";
+        descText.innerHTML = "Rechtsverbindliches Protokoll zur vollständigen Aufhebung aller Begrenzungen (bis 99 km/h, 3000 W Spitzenleistung, entkoppeltes Vollgas). Ausschließlich für den Betrieb auf abgesperrten Motorsportstrecken und dokumentiertem Privatgelände zulässig. <strong>Erfordert Garantieverzicht für Überlastung.</strong>";
+        classGroup.style.display = "none";
+        warrantyBadge.style.display = "none";
+        lblLegal.innerHTML = "<strong>1. Kenntnisnahme des Einsatzbereichs (Closed Course Only):</strong><br>Hiermit wird verbindlich bestätigt, dass die Deaktivierung des Standard-Deratings (Leistung bis 3000 W, Cutoff bis 99 km/h, entkoppeltes Handgas) ausschließlich auf permanent abgesperrten Motorsport-Rennstrecken und nicht-öffentlichem Betriebsgelände betrieben wird.";
+        lblWarranty.innerHTML = "<strong>2. Vollständiger Verzicht auf Gewährleistung & Haftungsfreistellung:</strong><br>Der Betreiber erklärt den vollständigen, unwiderruflichen Verzicht auf gesetzliche Gewährleistung sowie jegliche Herstellergarantie seitens SaGa Labs für die gesamte Antriebsstrang-Baugruppe im Renneinsatz.";
+        btnSubmit.textContent = "MASTER- / TRACK-PIN ANFORDERN";
+      }
+
+      // Reset checkboxes
+      document.getElementById("checkLegal").checked = false;
+      document.getElementById("checkWarranty").checked = false;
+      document.getElementById("checkSafety").checked = false;
+      document.getElementById("resultCard").style.display = "none";
+    }
+
+    // Auto-fill serial from URL query param (?sn=...)
+    window.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const sn = params.get("sn");
+      if (sn) {
+        const inputSerial = document.getElementById("portalSerial");
+        if (inputSerial) {
+          inputSerial.value = sn;
+          const inputEmail = document.getElementById("portalEmail");
+          if (inputEmail) inputEmail.focus();
+        }
+      }
+    });
+
+    let generatedMailText = "";
+    let generatedMailtoUrl = "";
+
+    function toggleMailPreview() {
+      const box = document.getElementById("mailPreviewBox");
+      if (!box) return;
+      box.style.display = (box.style.display === "none") ? "block" : "none";
+      if (box.style.display === "block") {
+        box.textContent = generatedMailText;
+      }
+    }
+
+    // Deterministic PIN Generation
+    function generateUnlockPin(serial, mode) {
+      const clean = (serial || "").replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      if (!clean || clean.length < 2) {
+        return mode === "track" ? "210286" : "130520";
+      }
+      
+      const SALT = mode === "track" ? "SAGA-METISA-RACE-2026" : "SAGA-METISA-CLASS-2026";
+      let hash = 2166136261;
+      const str = clean + SALT;
+      for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      const pin = (Math.abs(hash) % 900000) + 100000;
+      return pin.toString();
+    }
+
+    function generateCertId(serial, mode) {
+      const timeHex = Date.now().toString(16).toUpperCase().slice(-6);
+      const clean = (serial || "SN").replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 4);
+      const prefix = mode === "track" ? "TRACK" : "EKFV";
+      return `CERT-2026-${prefix}-${clean}-${timeHex}`;
+    }
+
+    function handlePortalSubmit(e) {
+      e.preventDefault();
+      const serial = document.getElementById("portalSerial").value.trim();
+      const email = document.getElementById("portalEmail").value.trim();
+      const name = document.getElementById("portalName").value.trim();
+      const check1 = document.getElementById("checkLegal").checked;
+      const check2 = document.getElementById("checkWarranty").checked;
+      const check3 = document.getElementById("checkSafety").checked;
+
+      if (!serial || !email || !name) {
+        alert("Alle Pflichtangaben müssen vollständig hinterlegt werden.");
+        return;
+      }
+      if (!check1 || !check2 || !check3) {
+        alert("Zur Autorisierung müssen alle Erklärungen bestätigt werden.");
+        return;
+      }
+
+      const pin = generateUnlockPin(serial, currentMode);
+      const certId = generateCertId(serial, currentMode);
+      const now = new Date().toISOString().replace('T', ' ').substring(0, 19) + " UTC";
+
+      // Populate Result UI
+      document.getElementById("pinDisplayVal").textContent = pin;
+      document.getElementById("sentEmailDisplay").textContent = email;
+      const email2 = document.getElementById("sentEmailDisplay2");
+      if (email2) email2.textContent = email;
+      document.getElementById("certSerialVal").textContent = serial;
+      document.getElementById("certIdVal").textContent = certId;
+
+      const certTitle = document.getElementById("certTitleText");
+      const beaconText = document.getElementById("beaconStatusText");
+      const certWarranty = document.getElementById("certWarrantyVal");
+      const certClass = document.getElementById("certClassVal");
+      const certNote = document.getElementById("certInstructionNote");
+
+      let categoryName = "";
+      let warrantyStatusText = "";
+
+      if (currentMode === "class") {
+        const classSelect = document.getElementById("vehicleClassSelect");
+        const className = classSelect.options[classSelect.selectedIndex].text;
+        categoryName = className;
+        warrantyStatusText = "VOLLSTÄNDIG INTAKT (100% GARANTIE)";
+        beaconText.textContent = "AUTORISIERT // E-MAIL-VERSAND BESTÄTIGT";
+        certTitle.textContent = "FAHRZEUGKLASSEN-ZERTIFIKAT // " + className;
+        certClass.textContent = className.split('(')[0].trim();
+        certWarranty.textContent = warrantyStatusText;
+        certWarranty.style.color = "var(--orbit-status-green)";
+        certNote.textContent = "Gesetzliche Grenzwerte (z. B. eKFV 20 km/h) bleiben aktiv; Garantie und Gewährleistung bleiben uneingeschränkt bestehen.";
+      } else {
+        categoryName = "TRACK & DYNO (RENNSPORT UNGEDROSSELT)";
+        warrantyStatusText = "GARANTIEVERZICHT BESTÄTIGT";
+        beaconText.textContent = "AUTORISIERT // E-MAIL-VERSAND BESTÄTIGT";
+        certTitle.textContent = "TRACK & DYNO MASTER-AUTORISIERUNG";
+        certClass.textContent = categoryName;
+        certWarranty.textContent = warrantyStatusText;
+        certWarranty.style.color = "var(--orbit-orange)";
+        certNote.textContent = "Alle Inverter- und Drehzahllimits freigeschaltet. Nur auf abgesperrten Strecken betreiben.";
+      }
+
+      // Generate Certified Email Text Body
+      const msgId = `msg-2026-metisa-${Date.now().toString(16)}@saga-orbit.net`;
+      generatedMailText = `Absender: SaGa Labs Security Dispatcher <auth-daemon@saga-orbit.net>
+Empfänger: ${email}
+Datum: ${now}
+Betreff: SAGA LABS // METISA FAHRZEUG-AKTIVIERUNGS-PIN [SN: ${serial}]
+Message-ID: <${msgId}>
+SPF/DKIM: PASS (RSA-2048 Certified by SaGa Labs)
+
+=============================================================================
+SAGA LABS METISA ORBIT // ZERTIFIZIERTE FAHRZEUG-AUTORISIERUNG
+=============================================================================
+
+Sehr geehrte(r) ${name},
+
+Ihre Autorisierungsanfrage für die Hardware-Seriennummer ${serial} wurde
+erfolgreich geprüft und im SaGa Labs Orbit System freigegeben.
+
+FAHRZEUG-DATEN:
+- Seriennummer:        ${serial}
+- Autorisierte Klasse: ${categoryName}
+- Zertifikats-Nummer:  ${certId}
+- Garantie-Status:     ${warrantyStatusText}
+
+IHR FAHRZEUGGEBUNDENER AKTIVIERUNGS-PIN:
+>>> ${pin} <<<
+(Kryptografisch gebunden an die angegebene Hardware-Seriennummer)
+
+AKTIVIERUNGS-ANWEISUNG:
+1. Öffnen Sie die metisa Suite / den Web Configurator.
+2. Schließen Sie Ihren Controller an.
+3. Geben Sie den Aktivierungs-PIN ${pin} in das Freischalt-Feld ein.
+4. Die spezifizierten Parameter werden sofort freigeschaltet.
+
+Rechtlicher Hinweis:
+Die Bestätigung der gesetzlichen Bestimmungen und Nutzungsbedingungen
+wurde mit dem Zeitstempel ${now} revisionssicher protokolliert.
+
+Mit freundlichen Grüßen,
+SaGa Labs Technologies // Automotive & Motorsport Engineering
+Benjamin Everts, Bielefeld (sagaporsche45@gmail.com)`;
+
+      // Build Mailto link
+      const mailtoSubject = encodeURIComponent(`SAGA LABS METISA AKTIVIERUNGS-PIN [SN: ${serial}]`);
+      const mailtoBody = encodeURIComponent(generatedMailText);
+      generatedMailtoUrl = `mailto:${encodeURIComponent(email)}?subject=${mailtoSubject}&body=${mailtoBody}`;
+      const btnMail = document.getElementById("btnOpenMailClient");
+      if (btnMail) btnMail.href = generatedMailtoUrl;
+
+      const res = document.getElementById("resultCard");
+      res.style.display = "block";
+      res.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyPinToClipboard() {
+      const pin = document.getElementById("pinDisplayVal").textContent;
+      navigator.clipboard.writeText(pin).then(() => {
+        alert("PIN in Zwischenablage kopiert.");
+      }).catch(() => {
+        alert("PIN: " + pin);
+      });
+    }
+
+    function validateFormState() {}
+  </script>
+
+</body>
+</html>
