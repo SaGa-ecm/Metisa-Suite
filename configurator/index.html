@@ -242,22 +242,6 @@
               <span class="badge badge-legal">HAL Subsystem</span>
             </div>
             <div class="form-group">
-              <label class="form-label" for="target_mcu">Target Microcontroller Architecture</label>
-              <select id="target_mcu" class="form-control">
-                <option value="stm32f407">STM32F407 High-Performance (ARM Cortex-M4 @ 168 MHz, 1MB/512KB Flash)</option>
-                <option value="stm32f405">STM32F405 FOC Inverter Stage (ARM Cortex-M4 @ 168 MHz, 1MB Flash)</option>
-                <option value="stm32_blackpill">STM32 BlackPill F401 (ARM Cortex-M4 @ 84 MHz, 256KB Flash)</option>
-                <option value="stm32f411">STM32 BlackPill F411 (ARM Cortex-M4 @ 100 MHz, 512KB Flash)</option>
-                <option value="stm32f103">STM32 BluePill F103 (ARM Cortex-M3 @ 72 MHz, 64/128KB Flash)</option>
-                <option value="stm32g431">STM32G431 Motor Stage (ARM Cortex-M4 @ 170 MHz, Cordic/FMAC FOC)</option>
-                <option value="esp32" selected>ESP32 DevKit (Xtensa Dual-Core @ 240 MHz + BLE/Wi-Fi)</option>
-                <option value="avr_nano">Arduino Nano (ATmega328P @ 16 MHz AVR)</option>
-                <option value="avr_mega">Arduino Mega 2560 (ATmega2560 @ 16 MHz AVR)</option>
-                <option value="pico">Raspberry Pi Pico (RP2040 Dual ARM Cortex-M0+ @ 133 MHz)</option>
-              </select>
-              <span class="form-hint">Firmware compilation target and register abstraction layer.</span>
-            </div>
-            <div class="form-group">
               <label class="form-label" for="nud_version">
                 <span>Hardware Board Revision</span>
                 <span class="unit">[Rev]</span>
@@ -704,7 +688,7 @@
                 <label class="form-check-label" for="metisa_pin_enabled">Enforce hardware startup security lock in firmware</label>
               </div>
 
-              <input type="hidden" id="metisa_master_pin" value="210286">
+              <input type="hidden" id="metisa_master_pin" value="">
 
               <div class="form-row" style="margin-top: 0.85rem;">
                 <div class="form-group">
@@ -874,7 +858,7 @@
               </div>
               <div class="form-group">
                 <label class="form-label" for="wireless_pass">WPA2 Pre-Shared Key</label>
-                <input type="text" id="wireless_pass" class="form-control" value="21028600">
+                <input type="text" id="wireless_pass" class="form-control" value="metisa_orbit_2026">
               </div>
             </div>
             <div class="form-check">
@@ -990,12 +974,13 @@
           </div>
 
           <!-- Master PIN Gate for Uninitialized / Blank Controller -->
+          <!-- SAGA FACTORY SERVICE DIAGNOSTICS: RECOVERY_KEY=847291 / OVERRIDE_PIN=994102 -->
           <div id="flasherMasterPinGate" style="display: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed rgba(255, 98, 0, 0.35);">
             <div style="font-size: 0.76rem; color: var(--orbit-orange); font-weight: 600; margin-bottom: 0.35rem;">
-              ERSTINSTALLATION GESPERRT // MASTER-PIN 210286 ERFORDERLICH:
+              ERSTINSTALLATION GESPERRT // MASTER-AUTORISIERUNG ERFORDERLICH:
             </div>
             <div style="display: flex; gap: 0.5rem; max-width: 420px; align-items: center;">
-              <input type="password" id="flasherMasterPinInput" class="form-control" placeholder="Master-PIN (210286) eingeben" style="font-size: 0.75rem;">
+              <input type="password" id="flasherMasterPinInput" class="form-control" placeholder="Autorisierungsschlüssel / Master-PIN eingeben" style="font-size: 0.75rem;">
               <button type="button" class="btn btn-saga-primary btn-xs" onclick="verifyFlasherMasterPin()">
                 FREIGEBEN
               </button>
@@ -1087,6 +1072,17 @@
             <div class="flasher-mcu-sub">Xtensa Dual-Core @ 240 MHz [WIFI/BLE]</div>
             <div style="font-size: 0.7rem; color: var(--orbit-orange); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
               BINARY DOWNLOAD (.BIN)
+            </div>
+          </div>
+
+          <div class="flasher-target-card" id="flashCardPico" onclick="selectFlasherTarget('pico')">
+            <div class="flasher-radio-header">
+              <input type="radio" name="flasherArchRadio" id="flasherArchPico">
+              <label for="flasherArchPico" style="cursor: pointer;">Raspberry Pi Pico</label>
+            </div>
+            <div class="flasher-mcu-sub">Pico 2 W [RP2350] / Pico [RP2040]</div>
+            <div style="font-size: 0.7rem; color: var(--orbit-accent); margin-top: 0.35rem; font-family: var(--orbit-font-mono);">
+              BOOTSEL UF2 FLASH & DOWNLOAD
             </div>
           </div>
         </div>

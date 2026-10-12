@@ -234,7 +234,11 @@ const int lights_high_beam_pin = PB15;
 const int lights_rear_pin = PA8;
 const int lights_brake_pin = PA9;
 const int turn_signal_left_pin = PA10;
+#if defined(PA11)
 const int turn_signal_right_pin = PA11;
+#else
+const int turn_signal_right_pin = PB7;
+#endif
 const int horn_pin = PB8;
 #elif defined(ARDUINO_ARCH_RP2040)
 const int option_pin = 26;
@@ -1856,7 +1860,7 @@ void pin_set_level(byte new_level)
         curr_capacity = (current_profile == 0) ? capacity : capacity_2;
         pure_throttle_allowed = true; // E-Scooter (eKFV): autarker Daumengasbetrieb bis 20 km/h zulässig (100% Garantie & Gewährleistung intakt)
     }
-    else if (pin_security_level == 2) // Level 2: Race / Privatgelände (Master-PIN 210286)
+    else if (pin_security_level == 2) // Level 2: Race / Privatgelände (Master-PIN)
     {
         curr_startingaid_speed = spd_max2_race;
         curr_spd_max1 = spd_max1_race;

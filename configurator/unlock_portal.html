@@ -624,7 +624,7 @@
     function generateUnlockPin(serial, mode) {
       const clean = (serial || "").replace(/[^A-Za-z0-9]/g, '').toUpperCase();
       if (!clean || clean.length < 2) {
-        return mode === "track" ? "210286" : "130520";
+        return null;
       }
       
       const SALT = mode === "track" ? "SAGA-METISA-RACE-2026" : "SAGA-METISA-CLASS-2026";
@@ -664,6 +664,10 @@
       }
 
       const pin = generateUnlockPin(serial, currentMode);
+      if (!pin) {
+        alert("Ungültige Seriennummer.");
+        return;
+      }
       const certId = generateCertId(serial, currentMode);
       const now = new Date().toISOString().replace('T', ' ').substring(0, 19) + " UTC";
 

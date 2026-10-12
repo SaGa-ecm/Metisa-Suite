@@ -109,8 +109,8 @@ const defaultState = {
 
   // Metisa Multi-Level PIN Security System
   metisa_pin_enabled: true,
-  metisa_master_pin: "210286",   // Master-PIN for Race Mode
-  metisa_sport_pin: "1234",      // Optional Sport-PIN
+  metisa_master_pin: "",         // Never stored client-side; verified by controller firmware
+  metisa_sport_pin: "",          // Never stored client-side
   metisa_boot_level: 0,          // 0=Standard default on boot
   metisa_race_speed: 99,         // km/h in Level 2
   metisa_race_power: 1000,       // Watt in Level 2
@@ -146,7 +146,7 @@ const defaultState = {
   chb_bluetoothstartup: true,
   wireless_wifi_softap: true,
   wireless_ssid: "APC-Pedelec-WiFi",
-  wireless_pass: "21028600",
+  wireless_pass: "metisa_orbit_2026",
   wireless_web_dashboard: true,  // Self-hosted HTML5 cockpit on port 80
   wireless_telnet_server: true,  // Telnet on port 23
 };
@@ -788,7 +788,19 @@ function detectControllerHardware(port) {
     }
     return "Arduino Official Stage [ATmega328P]";
   } else if (vid === 0x2E8A || vid === 0x2e8a) {
-    return "Raspberry Pi Pico [RP2040 Dual-Core ARM]";
+    if (pid === 0x000F) {
+      return "Raspberry Pi Pico 2 / Pico 2 W [RP2350 BOOTSEL UF2]";
+    } else if (pid === 0x0003) {
+      return "Raspberry Pi Pico / Pico W [RP2040 BOOTSEL UF2]";
+    } else if (pid === 0x0009) {
+      return "Raspberry Pi Pico 2 W [RP2350 Dual-Core @ 150 MHz]";
+    } else if (pid === 0x000A || pid === 0x0005 || pid === 0x0004) {
+      if (typeof appState !== "undefined" && (appState.target_mcu === "pico2w" || (typeof detectedMcuModel === "string" && detectedMcuModel.includes("2")))) {
+        return "Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])";
+      }
+      return "Raspberry Pi Pico [RP2040 / RP2350 USB CDC]";
+    }
+    return "Raspberry Pi Pico Family [RP2350 / RP2040]";
   }
   return "Arduino Nano (ATmega328P)";
 }
@@ -825,13 +837,13 @@ function updateHardwareStatusUI(status, model) {
     }
   } else if (status === "BLANK") {
     if (lblFirmware) {
-      lblFirmware.textContent = "UNINITIALISIERT [MASTER-PIN 210286 NÖTIG]";
+      lblFirmware.textContent = "UNINITIALISIERT [MASTER-AUTORISIERUNG NÖTIG]";
       lblFirmware.className = "tech-status-val status-locked";
     }
     if (masterUnlockForFlashApproved) {
       if (banner) banner.className = "flasher-security-banner banner-authorized";
       if (title) title.textContent = `ERKANNT: ${model} // MASTER-PIN VERIFIZIERT`;
-      if (desc) desc.textContent = "Master-PIN (210286) bestätigt. Erst-Upload der Firmware auf uninitialisierten Controller freigegeben.";
+      if (desc) desc.textContent = "Master-Autorisierung bestätigt. Erst-Upload der Firmware auf uninitialisierten Controller freigegeben.";
       if (badge) {
         badge.textContent = "ERST-UPLOAD FREIGEGEBEN";
         badge.className = "badge badge-metisa";
@@ -845,7 +857,7 @@ function updateHardwareStatusUI(status, model) {
     } else {
       if (banner) banner.className = "flasher-security-banner banner-locked";
       if (title) title.textContent = `ERKANNT: ${model} // KEINE METISA FIRMWARE`;
-      if (desc) desc.textContent = "Uninitialisierter Controller erkannt. Aus Schutzgründen ist der Erst-Upload nur nach Verifizierung des Master-PINs (210286) zulässig.";
+      if (desc) desc.textContent = "Uninitialisierter Controller erkannt. Aus Schutzgründen ist der Erst-Upload nur nach Master-Autorisierung zulässig.";
       if (badge) {
         badge.textContent = "ERST-UPLOAD GESPERRT";
         badge.className = "badge badge-legal";
@@ -854,7 +866,7 @@ function updateHardwareStatusUI(status, model) {
       if (btnFlash) {
         btnFlash.disabled = true;
         btnFlash.textContent = "FIRMWARE FLASHEN (GESPERRT)";
-        btnFlash.title = "Erst-Upload erfordert Master-PIN 210286";
+        btnFlash.title = "Erst-Upload erfordert Master-Autorisierung";
       }
     }
   } else if (status === "PROBING") {
@@ -1189,10 +1201,14 @@ function parseRawTelemetry(line) {
         detectedMcuModel = "ESP32 DevKit Dual-Core (Xtensa @ 240 MHz)";
         setTargetMcuSelect("esp32");
         selectFlasherTarget("esp32");
-      } else if (line.includes("METISA:REV22:RP2040") || line.includes("METISA:RP2040")) {
+      } else if (line.includes("METISA:REV22:RP2350") || line.includes("METISA:RP2350") || line.includes("PICO2W") || line.includes("PICO2")) {
+        detectedMcuModel = "Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])";
+        setTargetMcuSelect("pico2w");
+        selectFlasherTarget("pico", "pico2w");
+      } else if (line.includes("METISA:REV22:RP2040") || line.includes("METISA:RP2040") || line.includes("PICO")) {
         detectedMcuModel = "Raspberry Pi Pico (RP2040 Dual ARM @ 133 MHz)";
         setTargetMcuSelect("pico");
-        selectFlasherTarget("pico");
+        selectFlasherTarget("pico", "pico");
       } else if (line.includes("METISA:REV22:NANO")) {
         detectedMcuModel = "Arduino Nano (ATmega328P @ 16 MHz AVR)";
         setTargetMcuSelect("avr_nano");
@@ -1626,7 +1642,7 @@ let currentUnlockLevel = 0;
 function generateUnlockPin(serial, mode = "track") {
   const clean = (serial || "").replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   if (!clean || clean.length < 2) {
-    return mode === "track" ? "210286" : "130520";
+    return null;
   }
   const SALT = mode === "track" ? "SAGA-METISA-RACE-2026" : "SAGA-METISA-CLASS-2026";
   let hash = 2166136261;
@@ -1679,7 +1695,7 @@ function setUnlockUILevel(lvl) {
   const statusVal = document.getElementById("techModeStatus");
 
   if (lvl === 2) {
-    // Level 2: Race / Track & Dyno (Master-PIN 210286)
+    // Level 2: Race / Track & Dyno (Master-Autorisierung)
     if (lockedBox) lockedBox.style.display = "none";
     if (unlockedBox) unlockedBox.style.display = "block";
     if (badge) {
@@ -1808,8 +1824,8 @@ function verifyAndUnlockRaceMode() {
     (appState.profile_serial || "")
   ].filter(s => s && s.length >= 2);
 
-  let isTrackMatch = (enteredPin === "210286");
-  let isClassMatch = (enteredPin === "130520" || enteredPin === "1305" || enteredPin === "1234");
+  let isTrackMatch = false;
+  let isClassMatch = false;
 
   for (const s of candidateSerials) {
     if (enteredPin === generateUnlockPin(s, "track")) isTrackMatch = true;
@@ -1822,14 +1838,14 @@ function verifyAndUnlockRaceMode() {
     setUnlockUILevel(2);
     if (errorBox) errorBox.style.display = "none";
     showToast("Master-PIN autorisiert: Rennstrecke & Privatgelände [Offenes Menü aktiv]", "success");
-    if (isConnected) sendSerialCommand("pn210286");
+    if (isConnected) sendSerialCommand("pn" + enteredPin);
   } else if (isClassMatch) {
     // Level 1: E-Scooter eKFV (100% Garantie & Gewährleistung intakt)
     appState.metisa_master_pin = enteredPin;
     setUnlockUILevel(1);
     if (errorBox) errorBox.style.display = "none";
     showToast("E-Scooter (eKFV) autorisiert: 20 km/h autarkes Handgas aktiv [Garantie 100% intakt]", "success");
-    if (isConnected) sendSerialCommand("pn130520");
+    if (isConnected) sendSerialCommand("pn" + enteredPin);
   } else {
     if (errorBox) {
       errorBox.textContent = "Ungültige Freischalt-PIN. Bitte Seriennummer überprüfen oder PIN im Autorisierungsportal anfordern.";
@@ -1943,6 +1959,7 @@ function selectFlasherTarget(target, subModel = null) {
   const cardStm32 = document.getElementById("flashCardStm32");
   const cardMega = document.getElementById("flashCardMega");
   const cardEsp32 = document.getElementById("flashCardEsp32");
+  const cardPico = document.getElementById("flashCardPico");
   const btnDown = document.getElementById("btnDownloadBinaryText");
   const targetNote = document.getElementById("flasherTargetNote");
   const btnFlash = document.getElementById("btnStartFlashSerial");
@@ -1956,17 +1973,20 @@ function selectFlasherTarget(target, subModel = null) {
   if (cardStm32) cardStm32.classList.toggle("selected", target === 'stm32');
   if (cardMega) cardMega.classList.toggle("selected", target === 'mega');
   if (cardEsp32) cardEsp32.classList.toggle("selected", target === 'esp32');
+  if (cardPico) cardPico.classList.toggle("selected", target === 'pico' || target === 'pico2w');
 
   const radioAuto = document.getElementById("flasherArchAuto");
   const radioNano = document.getElementById("flasherArchNano");
   const radioStm32 = document.getElementById("flasherArchStm32");
   const radioMega = document.getElementById("flasherArchMega");
   const radioEsp32 = document.getElementById("flasherArchEsp32");
+  const radioPico = document.getElementById("flasherArchPico");
   if (radioAuto) radioAuto.checked = (target === 'auto');
   if (radioNano) radioNano.checked = (target === 'nano');
   if (radioStm32) radioStm32.checked = (target === 'stm32');
   if (radioMega) radioMega.checked = (target === 'mega');
   if (radioEsp32) radioEsp32.checked = (target === 'esp32');
+  if (radioPico) radioPico.checked = (target === 'pico' || target === 'pico2w');
 
   if (subModel && (target === 'stm32' || target === 'auto')) {
     const elModel = document.getElementById("flasherStm32Model");
@@ -1982,7 +2002,7 @@ function selectFlasherTarget(target, subModel = null) {
       if (isConnected && detectedMcuModel && detectedMcuModel !== "Kein Controller" && detectedMcuModel !== "Getrennt") {
         targetNote.textContent = `Auto-Detect aktiv: ${detectedMcuModel} erkannt [Automatisch bereit zum Flashen]`;
       } else {
-        targetNote.textContent = "Auto-Detect aktiv: Hardware wird beim Flashen vollautomatisch ermittelt (STM32 / AVR / ESP32)";
+        targetNote.textContent = "Auto-Detect aktiv: Hardware wird beim Flashen vollautomatisch ermittelt (STM32 / AVR / ESP32 / PICO)";
       }
     }
     if (btnFlash) btnFlash.style.display = "inline-flex";
@@ -2018,6 +2038,15 @@ function selectFlasherTarget(target, subModel = null) {
     if (targetNote) targetNote.textContent = "Ziel: ESP32 DevKit Dual-Core (Xtensa @ 240 MHz) Binary Image";
     if (btnFlash) btnFlash.style.display = "inline-flex";
     if (flashBtnText) flashBtnText.textContent = "BINARY HERUNTERLADEN";
+  } else if (target === 'pico' || target === 'pico2w') {
+    if (stm32SelectBox) stm32SelectBox.style.display = "none";
+    if (baudRateBox) baudRateBox.style.display = "none";
+    if (btnDfuFlash) btnDfuFlash.style.display = "none";
+    const isPico2W = (subModel === 'pico2w' || target === 'pico2w' || (detectedMcuModel && (detectedMcuModel.includes("RP2350") || detectedMcuModel.includes("Pico 2"))));
+    if (btnDown) btnDown.textContent = isPico2W ? "DOWNLOAD PICO 2 W (.UF2)" : "DOWNLOAD PICO (.UF2)";
+    if (targetNote) targetNote.textContent = isPico2W ? "Ziel: Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])" : "Ziel: Raspberry Pi Pico (RP2040 Dual-Core @ 133 MHz)";
+    if (btnFlash) btnFlash.style.display = "inline-flex";
+    if (flashBtnText) flashBtnText.textContent = "BOOTSEL MODUS / UF2 FLASH";
   }
 }
 
@@ -2052,6 +2081,11 @@ function downloadSelectedFirmwareBinary() {
       filename = 'metisa_mega_firmware.hex';
       path = 'firmware/metisa_nano_firmware.hex';
       mime = 'text/plain';
+    } else if (detectedMcuModel && (detectedMcuModel.includes("Pico") || detectedMcuModel.includes("RP2350") || detectedMcuModel.includes("RP2040"))) {
+      const isPico2W = (detectedMcuModel.includes("RP2350") || detectedMcuModel.includes("Pico 2"));
+      filename = isPico2W ? 'metisa_pico2w_firmware.uf2' : 'metisa_pico_firmware.uf2';
+      path = isPico2W ? 'firmware/metisa_pico2w_firmware.uf2' : 'firmware/metisa_pico_firmware.uf2';
+      mime = 'application/octet-stream';
     } else {
       filename = 'metisa_nano_firmware.hex';
       path = 'firmware/metisa_nano_firmware.hex';
@@ -2075,6 +2109,11 @@ function downloadSelectedFirmwareBinary() {
     filename = 'metisa_mega_firmware.hex';
     path = 'firmware/metisa_nano_firmware.hex';
     mime = 'text/plain';
+  } else if (target === 'pico' || target === 'pico2w') {
+    const isPico2W = (target === 'pico2w' || (detectedMcuModel && (detectedMcuModel.includes("RP2350") || detectedMcuModel.includes("Pico 2"))));
+    filename = isPico2W ? 'metisa_pico2w_firmware.uf2' : 'metisa_pico_firmware.uf2';
+    path = isPico2W ? 'firmware/metisa_pico2w_firmware.uf2' : 'firmware/metisa_pico_firmware.uf2';
+    mime = 'application/octet-stream';
   }
 
   const a = document.createElement("a");
@@ -2205,10 +2244,10 @@ async function dfuLeave(device, ifaceNum, address) {
 
 async function startDfuFirmwareFlash() {
   if (controllerFirmwareStatus === "BLANK" && !masterUnlockForFlashApproved) {
-    showToast("Erst-Upload gesperrt: Master-PIN 210286 erforderlich", "error");
+    showToast("Erst-Upload gesperrt: Master-Autorisierung erforderlich", "error");
     const logView = document.getElementById("flashTerminalLog");
     if (logView) {
-      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-PIN (210286) erforderlich.`;
+      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-Autorisierung erforderlich.`;
     }
     return;
   }
@@ -2428,10 +2467,10 @@ async function startDfuFirmwareFlash() {
 
 async function startStm32SerialBootloaderFlash(subModelOverride = null) {
   if (controllerFirmwareStatus === "BLANK" && !masterUnlockForFlashApproved) {
-    showToast("Erst-Upload gesperrt: Master-PIN 210286 erforderlich", "error");
+    showToast("Erst-Upload gesperrt: Master-Autorisierung erforderlich", "error");
     const logView = document.getElementById("flashTerminalLog");
     if (logView) {
-      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-PIN (210286) erforderlich.`;
+      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-Autorisierung erforderlich.`;
     }
     return;
   }
@@ -2446,7 +2485,7 @@ async function startStm32SerialBootloaderFlash(subModelOverride = null) {
       const time = new Date().toISOString().substring(11, 19);
       logView.textContent += `\n[${time}] [FLASH] DECOY-SANDBOX PAYLOAD ERFOLGREICH ÜBERTRAGEN.`;
       logView.textContent += `\n[${time}] [WARNUNG] Motor-Regelung im Sandbox-Modus dauerhaft verriegelt (0W).`;
-      logView.textContent += `\n[${time}] [SICHERHEIT] Für Hardware-Aktivierung echten Master-PIN (210286) eingeben.`;
+      logView.textContent += `\n[${time}] [SICHERHEIT] Für Hardware-Aktivierung gültige Master-Autorisierung eingeben.`;
       logView.scrollTop = logView.scrollHeight;
     }
     showToast("Decoy-Firmware geflasht (Motor dauerhaft verriegelt)", "warning");
@@ -2923,10 +2962,20 @@ async function startAutoDetectFirmwareFlash() {
   if (pBar) pBar.style.width = "5%";
   if (pText) pText.textContent = "HARDWARE ERKENNUNG [5%]";
 
-  // 0. Prüfe zuerst WebUSB, ob bereits ein STM32 im DFU-Modus angeschlossen ist:
+  // 0. Prüfe zuerst WebUSB auf angeschlossene Bootloader (STM32 DFU oder Raspberry Pi Pico):
   if (navigator.usb && navigator.usb.getDevices) {
     try {
       const pairedUsb = await navigator.usb.getDevices();
+      const picoDev = pairedUsb.find(d => (d.vendorId === 0x2E8A || d.vendorId === 0x2e8a));
+      if (picoDev) {
+        const isPico2W = (picoDev.productId === 0x000F || picoDev.productId === 0x0009);
+        const desc = isPico2W ? "Raspberry Pi Pico 2 W [RP2350 BOOTSEL UF2]" : "Raspberry Pi Pico [RP2040 BOOTSEL UF2]";
+        logTerminal(`[AUTO-DETECT] ${desc} über WebUSB erkannt (VID 0x${picoDev.vendorId.toString(16).padStart(4,'0')}, PID 0x${picoDev.productId.toString(16).padStart(4,'0')})`);
+        detectedMcuModel = desc;
+        setTargetMcuSelect(isPico2W ? "pico2w" : "pico");
+        selectFlasherTarget(isPico2W ? "pico2w" : "pico");
+        return await startPicoFirmwareFlash(isPico2W ? "pico2w" : "pico");
+      }
       const dfuDev = pairedUsb.find(d => (d.vendorId === 0x0483 && d.productId === 0xDF11) || d.vendorId === 0x0483);
       if (dfuDev) {
         logTerminal(`[AUTO-DETECT] STM32 DFU-Bootloader Device über WebUSB erkannt (VID 0x${dfuDev.vendorId.toString(16).padStart(4,'0')}, PID 0x${dfuDev.productId.toString(16).padStart(4,'0')})`);
@@ -2972,6 +3021,12 @@ async function startAutoDetectFirmwareFlash() {
 
       logTerminal(`[AUTO-DETECT] Ziel-Firmware: ${sub.toUpperCase()}. Starte STM32 Bootloader Flash...`);
       return await startStm32SerialBootloaderFlash(sub);
+    } else if (detectedMcuModel.includes("Pico") || detectedMcuModel.includes("RP2350") || detectedMcuModel.includes("RP2040")) {
+      const isPico2W = detectedMcuModel.includes("Pico 2") || detectedMcuModel.includes("RP2350");
+      logTerminal(`[AUTO-DETECT] Ziel-Firmware: ${isPico2W ? "Raspberry Pi Pico 2 W (RP2350)" : "Raspberry Pi Pico (RP2040)"}.`);
+      setTargetMcuSelect(isPico2W ? "pico2w" : "pico");
+      selectFlasherTarget(isPico2W ? "pico2w" : "pico");
+      return await startPicoFirmwareFlash(isPico2W ? "pico2w" : "pico");
     } else if (detectedMcuModel.includes("Mega")) {
       logTerminal("[AUTO-DETECT] Ziel-Firmware: Arduino Mega 2560.");
       return await startNanoStk500Flash(115200);
@@ -3124,6 +3179,17 @@ async function startAutoDetectFirmwareFlash() {
     return;
   }
 
+  // Raspberry Pi Pico Family (VID 0x2E8A)
+  if (vid === 0x2E8A || vid === 0x2e8a) {
+    const isPico2W = (pid === 0x000F || pid === 0x0009 || (detectedMcuModel && (detectedMcuModel.includes("Pico 2") || detectedMcuModel.includes("RP2350"))));
+    detectedMcuModel = isPico2W ? "Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])" : "Raspberry Pi Pico (RP2040 Dual ARM @ 133 MHz)";
+    logTerminal(`[AUTO-DETECT] ${detectedMcuModel} erkannt (VID 0x2E8A, PID 0x${pid.toString(16).padStart(4, '0').toUpperCase()})`);
+    setTargetMcuSelect(isPico2W ? "pico2w" : "pico");
+    updateHardwareStatusUI("METISA", detectedMcuModel);
+    selectFlasherTarget(isPico2W ? "pico2w" : "pico");
+    return await startPicoFirmwareFlash(isPico2W ? "pico2w" : "pico");
+  }
+
   // Unbekannte Hardware: Aktiver Probe-Handshake
   logTerminal("[AUTO-DETECT] Unbekannte USB-ID. Führe Probe-Handshake durch...");
 
@@ -3208,17 +3274,112 @@ async function startAutoDetectFirmwareFlash() {
     try { await serialPort.close(); } catch (ce) {}
   }
 
+  // Probe D: Raspberry Pi Pico USB CDC Probe
+  logTerminal("[AUTO-DETECT] Teste Raspberry Pi Pico USB CDC Schnittstelle...");
+  try {
+    await serialPort.open({ baudRate: 115200 });
+    const writer = serialPort.writable.getWriter();
+    const reader = serialPort.readable.getReader();
+    let isPico = false;
+    let isPico2W = false;
+    try {
+      await writer.write(new TextEncoder().encode("id?\r\n"));
+      const r = await readExactBytes(reader, 16, 200);
+      const text = new TextDecoder().decode(r);
+      if (text.includes("PICO") || text.includes("RP2040") || text.includes("RP2350")) {
+        isPico = true;
+        if (text.includes("RP2350") || text.includes("PICO2")) isPico2W = true;
+      }
+    } catch (e) {}
+    try { reader.releaseLock(); } catch (e) {}
+    try { writer.releaseLock(); } catch (e) {}
+    try { await serialPort.close(); } catch (e) {}
+
+    if (isPico) {
+      detectedMcuModel = isPico2W ? "Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])" : "Raspberry Pi Pico (RP2040 Dual ARM @ 133 MHz)";
+      logTerminal(`[AUTO-DETECT] ${detectedMcuModel} erfolgreich über CDC synchronisiert!`);
+      setTargetMcuSelect(isPico2W ? "pico2w" : "pico");
+      updateHardwareStatusUI("METISA", detectedMcuModel);
+      selectFlasherTarget(isPico2W ? "pico2w" : "pico");
+      return await startPicoFirmwareFlash(isPico2W ? "pico2w" : "pico");
+    }
+  } catch (e) {
+    try { await serialPort.close(); } catch (ce) {}
+  }
+
   // Standard-Fallback
   logTerminal("[AUTO-DETECT] Standard-Fallback: Starte Arduino Nano Flasher.");
   return await startNanoStk500Flash();
 }
 
+async function startPicoFirmwareFlash(targetSub = 'pico') {
+  const logView = document.getElementById("flashTerminalLog");
+  const pBar = document.getElementById("flashProgressBar");
+  const pText = document.getElementById("flashProgressText");
+
+  function logTerminal(msg) {
+    const time = new Date().toISOString().substring(11, 19);
+    if (logView) {
+      logView.textContent += `\n[${time}] ${msg}`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+  }
+
+  const isPico2W = (targetSub === 'pico2w' || (detectedMcuModel && (detectedMcuModel.includes("RP2350") || detectedMcuModel.includes("Pico 2"))));
+  const modelName = isPico2W ? "Raspberry Pi Pico 2 W [RP2350 Dual-Core @ 150 MHz + WIFI/BLE]" : "Raspberry Pi Pico [RP2040 Dual ARM @ 133 MHz]";
+  logTerminal(`[PICO] Starte Flasher-Prozedur für ${modelName}...`);
+  if (pBar) pBar.style.width = "20%";
+  if (pText) pText.textContent = "BOOTSEL MODUS INITIALISIERUNG [20%]";
+
+  // 1. If currently connected over Web Serial, trigger BOOTSEL reset
+  if (serialPort) {
+    logTerminal("[PICO] Sende Reset-Sequenz an Controller (1200 Baud CDC Touch Reset)...");
+    try {
+      if (serialReader) {
+        try { await serialReader.cancel(); } catch (e) {}
+        serialReader = null;
+      }
+      try {
+        await sendSerialCommand("df1");
+        await sleep(150);
+      } catch (e) {}
+      if (serialPort.readable) {
+        try { await serialPort.close(); } catch (e) {}
+      }
+      // 1200 bps touch-reset puts RP2040 / RP2350 directly into BOOTSEL UF2 drive mode
+      await serialPort.open({ baudRate: 1200 });
+      await sleep(100);
+      await serialPort.close();
+      isConnected = false;
+      logTerminal("[PICO] Controller erfolgreich via 1200 Baud Touch in BOOTSEL-Modus versetzt!");
+    } catch (e) {
+      logTerminal(`[PICO] Touch-Reset Information: ${e.message || e}`);
+    }
+  } else {
+    logTerminal("[PICO] Manueller Modus: Halten Sie beim Einstecken die BOOTSEL-Taste gedrückt.");
+  }
+
+  if (pBar) pBar.style.width = "60%";
+  if (pText) pText.textContent = "LADE UF2 FIRMWARE [60%]";
+
+  // 2. Download or serve UF2 binary
+  downloadSelectedFirmwareBinary();
+
+  if (pBar) pBar.style.width = "100%";
+  if (pText) pText.textContent = "UF2 BEREIT ZUM KOPIEREN [100%]";
+
+  logTerminal(`[SUCCESS] Metisa ${isPico2W ? "Pico 2 W" : "Pico"} UF2 Image heruntergeladen.`);
+  logTerminal(`[HINWEIS] Kopieren Sie die heruntergeladene .uf2 Datei direkt auf das USB-Laufwerk 'RPI-RP2'.`);
+  logTerminal(`[INFO] Nach dem Kopieren startet der ${isPico2W ? "Pico 2 W" : "Pico"} in Sekundenbruchteilen automatisch mit der neuen Firmware neu.`);
+  showToast(`${isPico2W ? "Pico 2 W" : "Pico"} UF2 bereit: Auf RPI-RP2 Laufwerk kopieren`, "success");
+}
+
 async function startFirmwareFlash() {
   if (controllerFirmwareStatus === "BLANK" && !masterUnlockForFlashApproved) {
-    showToast("Erst-Upload gesperrt: Master-PIN 210286 erforderlich", "error");
+    showToast("Erst-Upload gesperrt: Master-Autorisierung erforderlich", "error");
     const logView = document.getElementById("flashTerminalLog");
     if (logView) {
-      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-PIN (210286) erforderlich.`;
+      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-Autorisierung erforderlich.`;
     }
     return;
   }
@@ -3233,7 +3394,7 @@ async function startFirmwareFlash() {
       const time = new Date().toISOString().substring(11, 19);
       logView.textContent += `\n[${time}] [FLASH] DECOY-SANDBOX PAYLOAD ERFOLGREICH ÜBERTRAGEN.`;
       logView.textContent += `\n[${time}] [WARNUNG] Motor-Regelung im Sandbox-Modus dauerhaft verriegelt (0W).`;
-      logView.textContent += `\n[${time}] [SICHERHEIT] Für Hardware-Aktivierung echten Master-PIN (210286) eingeben.`;
+      logView.textContent += `\n[${time}] [SICHERHEIT] Für Hardware-Aktivierung gültige Master-Autorisierung eingeben.`;
       logView.scrollTop = logView.scrollHeight;
     }
     showToast("Decoy-Firmware geflasht (Motor dauerhaft verriegelt)", "warning");
@@ -3255,6 +3416,10 @@ async function startFirmwareFlash() {
       logView.textContent += `\n[INFO] Firmware-Binary für ESP32 heruntergeladen.\nNutzen Sie esptool.py für das finale Flashen.`;
     }
     return;
+  }
+
+  if (currentFlasherTarget === 'pico' || currentFlasherTarget === 'pico2w') {
+    return await startPicoFirmwareFlash(currentFlasherTarget);
   }
 
   if (currentFlasherTarget === 'nano') {
@@ -3298,7 +3463,7 @@ async function verifyFlasherMasterPin() {
 
   // 2. Genuine Master-PIN Verification via Salted SHA-256 Hash
   const inputHash = await sha256Hex(pin + METISA_PIN_SALT);
-  if (inputHash === METISA_MASTER_PIN_HASH || pin === "210286") {
+  if (inputHash !== "" && inputHash === METISA_MASTER_PIN_HASH) {
     masterUnlockForFlashApproved = true;
     flasherIsDecoySandbox = false;
     flasherFailedAttempts = 0;
@@ -3309,7 +3474,7 @@ async function verifyFlasherMasterPin() {
     }
 
     updateHardwareStatusUI("BLANK", detectedMcuModel);
-    showToast("Master-PIN 210286 verifiziert: Seriennummer zugewiesen", "success");
+    showToast("Master-Autorisierung verifiziert: Seriennummer zugewiesen", "success");
 
     // Transmit Serial Number to Controller EEPROM
     try {
@@ -3317,7 +3482,7 @@ async function verifyFlasherMasterPin() {
     } catch (e) {}
 
     if (logView) {
-      logView.textContent += `\n[${time}] [AUTHORISIERUNG] Master-PIN (210286) kryptografisch bestätigt.`;
+      logView.textContent += `\n[${time}] [AUTHORISIERUNG] Master-Autorisierung bestätigt.`;
       logView.textContent += `\n[${time}] [PROVISIONING] Eindeutige Seriennummer generiert & im EEPROM verankert: ${assignedSerialNumber}`;
       logView.textContent += `\n[${time}] [INFO] Erst-Upload für ${detectedMcuModel} autorisiert.`;
       logView.scrollTop = logView.scrollHeight;
@@ -3374,5 +3539,6 @@ window.verifyFlasherMasterPin = verifyFlasherMasterPin;
 window.copyAssignedSerialToClipboard = copyAssignedSerialToClipboard;
 window.startAutoDetectFirmwareFlash = startAutoDetectFirmwareFlash;
 window.startNanoStk500Flash = startNanoStk500Flash;
+window.startPicoFirmwareFlash = startPicoFirmwareFlash;
 
 

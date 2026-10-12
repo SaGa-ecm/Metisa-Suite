@@ -42,7 +42,7 @@ class WebConfiguratorContractTest(unittest.TestCase):
         self.assertIn("importApcString", code, "Must implement .apc import")
         self.assertIn("generateConfigHeader", code, "Must implement config.h generator")
         self.assertIn("parseRawTelemetry", code, "Must parse ---raw--- serial packets")
-        self.assertIn("210286", code, "Must contain Master-PIN 210286 support")
+        self.assertNotIn("210286", code, "Master-PIN must never appear in public frontend code")
         self.assertIn("verifyAndUnlockRaceMode", code, "Must implement PIN verification")
         self.assertIn("lockRaceMode", code, "Must implement re-lock")
 

@@ -134,6 +134,13 @@ static bool parseHexWord(char*& p, uint16_t& outW) {
 
 static void trigger_bootloader_jump()
 {
+    // Bootloader entry is restricted to a session already authorized on the
+    // controller itself (Level 2). The browser cannot grant this.
+    if (pin_security_level != 2)
+    {
+        active_serial_port->println(MY_F("ERR:DFU_NOT_AUTHORIZED"));
+        return;
+    }
     active_serial_port->println(MY_F("OK:DFU_BOOTLOADER_ENTER"));
 #if defined(ARDUINO_ARCH_STM32)
     delay(50);

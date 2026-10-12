@@ -7,7 +7,7 @@
  */
 
 #include "security_auth.h"
-#include <EEPROM.h>
+#include "hal.h"
 
 #if defined(ARDUINO_ARCH_ESP32)
 #include <mbedtls/md.h>
