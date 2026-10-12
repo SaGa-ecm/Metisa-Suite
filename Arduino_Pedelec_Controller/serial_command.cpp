@@ -54,6 +54,7 @@ serial_command serial_commands[] =
     {{"wb"}},     //20: write basic register (Zone A Unrestricted)
     {{"qc"}},     //21: query cryptographic challenge (Zero-Trust Nonce)
     {{"ws"}},     //22: write secure register (Zone B HMAC-SHA256 authenticated)
+    {{"df"}},     //23: DFU / Bootloader jump (set: df1 or df)
 };
 const byte n_commands = sizeof(serial_commands)/sizeof(serial_command); //number of commands that we have
 
@@ -131,6 +132,39 @@ static bool parseHexWord(char*& p, uint16_t& outW) {
     return true;
 }
 
+static void trigger_bootloader_jump()
+{
+    active_serial_port->println(MY_F("OK:DFU_BOOTLOADER_ENTER"));
+#if defined(ARDUINO_ARCH_STM32)
+    delay(50);
+    __disable_irq();
+    SysTick->CTRL = 0;
+    SysTick->LOAD = 0;
+    SysTick->VAL = 0;
+    for (uint8_t i = 0; i < 8; i++) {
+        NVIC->ICER[i] = 0xFFFFFFFF;
+        NVIC->ICPR[i] = 0xFFFFFFFF;
+    }
+#if defined(STM32F4xx) || defined(STM32G4xx)
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
+    SYSCFG->MEMRMP = 0x01;
+    const uint32_t boot_addr = 0x1FFF0000;
+#elif defined(STM32F1xx)
+    const uint32_t boot_addr = 0x1FFFF000;
+#else
+    const uint32_t boot_addr = 0x1FFF0000;
+#endif
+    uint32_t jump_addr = *(__IO uint32_t*)(boot_addr + 4);
+    void (*boot_jump)(void) = (void (*)(void))jump_addr;
+    __set_MSP(*(__IO uint32_t*)boot_addr);
+    boot_jump();
+    while (1);
+#elif defined(__AVR__)
+    wdt_enable(WDTO_15MS);
+    while (1);
+#endif
+}
+
 static void handle_command()
 {
     // sanity check
@@ -165,6 +199,11 @@ static void handle_command()
                 return;
             }
             active_serial_port->println(MY_F("ERR:CHALLENGE_GEN_FAILED"));
+            return;
+        }
+        if (active_serial->cmd_index == 23) // "df" without arguments
+        {
+            trigger_bootloader_jump();
             return;
         }
         active_serial_port->println(MY_F("ERROR"));
@@ -499,6 +538,9 @@ static void handle_command()
                 active_serial_port->println(MY_F("ERR:SYNTAX_WS"));
                 return;
             }
+        case 23: // "df" with argument (e.g. df1)
+            trigger_bootloader_jump();
+            return;
     }
     active_serial_port->println(MY_F("OK"));
 }

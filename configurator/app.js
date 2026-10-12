@@ -2236,12 +2236,22 @@ async function startDfuFirmwareFlash() {
     if (pBar) pBar.style.width = "5%";
     if (pText) pText.textContent = "USB AUSWAHL [5%]";
 
-    const usbDevice = await navigator.usb.requestDevice({
-      filters: [
-        { vendorId: 0x0483, productId: 0xDF11 },
-        { vendorId: 0x0483 }
-      ]
-    });
+    let usbDevice = null;
+    if (navigator.usb.getDevices) {
+      try {
+        const paired = await navigator.usb.getDevices();
+        usbDevice = paired.find(d => (d.vendorId === 0x0483 && d.productId === 0xDF11) || d.vendorId === 0x0483);
+      } catch (pe) {}
+    }
+
+    if (!usbDevice) {
+      usbDevice = await navigator.usb.requestDevice({
+        filters: [
+          { vendorId: 0x0483, productId: 0xDF11 },
+          { vendorId: 0x0483 }
+        ]
+      });
+    }
 
     logTerminal(`[USB] Gerät verbunden: ${usbDevice.productName || 'STM32 Bootloader'} (VID 0x${usbDevice.vendorId.toString(16).padStart(4,'0')}, PID 0x${usbDevice.productId.toString(16).padStart(4,'0')})`);
     await usbDevice.open();
@@ -2272,21 +2282,27 @@ async function startDfuFirmwareFlash() {
 
     // Hardware-Modell aus DFU Interface Deskriptor ermitteln
     let detectedChip = "STM32 Universal";
-    let isF407 = false;
-    if (interfaceString.includes("07*128Kg") || interfaceString.includes("07*128K")) {
+    const isF407 = interfaceString.includes("07*128Kg") || 
+                   interfaceString.includes("07*128K") || 
+                   (typeof appState !== "undefined" && appState.target_mcu && (appState.target_mcu.includes("f407") || appState.target_mcu.includes("f405"))) ||
+                   (typeof detectedMcuModel === "string" && (detectedMcuModel.includes("F407") || detectedMcuModel.includes("F405")));
+
+    if (isF407) {
       detectedChip = "STM32F407 High-Performance (1024 KB Flash, 168 MHz)";
-      isF407 = true;
+      setTargetMcuSelect("stm32f407");
     } else if (interfaceString.includes("03*128Kg")) {
       detectedChip = "STM32F411 BlackPill (512 KB Flash, 100 MHz)";
+      setTargetMcuSelect("stm32f411");
     } else if (interfaceString.includes("01*128Kg")) {
       detectedChip = "STM32F401 BlackPill (256 KB Flash, 84 MHz)";
+      setTargetMcuSelect("stm32_blackpill");
     } else if (interfaceString.includes("128*001Kg") || interfaceString.includes("064*001Kg")) {
       detectedChip = "STM32F103 BluePill (128 KB Flash, 72 MHz)";
+      setTargetMcuSelect("stm32f103");
     } else {
       const selected = getSelectedStm32SubModel();
       if (selected === "stm32f407") {
         detectedChip = "STM32F407 High-Performance (ARM Cortex-M4 @ 168 MHz)";
-        isF407 = true;
       } else {
         detectedChip = "STM32 Family Stage (ARM Cortex-M4)";
       }
@@ -2394,10 +2410,17 @@ async function startDfuFirmwareFlash() {
   } catch (err) {
     console.error("DFU Flash Error:", err);
     logTerminal(`[FEHLER] DFU Flash fehlgeschlagen: ${err.message}`);
+    if (err.name === "NotFoundError" || (err.message && err.message.includes("No device selected"))) {
+      logTerminal("[TIPP] Wenn kein Gerät im Browser-Dialog erscheint:");
+      logTerminal("  1. Halten Sie die BOOT0-Taste auf dem STM32-Board gedrückt.");
+      logTerminal("  2. Drücken Sie kurz die RESET-Taste (oder stecken Sie das USB-Kabel mit gedrückter BOOT0-Taste ein).");
+      logTerminal("  3. Klicken Sie erneut auf 'WEBUSB DFU FLASHEN'.");
+    }
     showToast(`DFU Flash-Fehler: ${err.message}`, "error");
     if (pText) pText.textContent = "FEHLER BEIM FLASHEN";
   }
 }
+
 
 // -------------------------------------------------------------
 // Web Serial STM32 USART Bootloader Flasher (AN3155 Protocol)
@@ -2511,9 +2534,14 @@ async function startStm32SerialBootloaderFlash(subModelOverride = null) {
       }
 
       if (!inSync) {
-        logTerminal("[INFO] STM32 Serial Bootloader antwortet nicht mit 0x79 (ACK).");
-        logTerminal("[TIPP] Wenn das Board direkt über USB verbunden ist: Nutzen Sie 'WEBUSB DFU FLASHEN' (BOOT0-Taste beim Einstecken gedrückt halten).");
-        throw new Error("Bootloader antwortet nicht. Bitte BOOT0 aktivieren oder 'WEBUSB DFU FLASHEN' verwenden.");
+        logTerminal("[INFO] STM32 Serial Bootloader antwortet nicht über USART (0x79 ACK fehlt).");
+        logTerminal("[AUTO-FALLBACK] Schalte automatisch um auf WebUSB DFU 1.1 Flasher (für native USB-Verbindung)...");
+        try { reader.releaseLock(); } catch (e) {}
+        try { writer.releaseLock(); } catch (e) {}
+        try { await serialPort.close(); } catch (e) {}
+        isConnected = false;
+        await sleep(300);
+        return await startDfuFirmwareFlash();
       }
 
       logTerminal("[USART] Bootloader synchronisiert (0x79 ACK empfangen).");
@@ -2895,6 +2923,18 @@ async function startAutoDetectFirmwareFlash() {
   if (pBar) pBar.style.width = "5%";
   if (pText) pText.textContent = "HARDWARE ERKENNUNG [5%]";
 
+  // 0. Prüfe zuerst WebUSB, ob bereits ein STM32 im DFU-Modus angeschlossen ist:
+  if (navigator.usb && navigator.usb.getDevices) {
+    try {
+      const pairedUsb = await navigator.usb.getDevices();
+      const dfuDev = pairedUsb.find(d => (d.vendorId === 0x0483 && d.productId === 0xDF11) || d.vendorId === 0x0483);
+      if (dfuDev) {
+        logTerminal(`[AUTO-DETECT] STM32 DFU-Bootloader Device über WebUSB erkannt (VID 0x${dfuDev.vendorId.toString(16).padStart(4,'0')}, PID 0x${dfuDev.productId.toString(16).padStart(4,'0')})`);
+        return await startDfuFirmwareFlash();
+      }
+    } catch (e) {}
+  }
+
   // 1. Wenn Controller bereits verbunden und Modell bekannt ist:
   if (isConnected && detectedMcuModel && detectedMcuModel !== "Kein Controller" && detectedMcuModel !== "Getrennt") {
     logTerminal(`[AUTO-DETECT] Aktuell verbundener Controller: ${detectedMcuModel}`);
@@ -2905,6 +2945,31 @@ async function startAutoDetectFirmwareFlash() {
                   detectedMcuModel.includes("F411") ? "stm32f411" :
                   detectedMcuModel.includes("F103") ? "stm32f103" :
                   detectedMcuModel.includes("G431") ? "stm32g431" : "stm32f401";
+      setTargetMcuSelect(sub);
+
+      // Bei USB CDC (nativer STM32 USB-Port): DFU-Bootloader-Befehl senden und zu WebUSB DFU wechseln
+      if (detectedMcuModel.includes("USB CDC") || detectedMcuModel.includes("CDC")) {
+        logTerminal(`[AUTO-DETECT] STM32 Controller über USB CDC verbunden (${sub.toUpperCase()}).`);
+        logTerminal("[AUTO-DETECT] Sende DFU-Bootloader Sprungbefehl (df1) an Controller...");
+        try {
+          await sendSerialCommand("df1");
+          await sleep(250);
+        } catch (e) {}
+
+        if (serialReader) {
+          try { await serialReader.cancel(); } catch (e) {}
+          serialReader = null;
+        }
+        if (serialPort && serialPort.readable) {
+          try { await serialPort.close(); } catch (e) {}
+        }
+        isConnected = false;
+
+        logTerminal("[AUTO-DETECT] Controller wechselt in DFU-Modus. Starte WebUSB DFU 1.1 Flasher...");
+        await sleep(500);
+        return await startDfuFirmwareFlash();
+      }
+
       logTerminal(`[AUTO-DETECT] Ziel-Firmware: ${sub.toUpperCase()}. Starte STM32 Bootloader Flash...`);
       return await startStm32SerialBootloaderFlash(sub);
     } else if (detectedMcuModel.includes("Mega")) {
