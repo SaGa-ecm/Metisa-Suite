@@ -49,6 +49,7 @@ serial_command serial_commands[] =
     {{"hn"}},     //16: Hupe (0=off, 1=on)
     {{"id"}},     //17: Hardware- & Firmware-ID Probe
     {{"sn"}},     //18: Hardware-Seriennummer (get: sn?, set: sn=...)
+    {{"sv"}},     //19: Save to EEPROM (get: sv?, set: sv1 or sv)
 };
 const byte n_commands = sizeof(serial_commands)/sizeof(serial_command); //number of commands that we have
 
@@ -105,8 +106,21 @@ static bool find_commands()
 static void handle_command()
 {
     // sanity check
-    if (active_serial->number_pos == 0 || active_serial->cmd_index >= n_commands)
+    if (active_serial->cmd_index >= n_commands)
     {
+        active_serial_port->println(MY_F("ERROR"));
+        return;
+    }
+
+    if (active_serial->number_pos == 0)
+    {
+        if (active_serial->cmd_index == 19) // "sv" without arguments
+        {
+            active_serial_port->print(serial_commands[active_serial->cmd_index].mnemonic);
+            save_eeprom();
+            active_serial_port->println(MY_F("OK:EEPROM_SAVED"));
+            return;
+        }
         active_serial_port->println(MY_F("ERROR"));
         return;
     }
@@ -176,6 +190,9 @@ static void handle_command()
                 break;
             case 18:             //Hardware-Seriennummer query
                 active_serial_port->println(metisa_serial_number);
+                break;
+            case 19:             //EEPROM status query
+                active_serial_port->println(MY_F("EEPROM:OK"));
                 break;
         }
 
@@ -306,15 +323,24 @@ static void handle_command()
             break;
         case 18: // Hardware-Seriennummer zuweisen
             {
-                if (strlen(active_serial->numberstring) > 0)
+                char* p_sn = active_serial->numberstring;
+                if (*p_sn == '=') p_sn++;
+                if (strlen(p_sn) > 0)
                 {
-                    strncpy(metisa_serial_number, active_serial->numberstring, sizeof(metisa_serial_number) - 1);
+                    strncpy(metisa_serial_number, p_sn, sizeof(metisa_serial_number) - 1);
                     metisa_serial_number[sizeof(metisa_serial_number) - 1] = '\0';
+                    save_eeprom();
                     active_serial_port->print(MY_F("OK:SN_ASSIGNED="));
                     active_serial_port->println(metisa_serial_number);
                     return;
                 }
                 break;
+            }
+        case 19: // EEPROM persistieren
+            {
+                save_eeprom();
+                active_serial_port->println(MY_F("OK:EEPROM_SAVED"));
+                return;
             }
     }
     active_serial_port->println(MY_F("OK"));
@@ -353,9 +379,14 @@ void parse_serial(const char &read_c, const byte port)
             /* fallthrough */
 
         case SearchCommand:
-            // skip return chars
+            // skip return chars or handle legacy single-character 's' save command
             if (read_c == 10 || read_c == 13)
             {
+                if (active_serial->cmdbuf[0] == 's' && active_serial->cmdbuf[1] == 0)
+                {
+                    save_eeprom();
+                    active_serial_port->println(MY_F("sOK:EEPROM_SAVED"));
+                }
                 active_serial->parse_state = Reset;
                 break;
             }

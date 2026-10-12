@@ -1866,6 +1866,30 @@ void pin_set_level(byte new_level)
     }
 }
 
+uint32_t compute_pin_hash(const char* serial, bool is_track)
+{
+    const char* salt = is_track ? "SAGA-METISA-RACE-2026" : "SAGA-METISA-CLASS-2026";
+    uint32_t hash = 2166136261UL;
+    for (const char* p = serial; *p; ++p)
+    {
+        char c = *p;
+        if (c >= 'a' && c <= 'z') c -= 32;
+        if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+        {
+            hash ^= (uint8_t)c;
+            hash = hash * 16777619UL;
+        }
+    }
+    for (const char* s = salt; *s; ++s)
+    {
+        hash ^= (uint8_t)*s;
+        hash = hash * 16777619UL;
+    }
+    int32_t signed_hash = (int32_t)hash;
+    if (signed_hash < 0) signed_hash = -signed_hash;
+    return (uint32_t)((signed_hash % 900000L) + 100000L);
+}
+
 bool pin_check_and_apply(unsigned long entered_pin)
 {
     if (entered_pin == PIN_MASTER_RACE) // 210286: Master-PIN
@@ -1882,6 +1906,21 @@ bool pin_check_and_apply(unsigned long entered_pin)
     {
         pin_set_level(0);
         return true;
+    }
+
+    // Dynamic serial-bound PIN verification
+    if (metisa_serial_number[0] != '\0' && strcmp(metisa_serial_number, "SAGA-UNPROVISIONED") != 0)
+    {
+        if (entered_pin == compute_pin_hash(metisa_serial_number, true))
+        {
+            pin_set_level(2);
+            return true;
+        }
+        if (entered_pin == compute_pin_hash(metisa_serial_number, false))
+        {
+            pin_set_level(1);
+            return true;
+        }
     }
     return false;
 }
@@ -1977,6 +2016,16 @@ void save_eeprom()
     ++p_old;
   }
     variable = variable_new;
+
+    // Persist provisioned serial number if set
+    if (metisa_serial_number[0] == 'S')
+    {
+        for (i = 0; i < sizeof(metisa_serial_number); i++)
+        {
+            if (EEPROM.read(64 + i) != (byte)metisa_serial_number[i])
+                EEPROM.write(64 + i, (byte)metisa_serial_number[i]);
+        }
+    }
 }
 
 void read_eeprom()
@@ -1987,6 +2036,18 @@ void read_eeprom()
   for (i = 0; i < sizeof(variable); i++)
     *p++ = EEPROM.read(i);
   sei();
+
+  // Restore serial number from EEPROM offset 64 if provisioned
+  if (EEPROM.read(64) == 'S')
+  {
+    for (i = 0; i < sizeof(metisa_serial_number) - 1; i++)
+    {
+      char c = (char)EEPROM.read(64 + i);
+      if (c == 0 || c == (char)0xFF) break;
+      metisa_serial_number[i] = c;
+    }
+    metisa_serial_number[i] = '\0';
+  }
 }
 
 void save_shutdown()

@@ -167,6 +167,27 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSerialHandler();
   setupHotspots();
   renderCanvasGraph();
+  checkUrlAutoUnlock();
+
+  // Enter key support for PIN inputs
+  const pinInput = document.getElementById("input_unlock_pin");
+  if (pinInput) {
+    pinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") verifyAndUnlockRaceMode();
+    });
+  }
+  const serialInput = document.getElementById("input_unlock_serial");
+  if (serialInput) {
+    serialInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") verifyAndUnlockRaceMode();
+    });
+  }
+  const flasherPinInput = document.getElementById("flasherMasterPinInput");
+  if (flasherPinInput) {
+    flasherPinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") verifyFlasherMasterPin();
+    });
+  }
 });
 
 // Setup Navigation Tabs
@@ -304,25 +325,27 @@ function renderCanvasGraph() {
   ctx.lineTo(w - rightMargin, h - bottomMargin);
   ctx.stroke();
 
-  // Axis Labels & Monospace Engineering Units
-  ctx.fillStyle = "#64748b";
-  ctx.font = "600 9px 'JetBrains Mono', 'SF Mono', monospace";
-  ctx.fillText("0", leftMargin - 10, h - bottomMargin + 14);
-  ctx.fillText("15", leftMargin + plotW * (15 / 35) - 6, h - bottomMargin + 14);
-  ctx.fillText("25", leftMargin + plotW * (25 / 35) - 6, h - bottomMargin + 14);
-  ctx.fillText("35 km/h", w - rightMargin - 40, h - bottomMargin + 14);
-
-  ctx.fillStyle = "#ff6200";
-  ctx.fillText("POWER [W]", 6, topMargin + 10);
-
   // Curve Parameters
   const pMax = appState.nud_power_max || 250;
   const spdStart = appState.nud_speedcutoff_start || 23;
   const spdStop = appState.nud_speedcutoff_stop || 25;
   const pThermal = appState.nud_power_thermal || 150;
 
-  const maxDisplaySpd = 35;
+  const maxDisplaySpd = Math.max(35, Math.ceil((spdStop + 5) / 10) * 10);
   const maxDisplayPower = Math.max(pMax * 1.25, 500);
+
+  // Axis Labels & Monospace Engineering Units
+  ctx.fillStyle = "#64748b";
+  ctx.font = "600 9px 'JetBrains Mono', 'SF Mono', monospace";
+  ctx.fillText("0", leftMargin - 10, h - bottomMargin + 14);
+  const mid1 = Math.round(maxDisplaySpd * 0.4);
+  const mid2 = Math.round(maxDisplaySpd * 0.7);
+  ctx.fillText(`${mid1}`, leftMargin + plotW * (mid1 / maxDisplaySpd) - 6, h - bottomMargin + 14);
+  ctx.fillText(`${mid2}`, leftMargin + plotW * (mid2 / maxDisplaySpd) - 6, h - bottomMargin + 14);
+  ctx.fillText(`${maxDisplaySpd} km/h`, w - rightMargin - 45, h - bottomMargin + 14);
+
+  ctx.fillStyle = "#ff6200";
+  ctx.fillText("POWER [W]", 6, topMargin + 10);
 
   // Calculate Curve Points
   const points = [];
@@ -389,6 +412,13 @@ function renderCanvasGraph() {
   ctx.fillText(`THERMAL LIMIT: ${pThermal} W`, w - rightMargin - 120, yThermal - 4);
   ctx.fillStyle = "#ef4444";
   ctx.fillText(`CUTOFF: ${spdStop} km/h`, xCutoff + 4, topMargin + 10);
+
+  // Update Readout Bar
+  const readout = document.getElementById("dynoCursorReadout");
+  if (readout) {
+    const modeLabel = (currentUnlockLevel === 2) ? "MASTER-PIN UNRESTRICTED" : (currentUnlockLevel === 1) ? "E-SCOOTER eKFV" : "PEDELEC EN 15194";
+    readout.textContent = `Status: ${modeLabel} | P_max: ${pMax} W | Cutoff: ${spdStart} -> ${spdStop} km/h`;
+  }
 }
 
 // -------------------------------------------------------------
@@ -944,27 +974,60 @@ function parseRawTelemetry(line) {
     return;
   }
 
+  if (line.includes("OK:EEPROM_SAVED") || line.includes("sOK:EEPROM_SAVED")) {
+    showToast("Controller: EEPROM permanent gesichert [OK]", "success");
+    return;
+  }
+
   // 1. Controller Command Responses Parsing
   if (line.startsWith("pn") || line.startsWith("OK:LVL_")) {
     const lvlStr = line.replace("OK:LVL_", "").replace("pn", "").trim();
     const lvl = parseInt(lvlStr, 10);
     if (!isNaN(lvl)) {
-      setUnlockUILevel(lvl);
+      if (currentUnlockLevel > 0 && lvl === 0 && appState.metisa_master_pin) {
+        // UI is authorized in this session, re-synchronize authorization to controller
+        sendSerialCommand(`pn${appState.metisa_master_pin}`);
+      } else {
+        setUnlockUILevel(lvl);
+      }
+    }
+    return;
+  }
+  if (line.startsWith("sn") || line.includes("OK:SN_ASSIGNED=")) {
+    const cleanSn = line.replace("OK:SN_ASSIGNED=", "").replace("sn=", "").replace("sn", "").trim();
+    if (cleanSn && cleanSn !== "SAGA-UNPROVISIONED" && cleanSn !== "?") {
+      assignedSerialNumber = cleanSn;
+      const snBanner = document.getElementById("flasherAssignedSerialBanner");
+      if (snBanner) {
+        snBanner.style.display = "block";
+        const snText = document.getElementById("flasherAssignedSerialText");
+        if (snText) snText.textContent = assignedSerialNumber;
+        const snLink = document.getElementById("flasherRegisterPortalLink");
+        if (snLink) snLink.href = `unlock_portal.html?sn=${encodeURIComponent(assignedSerialNumber)}`;
+      }
+      const serialInp = document.getElementById("input_unlock_serial");
+      if (serialInp && !serialInp.value) serialInp.value = assignedSerialNumber;
+      const profSerial = document.getElementById("profile_serial");
+      if (profSerial && !profSerial.value) profSerial.value = assignedSerialNumber;
+      console.log(`[SERIAL] Seriennummer empfangen: ${assignedSerialNumber}`);
     }
     return;
   }
   if (line.startsWith("od")) {
     const odoKm = parseFloat(line.replace("od", "").trim());
     if (!isNaN(odoKm)) {
-      const el = document.getElementById("nud_circumference");
       console.log(`[SERIAL] Odometer gelesen: ${odoKm} km`);
     }
     return;
   }
   if (line.startsWith("ps")) {
     const potiVal = parseInt(line.replace("ps", "").trim(), 10);
-    if (!isNaN(potiVal)) {
-      console.log(`[SERIAL] Poti-Status gelesen: ${potiVal}`);
+    if (!isNaN(potiVal) && potiVal > 0) {
+      console.log(`[SERIAL] Poti/Power gelesen: ${potiVal} W`);
+      appState.nud_power_max = potiVal;
+      const elPower = document.getElementById("nud_power_max");
+      if (elPower) elPower.value = potiVal;
+      renderCanvasGraph();
     }
     return;
   }
@@ -1030,11 +1093,15 @@ async function readConfigFromController() {
   }
   showToast("Lese Konfiguration vom Controller...", "info");
   try {
+    await sendSerialCommand("id?");
+    await new Promise(r => setTimeout(r, 80));
+    await sendSerialCommand("sn?");
+    await new Promise(r => setTimeout(r, 80));
     await sendSerialCommand("pn?");
     await new Promise(r => setTimeout(r, 80));
-    await sendSerialCommand("od?");
-    await new Promise(r => setTimeout(r, 80));
     await sendSerialCommand("ps?");
+    await new Promise(r => setTimeout(r, 80));
+    await sendSerialCommand("od?");
     await new Promise(r => setTimeout(r, 80));
     await sendSerialCommand("lf?");
     await new Promise(r => setTimeout(r, 80));
@@ -1054,27 +1121,37 @@ async function writeConfigToController() {
   try {
     // 1. PIN & Betriebslevel
     if (currentUnlockLevel === 2) {
-      await sendSerialCommand("pn210286");
+      const pinToSend = (appState.metisa_master_pin && appState.metisa_master_pin !== "0") ? appState.metisa_master_pin : "210286";
+      await sendSerialCommand(`pn${pinToSend}`);
     } else if (currentUnlockLevel === 1) {
-      await sendSerialCommand("pn130520");
+      const pinToSend = (appState.metisa_master_pin && appState.metisa_master_pin !== "0") ? appState.metisa_master_pin : "130520";
+      await sendSerialCommand(`pn${pinToSend}`);
     } else {
       await sendSerialCommand("pn0");
     }
-    await new Promise(r => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 90));
 
-    // 2. Leistungs- & Poti-Parameter
-    const potiVal = Math.round(appState.nud_controlmode || 250);
-    await sendSerialCommand(`ps${potiVal}`);
-    await new Promise(r => setTimeout(r, 80));
+    // 2. Leistungs- & Poti-Parameter (aus aktiver Konfiguration)
+    const powerTarget = Math.round(appState.nud_power_max || 250);
+    await sendSerialCommand(`ps${powerTarget}`);
+    await new Promise(r => setTimeout(r, 90));
 
     // 3. Lichtsteuerung
     const lfVal = appState.metisa_highbeam ? 2 : (appState.metisa_headlight ? 1 : 0);
     await sendSerialCommand(`lf${lfVal}`);
-    await new Promise(r => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 90));
     await sendSerialCommand(`lr${appState.metisa_taillight ? 1 : 0}`);
-    await new Promise(r => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 90));
 
-    // 4. EEPROM Commit
+    // 4. Hardware-Seriennummer verankern, falls vorhanden
+    if (assignedSerialNumber && assignedSerialNumber !== "SAGA-UNPROVISIONED") {
+      await sendSerialCommand(`sn=${assignedSerialNumber}`);
+      await new Promise(r => setTimeout(r, 90));
+    }
+
+    // 5. EEPROM Commit (sv1 und s für maximale Redundanz)
+    await sendSerialCommand("sv1");
+    await new Promise(r => setTimeout(r, 90));
     await sendSerialCommand("s");
     showToast("Kalibrierung erfolgreich auf Controller übertragen & in EEPROM gesichert [OK]", "success");
   } catch (err) {
@@ -1249,6 +1326,38 @@ function generateUnlockPin(serial, mode = "track") {
   return pin.toString();
 }
 
+function checkUrlAutoUnlock() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const pin = params.get("pin");
+    const sn = params.get("sn");
+
+    if (sn) {
+      const elSerial = document.getElementById("input_unlock_serial");
+      if (elSerial) elSerial.value = sn;
+      const elProfSerial = document.getElementById("profile_serial");
+      if (elProfSerial) elProfSerial.value = sn;
+      assignedSerialNumber = sn;
+      appState.profile_serial = sn;
+    }
+
+    if (pin) {
+      const elPin = document.getElementById("input_unlock_pin");
+      if (elPin) elPin.value = pin;
+
+      // Switch to PIN tab so user sees the unlock immediately
+      switchTab("tab-pin");
+
+      // Verify and unlock
+      setTimeout(() => {
+        verifyAndUnlockRaceMode();
+      }, 60);
+    }
+  } catch (err) {
+    console.warn("Auto-unlock via URL param failed:", err);
+  }
+}
+
 function setUnlockUILevel(lvl) {
   currentUnlockLevel = lvl;
   const lockedBox = document.getElementById("raceLockedContainer");
@@ -1261,16 +1370,34 @@ function setUnlockUILevel(lvl) {
     if (lockedBox) lockedBox.style.display = "none";
     if (unlockedBox) unlockedBox.style.display = "block";
     if (badge) {
-      badge.textContent = "AUTORISIERT // MASTER-PIN";
+      badge.textContent = "AUTORISIERT // MASTER-PIN (RENNSTRECKE)";
       badge.className = "badge badge-race";
     }
     if (statusVal) {
-      statusVal.textContent = "AUTORISIERT // RENNSTRECKE & DOKUMENTIERTES PRIVATGELÄNDE (GARANTIEVERZICHT BESTÄTIGT)";
+      statusVal.textContent = "AUTORISIERT // RENNSTRECKE & DOKUMENTIERTES PRIVATGELÄNDE [99 km/h | 1000 W | GARANTIEVERZICHT BESTÄTIGT]";
       statusVal.className = "tech-status-val status-unlocked";
     }
     appState.metisa_race_speed = 99;
     appState.metisa_race_power = 1000;
     appState.metisa_race_pure_throttle = true;
+    appState.nud_power_max = 1000;
+    appState.nud_speedcutoff_stop = 99;
+    appState.nud_speedcutoff_start = 95;
+
+    // Synchronize Form Inputs in DOM
+    const elPwr = document.getElementById("nud_power_max");
+    if (elPwr) elPwr.value = 1000;
+    const elCutStop = document.getElementById("nud_speedcutoff_stop");
+    if (elCutStop) elCutStop.value = 99;
+    const elCutStart = document.getElementById("nud_speedcutoff_start");
+    if (elCutStart) elCutStart.value = 95;
+    const elRaceSpd = document.getElementById("metisa_race_speed");
+    if (elRaceSpd) elRaceSpd.value = 99;
+    const elRacePwr = document.getElementById("metisa_race_power");
+    if (elRacePwr) elRacePwr.value = 1000;
+    const elThrot = document.getElementById("metisa_race_pure_throttle");
+    if (elThrot) elThrot.checked = true;
+
   } else if (lvl === 1) {
     // Level 1: E-Scooter eKFV (100% Garantie & Gewährleistung intakt)
     if (lockedBox) lockedBox.style.display = "none";
@@ -1286,6 +1413,24 @@ function setUnlockUILevel(lvl) {
     appState.metisa_race_speed = 20;
     appState.metisa_race_power = 500;
     appState.metisa_race_pure_throttle = true;
+    appState.nud_power_max = 500;
+    appState.nud_speedcutoff_stop = 20;
+    appState.nud_speedcutoff_start = 19;
+
+    // Synchronize Form Inputs in DOM
+    const elPwr = document.getElementById("nud_power_max");
+    if (elPwr) elPwr.value = 500;
+    const elCutStop = document.getElementById("nud_speedcutoff_stop");
+    if (elCutStop) elCutStop.value = 20;
+    const elCutStart = document.getElementById("nud_speedcutoff_start");
+    if (elCutStart) elCutStart.value = 19;
+    const elRaceSpd = document.getElementById("metisa_race_speed");
+    if (elRaceSpd) elRaceSpd.value = 20;
+    const elRacePwr = document.getElementById("metisa_race_power");
+    if (elRacePwr) elRacePwr.value = 500;
+    const elThrot = document.getElementById("metisa_race_pure_throttle");
+    if (elThrot) elThrot.checked = true;
+
   } else {
     // Level 0: Standard Pedelec (StVZO / EN 15194)
     if (lockedBox) lockedBox.style.display = "block";
@@ -1301,6 +1446,28 @@ function setUnlockUILevel(lvl) {
     appState.metisa_race_speed = 25;
     appState.metisa_race_power = 250;
     appState.metisa_race_pure_throttle = false;
+    appState.nud_power_max = 250;
+    appState.nud_speedcutoff_stop = 25;
+    appState.nud_speedcutoff_start = 23;
+
+    // Synchronize Form Inputs in DOM
+    const elPwr = document.getElementById("nud_power_max");
+    if (elPwr) elPwr.value = 250;
+    const elCutStop = document.getElementById("nud_speedcutoff_stop");
+    if (elCutStop) elCutStop.value = 25;
+    const elCutStart = document.getElementById("nud_speedcutoff_start");
+    if (elCutStart) elCutStart.value = 23;
+    const elRaceSpd = document.getElementById("metisa_race_speed");
+    if (elRaceSpd) elRaceSpd.value = 25;
+    const elRacePwr = document.getElementById("metisa_race_power");
+    if (elRacePwr) elRacePwr.value = 250;
+    const elThrot = document.getElementById("metisa_race_pure_throttle");
+    if (elThrot) elThrot.checked = false;
+  }
+
+  // Live Canvas Graph Re-render
+  if (typeof renderCanvasGraph === "function") {
+    renderCanvasGraph();
   }
 }
 
@@ -1321,17 +1488,29 @@ function verifyAndUnlockRaceMode() {
     return;
   }
 
-  const expectedTrackPin = generateUnlockPin(enteredSerial, "track");
-  const expectedClassPin = generateUnlockPin(enteredSerial, "class");
+  // Collect candidate serials to cross-reference
+  const candidateSerials = [
+    enteredSerial,
+    assignedSerialNumber !== "SAGA-UNPROVISIONED" ? assignedSerialNumber : "",
+    (appState.profile_serial || "")
+  ].filter(s => s && s.length >= 2);
 
-  if (enteredPin === "210286" || (enteredSerial && enteredPin === expectedTrackPin)) {
+  let isTrackMatch = (enteredPin === "210286");
+  let isClassMatch = (enteredPin === "130520" || enteredPin === "1305" || enteredPin === "1234");
+
+  for (const s of candidateSerials) {
+    if (enteredPin === generateUnlockPin(s, "track")) isTrackMatch = true;
+    if (enteredPin === generateUnlockPin(s, "class")) isClassMatch = true;
+  }
+
+  if (isTrackMatch) {
     // Level 2: Master-PIN (Rennstrecke & Privatgelände)
     appState.metisa_master_pin = enteredPin;
     setUnlockUILevel(2);
     if (errorBox) errorBox.style.display = "none";
     showToast("Master-PIN autorisiert: Rennstrecke & Privatgelände [Offenes Menü aktiv]", "success");
     if (isConnected) sendSerialCommand("pn210286");
-  } else if (enteredPin === "130520" || enteredPin === "1305" || enteredPin === "1234" || (enteredSerial && enteredPin === expectedClassPin)) {
+  } else if (isClassMatch) {
     // Level 1: E-Scooter eKFV (100% Garantie & Gewährleistung intakt)
     appState.metisa_master_pin = enteredPin;
     setUnlockUILevel(1);
@@ -1615,20 +1794,21 @@ async function startFirmwareFlash() {
     const totalPages = Math.ceil(maxAddress / pageSize);
     logTerminal(`[HEX] Firmware-Größe: ${maxAddress} Bytes in ${totalPages} Pages (128 Bytes/Page)`);
 
-    // Prepare Web Serial connection
+    // Prepare Web Serial connection: cleanly cancel reader and close port to unlock stream and set baudrate
     if (serialReader) {
       try { await serialReader.cancel(); } catch (e) {}
       serialReader = null;
+    }
+    if (serialPort && serialPort.readable) {
+      try { await serialPort.close(); } catch (e) {}
     }
     if (!serialPort) {
       logTerminal(`[PORT] Bitte USB-Schnittstelle im Browser-Dialog auswählen...`);
       serialPort = await navigator.serial.requestPort();
     }
-    if (!serialPort.readable) {
-      await serialPort.open({ baudRate: baudRate });
-      isConnected = true;
-      updateConnectionUI(true, "Flasher Aktiv");
-    }
+    await serialPort.open({ baudRate: baudRate });
+    isConnected = true;
+    updateConnectionUI(true, "Flasher Aktiv");
 
     logTerminal(`[RESET] Trigger DTR Hardware-Reset an ATmega328P...`);
     await serialPort.setSignals({ dataTerminalReady: false, requestToSend: true });
@@ -1703,14 +1883,18 @@ async function startFirmwareFlash() {
       if (pText) pText.textContent = "FLASH ERFOLGREICH [100%]";
 
     } finally {
-      writer.releaseLock();
-      reader.releaseLock();
-      await serialPort.setSignals({ dataTerminalReady: false, requestToSend: false });
+      try { writer.releaseLock(); } catch (e) {}
+      try { reader.releaseLock(); } catch (e) {}
+      try { await serialPort.setSignals({ dataTerminalReady: false, requestToSend: false }); } catch (e) {}
     }
 
-    // Restart serial telemetry stream
+    // Re-open serial port at 115200 baud for telemetry stream
+    try { await serialPort.close(); } catch (e) {}
     await sleep(400);
-    readSerialStream();
+    try {
+      await serialPort.open({ baudRate: 115200 });
+      readSerialStream();
+    } catch (e) {}
     showToast("Firmware erfolgreich geflasht!", "success");
 
   } catch (err) {

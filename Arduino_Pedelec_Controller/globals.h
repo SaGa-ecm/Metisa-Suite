@@ -115,6 +115,8 @@ extern byte pin_security_level;
 extern bool pure_throttle_allowed;
 extern bool pin_check_and_apply(unsigned long entered_pin);
 extern void pin_set_level(byte new_level);
+extern char metisa_serial_number[26];
+uint32_t compute_pin_hash(const char* serial, bool is_track);
 
 extern RTC_DS1307 rtc;
 extern Time now;

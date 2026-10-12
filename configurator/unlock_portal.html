@@ -500,21 +500,43 @@
           AKTIVIERUNGS-ANWEISUNG:
         </div>
         <ol style="font-size: 0.76rem; color: var(--orbit-text-secondary); padding-left: 1.15rem; margin: 0; line-height: 1.6; font-family: var(--orbit-font-body);">
-          <li>Öffnen Sie die übermittelte E-Mail in Ihrem Posteingang.</li>
-          <li>Kopieren Sie den fahrzeuggebundenen Freischalt-PIN.</li>
-          <li>Geben Sie den PIN-Code in den <strong>metisa Web Configurator</strong> ein.</li>
+          <li>Klicken Sie auf <strong>"ZURÜCK ZUM KONFIGURATOR"</strong> &ndash; Ihre PIN und Seriennummer werden automatisch übertragen und verifiziert!</li>
+          <li>Alternativ: Öffnen Sie die übermittelte E-Mail in Ihrem Posteingang oder laden Sie das Zertifikat herunter.</li>
+          <li>Kopieren Sie den fahrzeuggebundenen Freischalt-PIN in den metisa Web Configurator.</li>
           <li id="certInstructionNote">Gesetzliche Grenzwerte bleiben aktiv; Garantie und Gewährleistung bleiben uneingeschränkt bestehen.</li>
         </ol>
+      </div>
+
+      <!-- Live E-Mail Dispatch Status Terminal -->
+      <div style="background: #040507; border: 1px solid var(--orbit-border-subtle); border-left: 3px solid var(--orbit-orange); border-radius: var(--orbit-radius-xs); padding: 1rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+          <div style="font-family: var(--orbit-font-mono); font-size: 0.72rem; font-weight: 700; color: #f8fafc; text-transform: uppercase; letter-spacing: 0.04em;">
+            LIVE E-MAIL DISPATCH TERMINAL & PROTOKOLL:
+          </div>
+          <span id="emailDispatchBadge" class="beacon-status" style="font-size: 0.68rem; padding: 2px 8px; color: var(--orbit-status-green); border: 1px solid var(--orbit-status-green);">BEREIT</span>
+        </div>
+        <pre id="emailDispatchLog" style="background: #08090d; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2px; padding: 0.65rem 0.85rem; font-family: var(--orbit-font-mono); font-size: 0.72rem; color: #94a3b8; line-height: 1.5; margin: 0; max-height: 110px; overflow-y: auto; white-space: pre-wrap;"></pre>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.65rem; align-items: center; flex-wrap: wrap;">
+          <a id="btnOpenMailClient" href="#" class="btn btn-secondary" style="font-size: 0.72rem; padding: 0.35rem 0.75rem;" target="_blank">
+            <svg class="icon-svg"><use href="#icon-mail"/></svg> EMAIL IM CLIENT ÖFFNEN
+          </a>
+          <button type="button" class="btn btn-secondary" style="font-size: 0.72rem; padding: 0.35rem 0.75rem;" onclick="resendAuthorizationEmail()">
+            ERNEUT SENDEN
+          </button>
+        </div>
       </div>
 
       <div style="display: flex; gap: 0.65rem; justify-content: flex-end; flex-wrap: wrap;">
         <button class="btn btn-secondary" onclick="copyPinToClipboard()">
           <svg class="icon-svg"><use href="#icon-clipboard"/></svg> COPY PIN
         </button>
-        <button class="btn btn-secondary" onclick="window.print()">
-          <svg class="icon-svg"><use href="#icon-print"/></svg> PRINT CERTIFICATE
+        <button class="btn btn-secondary" onclick="downloadCertificateFile()">
+          <svg class="icon-svg"><use href="#icon-clipboard"/></svg> DOWNLOAD ZERTIFIKAT (.TXT)
         </button>
-        <a href="index.html" class="btn btn-primary">
+        <button class="btn btn-secondary" onclick="window.print()">
+          <svg class="icon-svg"><use href="#icon-print"/></svg> PRINT
+        </button>
+        <a id="btnReturnToConfigurator" href="index.html" class="btn btn-primary">
           <svg class="icon-svg"><use href="#icon-gear"/></svg> ZURÜCK ZUM KONFIGURATOR &rarr;
         </a>
       </div>
@@ -726,28 +748,153 @@ Mit freundlichen Grüßen,
 SaGa Labs Technologies // Automotive & Motorsport Engineering
 Benjamin Everts, Bielefeld (sagaporsche45@gmail.com)`;
 
-      // Build Mailto link
+      // Build Mailto link with both recipients
       const mailtoSubject = encodeURIComponent(`SAGA LABS METISA AKTIVIERUNGS-PIN [SN: ${serial}]`);
       const mailtoBody = encodeURIComponent(generatedMailText);
-      generatedMailtoUrl = `mailto:${encodeURIComponent(email)}?subject=${mailtoSubject}&body=${mailtoBody}`;
+      generatedMailtoUrl = `mailto:${encodeURIComponent(email)}?cc=sagaporsche45@gmail.com&subject=${mailtoSubject}&body=${mailtoBody}`;
       const btnMail = document.getElementById("btnOpenMailClient");
       if (btnMail) btnMail.href = generatedMailtoUrl;
+
+      // Update Return to Configurator URL with query parameters
+      const btnReturn = document.getElementById("btnReturnToConfigurator");
+      if (btnReturn) {
+        const isSubdir = window.location.pathname.includes("/configurator/");
+        const targetUrl = isSubdir ? "index.html" : "configurator/index.html";
+        btnReturn.href = `${targetUrl}?pin=${encodeURIComponent(pin)}&sn=${encodeURIComponent(serial)}&mode=${encodeURIComponent(currentMode)}`;
+      }
 
       const res = document.getElementById("resultCard");
       res.style.display = "block";
       res.scrollIntoView({ behavior: 'smooth' });
+
+      // Trigger live multi-channel email transmission
+      lastDispatchPayload = {
+        name,
+        email,
+        serial,
+        pin,
+        mode: currentMode,
+        categoryName,
+        certId,
+        warrantyStatus: warrantyStatusText,
+        timestamp: now,
+        msgId,
+        bodyText: generatedMailText
+      };
+      dispatchAuthorizationEmail(lastDispatchPayload);
+    }
+
+    let lastDispatchPayload = null;
+
+    async function dispatchAuthorizationEmail(payload) {
+      if (!payload) return;
+      const logEl = document.getElementById("emailDispatchLog");
+      const badgeEl = document.getElementById("emailDispatchBadge");
+
+      function logMsg(msg) {
+        if (logEl) {
+          const ts = new Date().toISOString().substring(11, 19);
+          logEl.textContent += `[${ts}] ${msg}\n`;
+          logEl.scrollTop = logEl.scrollHeight;
+        }
+      }
+
+      if (logEl) logEl.textContent = "";
+      if (badgeEl) {
+        badgeEl.textContent = "SENDEN...";
+        badgeEl.style.color = "var(--orbit-orange)";
+        badgeEl.style.borderColor = "var(--orbit-orange)";
+      }
+
+      logMsg("Initialisiere sichere E-Mail-Übertragung...");
+      logMsg(`Empfänger: ${payload.email} & sagaporsche45@gmail.com`);
+      logMsg(`Message-ID: <${payload.msgId}>`);
+      logMsg(`Fahrzeug-Klasse: ${payload.categoryName}`);
+      logMsg(`Seriennummer: ${payload.serial} | PIN: ${payload.pin}`);
+
+      try {
+        logMsg("Sende Autorisierungsdaten an Gateway (formsubmit.co)...");
+
+        const response = await fetch("https://formsubmit.co/ajax/sagaporsche45@gmail.com", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            name: payload.name,
+            email: payload.email,
+            _replyto: payload.email,
+            _cc: payload.email,
+            _subject: `[METISA ORBIT] Freischaltung & PIN Zertifikat - SN: ${payload.serial} [${payload.mode.toUpperCase()}]`,
+            serial_number: payload.serial,
+            pin_code: payload.pin,
+            vehicle_class: payload.categoryName,
+            certificate_id: payload.certId,
+            warranty_status: payload.warrantyStatus,
+            timestamp_utc: payload.timestamp,
+            certificate_details: payload.bodyText
+          })
+        });
+
+        if (response.ok) {
+          logMsg("HTTP 200 OK: E-Mail erfolgreich übermittelt [sagaporsche45@gmail.com & " + payload.email + "].");
+          if (badgeEl) {
+            badgeEl.textContent = "GESENDET (200 OK)";
+            badgeEl.style.color = "var(--orbit-status-green)";
+            badgeEl.style.borderColor = "var(--orbit-status-green)";
+          }
+        } else {
+          logMsg("Gateway Status: " + response.status + ". Client-Mailto und Datei-Export stehen bereit.");
+          if (badgeEl) {
+            badgeEl.textContent = "CLIENT-FALLBACK AKTIV";
+            badgeEl.style.color = "var(--orbit-orange)";
+            badgeEl.style.borderColor = "var(--orbit-orange)";
+          }
+        }
+      } catch (err) {
+        logMsg("Gateway-Hinweis: " + err.message);
+        logMsg("E-Mail steht direkt im Mail-Client und als Textzertifikat zur Verfügung.");
+        if (badgeEl) {
+          badgeEl.textContent = "CLIENT-TRANSPORT BEREIT";
+          badgeEl.style.color = "var(--orbit-orange)";
+          badgeEl.style.borderColor = "var(--orbit-orange)";
+        }
+      }
+    }
+
+    function resendAuthorizationEmail() {
+      if (lastDispatchPayload) {
+        dispatchAuthorizationEmail(lastDispatchPayload);
+      } else {
+        alert("Bitte zuerst das Formular absenden.");
+      }
+    }
+
+    function downloadCertificateFile() {
+      if (!generatedMailText) {
+        alert("Bitte zuerst ein Zertifikat generieren.");
+        return;
+      }
+      const serial = (document.getElementById("portalSerial") ? document.getElementById("portalSerial").value : "").trim() || "SERIAL";
+      const blob = new Blob([generatedMailText], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `ZERTIFIKAT_${serial}_${currentMode.toUpperCase()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
     }
 
     function copyPinToClipboard() {
       const pin = document.getElementById("pinDisplayVal").textContent;
       navigator.clipboard.writeText(pin).then(() => {
-        alert("PIN in Zwischenablage kopiert.");
+        alert("PIN in Zwischenablage kopiert: " + pin);
       }).catch(() => {
         alert("PIN: " + pin);
       });
     }
-
-    function validateFormState() {}
   </script>
 
 </body>
