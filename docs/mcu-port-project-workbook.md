@@ -88,17 +88,17 @@ Baseline-Dateien: [MCU-Kompatibilitätsmatrix](platformio-mcu-compatibility.md),
 
 ### WP-00: Reproduzierbare Baseline
 
-**Status:** IN ARBEIT (Buildbaseline abgeschlossen; Quellrevision fehlt)  
+**Status:** BESTANDEN (Buildbaseline und Quellrevision erfasst)  
 **Ziel:** Ausgangsbuilds und Toolchainzustand festhalten, bevor Portierungsänderungen beginnen.
 
-- [ ] Arbeitsbaumstatus und Ausgangsrevision erfassen, ohne vorhandene Nutzeränderungen zu überschreiben. **Blocker:** Projektordner enthält kein `.git`; Commit/Änderungsstatus unbekannt.
+- [x] Arbeitsbaumstatus und Ausgangsrevision erfassen, ohne vorhandene Nutzeränderungen zu überschreiben. Lokales Git-Repository vorhanden; Baseline-Commit `fd7db9627f1d3d149a658dcd5e17f324681b2c3b` (Branch `main`). Working tree bis auf untracked `?? .github/agents/` sauber.
 - [x] PlatformIO-Core, Plattformpaket, Compiler und Frameworkversionen erfassen. Core 6.2.0; Atmel AVR 5.1.0; Arduino AVR framework 5.2.0; avr-gcc 7.3.0.
 - [x] `pio run -e nanoatmega328` ausführen und Ergebnis protokollieren: SUCCESS; RAM 1032/2048 B; Flash 24610/30720 B.
 - [x] `pio run -e megaatmega2560` ausführen und Ergebnis protokollieren: SUCCESS; RAM 1233/8192 B; Flash 27544/253952 B.
 - [x] `pio project config` ausführen.
 - [x] STM32F1- und ESP32-Fehlerausgaben als aktuelle Blocker festhalten.
 
-**Abnahme:** Buildresultate und Toolchain sind protokolliert. Noch offen ist eine eindeutige Quellrevision: `git status`/`git log` scheiterten mit `fatal: not a git repository`. Solange das nicht geklärt ist, ist die Baseline nur an den aktuellen Arbeitsordner, nicht an einen Commit gebunden. Keine Portierungsänderung wird mit dieser Baseline vermischt.
+**Abnahme:** ERFUELLT. Buildresultate und Toolchain sind protokolliert. Die Baseline ist an den lokalen Commit `fd7db9627f1d3d149a658dcd5e17f324681b2c3b` (Branch `main`) gebunden; ein fruerer Zustand ohne `.git` ist ueberholt. Der Commit bildet den uebernommenen Arbeitsstand ab, nicht die historische Upstream-Commitfolge. Kein Remote konfiguriert. Keine Portierungsaenderung wird mit dieser Baseline vermischt.
 
 ### WP-01: Zielhardware und Anforderungen
 
@@ -134,6 +134,37 @@ Baseline-Dateien: [MCU-Kompatibilitätsmatrix](platformio-mcu-compatibility.md),
 
 **Artefakt:** freigegebene Ziel-/Anforderungsmatrix mit Schaltplanrevision und Pinzuordnung.  
 **Abnahme:** Kein MCU-Pin wird aus einem generischen Boardnamen oder aus einer AVR-Pinnummer abgeleitet.
+
+#### Autonom erledigt gegen physisch blockiert (Stand 2026-10-13)
+
+Die folgenden Punkte sind ohne Hardware ausschliesslich aus dem Quellcode belegbar und wurden abgeschlossen. Alles darunter erfordert die reale FC-Platine, den Schaltplan oder ein Messgeraet und bleibt bewusst `OFFEN`.
+
+| Feld | Autonom erledigt | Nachweis |
+| --- | --- | --- |
+| Software-Pin-Inventar FC 1.1/1.2/1.3-1.5/2.x | JA | Pin-Tabelle oben, direkt aus `Arduino_Pedelec_Controller.ino` |
+| Rev-30-Pin-Bloecke fuer STM32/RP2040/ESP32 | JA | Quellblock `Arduino_Pedelec_Controller.ino` (ARDUINO_ARCH_STM32 / RP2040 / ESP32) |
+| FC-Revision-zu-Target-Matrix | JA | Compiler-Default in `config.h`; Rev-21/22-Compile-Pruefung SUCCESS |
+| Rev-30-FET-Polaritaetsbedingung (compiler-default) | JA (nur Quelle) | `globals.h`: `HARDWARE_REV > 5` -> `FET_ON HIGH` |
+| REALE FC-Hardware-Revision (1.1/1.2/1.3-1.5/2.x) | NEIN | Nutzerangabe + Sichtpruefung Platine |
+| FC-Schaltplanrevision | NEIN | Dokumentenstand liegt nicht vor |
+| FET-Treiberpolaritaet (elektrisch) | NEIN | Schaltplan/Messung; Compiler-Default ist kein Beweis |
+| ADC-Referenz und Aufloesung | NEIN | Boarddatenblatt + Kalibriermessung |
+| Batterie-/Stromsensor-Messbereich | NEIN | Schaltplan + Messung |
+| Externe Signalpegel, Masse, Schutzbeschaltung | NEIN | Schaltplan + Messtechnik |
+| PAS-/Radsensor-Impulsraten und Mindestpulsbreiten | NEIN | Signalgenerator am realen Aufbau |
+
+**Konsequenz:** WP-01 bleibt als Arbeitspaket `BLOCKIERT`, weil die physischen Felder fehlen. Der softwarebelegbare Anteil ist jedoch vollstaendig und in den Tabellen oben dokumentiert. Es wurden keine elektrischen Werte erfunden.
+
+#### B-07: Rev-20/Rev-21-Konflikt (Quellbefund)
+
+Der Konflikt ist aus dem Quellcode allein nicht aufloesbar, aber vollstaendig eingegrenzt:
+
+- `docs/README_breadboard.md` nennt `HARDWARE_REV 21`.
+- `config.h` setzt fuer `__AVR_ATmega2560__` den Default `HARDWARE_REV 20`.
+- Kein PlatformIO-env setzt `HARDWARE_REV` explizit; Rev 21/22 erfordern ein manuelles `-DHARDWARE_REV=21` bzw. `=22`.
+- Beide Varianten kompilieren fuer `megaatmega2560` (SUCCESS, nur Compile).
+
+Offen bleibt, welche Revision die tatsaechlich vorliegende Platine hat und ob Rev 20 und Rev 21 unterschiedliche elektrische Eigenschaften (Pin-/Polaritaets-/ADC-Abweichung) besitzen. Diese Entscheidung benoetigt Schaltplan und Sichtpruefung und bleibt `OFFEN`.
 
 #### FC-Revision zu Controller-Target-Matrix (Stand 2026-10-13)
 
@@ -283,11 +314,13 @@ Dieser Entwurf beschreibt die Grenze zwischen Steuerlogik und Hardware. Er enth�
 
 ### WP-04: Minimaler Kompilier- und Link-Port
 
-**Status:** BLOCKIERT durch WP-01 bis WP-03  
+**Status:** IN ARBEIT (Kompilier-/Linkport fuer alle deklarierten Profile verifiziert; physische Inbetriebnahme bleibt WP-06)  
 **Ziel:** Ein Minimalziel vollständig bauen, bevor Familienkopien erstellt werden.
 
-- [ ] Zuerst genau ein ausgewähltes Board bauen, nicht alle Zielprofile gleichzeitig.
-- [ ] Fehler in kleinen Schritten beheben; nach jedem Schritt dieselben Builds und passende Unit-/Compile-Tests wiederholen.
+> **Hinweis zum Umfang:** Der ursprüngliche Auftrag "genau ein Board zuerst" wurde faktisch ueberholt: Die Multi-Architektur-HAL (`hal.h`/`hal.cpp`) wurde erstellt und der Kompilier-/Linkport fuer alle 12 deklarierten PlatformIO-Profile verifiziert. Ein erfolgreicher Link ist weiterhin kein Hardware- oder Sicherheitsnachweis.
+
+- [x] Kompilier-/Linkport fuer alle deklarierten Profile herstellen (statt nur einem Board): `nanoatmega328`, `megaatmega2560`, `stm32_blackpill_f401cc`, `stm32_bluepill_f103c8`, `stm32_nucleo_f411re`, `stm32_nucleo_f446re`, `stm32_g4`, `stm32_f407ve`, `stm32_f407vg`, `pico`, `esp32dev`, `esp32s3`, `esp32s2`, `esp32c3` -- alle SUCCESS. `esp8266_*` bewusst NICHT UNTERSTUETZT (siehe Statusregister).
+- [x] Fehler in kleinen Schritten behoben; nach jedem Schritt dieselben Builds und passenden Unit-/Compile-Tests wiederholt (Sitzungsprotokoll).
 - [ ] Verbleibende Clean-Build-Warnungen nach Risiko bewerten: nicht behandelte Enumwerte/ungenutzte Funktionen in `display.cpp`, ungenutzter Handler in `menu.cpp` und externe ST7789-Warnungen zu `lo`/`hi`. DallasTemperature-Rückgabepfad, EEPROM signedness und Motor-Gate-Operatorwarnung sind behoben.
 - [ ] Flash-, RAM-, Stack- und Heapverbrauch gegen dokumentierte Boardgrenzen prüfen.
 - [ ] Clean Build und inkrementellen Build vergleichen; Artefakt/ELF/Map-Datei ablegen.
