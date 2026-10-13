@@ -87,7 +87,8 @@ body {
 /* ==========================================================================
    Precision Vector Icons (Clean 1.5px Hairline Strokes)
    ========================================================================== */
-.svg-icon {
+.svg-icon,
+.icon-svg {
   width: 14px;
   height: 14px;
   display: inline-block;
