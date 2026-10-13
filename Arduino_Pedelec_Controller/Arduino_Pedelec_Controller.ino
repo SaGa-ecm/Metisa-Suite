@@ -38,7 +38,13 @@ Features:
 #include "menu.h"            //on the go menu
 #include "serial_command.h"       //serial (bluetooth) communication stuff
 #include "wireless_manager.h"     //onboard bluetooth & wifi telemetry manager
-#include "security_auth.h"        //zero-trust split-privilege security subsystem
+#include "security_auth.h"
+
+// Board-neutral C++ control core (metisa:: namespace).
+// Enabled explicitly with -DMETISA_CORE_ENABLE. Observational only: it does
+// not write hardware and does not change the legacy control path.
+// See Arduino_Pedelec_Controller/core/metisa_core_integration.h
+#include "core/metisa_core_integration.h"        //zero-trust split-privilege security subsystem
 
 #ifdef SUPPORT_MOTOR_SERVO   //RC motor controller connected to motor output
 #include <Servo.h>
@@ -916,6 +922,19 @@ loadcell.set_scale(hx711_scale);   //apply scaling
     // Initial PIN security state: StVZO default on boot
     pin_set_level(0);
 
+#ifdef METISA_CORE_ENABLE
+    // Initialise the board-neutral C++ core with limits taken from the live
+    // legacy configuration. No pin map, ADC, PWM or FET value is asserted.
+    metisa_core::coreInit(
+        (metisa::Watts)curr_power_max,
+        (metisa::TenthsKmH)(spd_max1 * 10.0),
+        (metisa::TenthsKmH)(spd_max2 * 10.0),
+        (metisa::TenthsKmH)(spd_max2 * 10.0),
+        (metisa::Millivolts)(vcutoff * 1000.0),
+        (metisa::Millivolts)(vemergency_shutdown * 1000.0)
+    );
+#endif
+
     // Hardware Watchdog Timer: 1 second timeout
     wdt_enable(WDTO_1S);
 }
@@ -1239,6 +1258,28 @@ if (loadcell.is_ready())     //new conversion result from load cell available
     {
         float factor_temperature=constrain(1-(temperature_thermistor-temperature_cutoff_start)/(temperature_cutoff_stop-temperature_cutoff_start),0,1); //linear decrease of maximum power for temperatures higher than temperature_cutoff_start
         factor_volt=factor_volt*factor_temperature;
+    }
+#endif
+
+//Board-neutral C++ core evaluation (observational)----------------------------
+#ifdef METISA_CORE_ENABLE
+    {
+        const unsigned long now_core = millis();
+        if (now_core - metisa_core::g_core.lastEvaluateMs >= metisa_core::CORE_CYCLE_MS) {
+            metisa_core::coreEvaluate(
+                (brake_stat == 0),
+                (uint16_t)analogRead_noISR(throttle_in),
+                (metisa::Millivolts)(voltage * 1000.0),
+                (metisa::Milliamps)(current * 1000.0),
+                (metisa::TenthsKmH)(spd * 10.0),
+                (metisa::Rpm)cad,
+                (metisa::Milliseconds)last_pas_event,
+                (metisa::TenthsDegC)(temperature * 10.0),
+                (startingaidenable && pedaling && spd <= curr_startingaid_speed),
+                (unsigned int)pin_security_level,
+                (metisa::Milliseconds)now_core
+            );
+        }
     }
 #endif
 

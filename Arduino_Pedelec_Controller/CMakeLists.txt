@@ -74,6 +74,7 @@ add_executable(${FIRMWARE_NAME}
     core/security_manager.cpp
     core/safety_manager.cpp
     core/motor_control.cpp
+    core/metisa_core_integration.cpp
     )
 target_link_arduino_libraries(${FIRMWARE_NAME} PRIVATE AUTO_PUBLIC)
 

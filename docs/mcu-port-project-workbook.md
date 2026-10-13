@@ -42,7 +42,8 @@ Für jede gemeinsame Arbeitssitzung einen Eintrag ergänzen:
 | 2026-10-11 | Benutzer-Dokumentation: Umfassendes DAU-Einsteiger-Handbuch (Wiki & 25 FAQ-Fragen) + Interaktive Web-Hilfe | `docs/WIKI_UND_FAQ_DAU_HANDBUCH.md`, `configurator/wiki.html`, `configurator/index.html`, `tools/test_configurator_contract.py` | `python tools/test_configurator_contract.py`; `python tools/source_contract_test.py`; `python tools/testbench_harness.py`; `python tools/validate_project_context.py` | Vollständiges, laienverständliches Handbuch ohne Fachchinesisch erstellt: Steckanleitung, Verkabelung, StVZO vs. PIN 210286, WLAN-/Bluetooth-Kopplung, 25 detaillierte FAQ-Problemlösungen und E-Bike-Glossar. Interaktive, durchsuchbare Akkordeon-Web-Hilfe in `wiki.html` und Verlinkung im Konfigurator integriert. Alle Tests bestanden. | Vollständige Benutzerfreigabe |
 | 2026-10-11 | Konfigurator-Bereinigung & SAGA LABS Freischalt-Portal: Entfernung Marketingphrasen/Boardauswahl/StVZO-Labels + PIN-Freischaltung für offenes Rennstrecken-Menü + Separates Autorisierungsportal | `configurator/index.html`, `configurator/unlock_portal.html`, `configurator/app.js`, `configurator/style.css`, `configurator/wiki.html`, `docs/WIKI_UND_FAQ_DAU_HANDBUCH.md`, `tools/test_configurator_contract.py` | `python tools/test_configurator_contract.py`; `python tools/source_contract_test.py`; `python tools/testbench_harness.py`; `python tools/validate_project_context.py` | Alle Werbeslogans, Boardauswahl (`target_mcu`) und StVZO-Labels aus Konfigurator entfernt. Kompakter technischer Statusbalken. Sichere PIN-Eingabe zum Freischalten des voll offenen Rennstrecken-Menüs (bis 99 km/h, 3000 W, Handgas) ohne PIN-Generierung im Konfigurator integriert. Separates Freischalt-Portal (`unlock_portal.html`) implementiert: Seriennummer-Eingabe, Pflicht-Bestätigung von gesetzlichen Bestimmungen und Garantieverzicht, deterministische PIN-Generierung und Zertifikatausgabe. 5/5 Vertragstests bestanden. | Bereitstellung und Benutzerabnahme |
 | 2026-10-12 | C++ HAL- & Core-Architektur + Automatische Hardware-Erkennung + Master-PIN Flasher-Gate (210286) | `core/*`, `hal/*`, `serial_command.cpp`, `configurator/app.js`, `configurator/index.html`, `configurator/style.css`, `tools/test_metisa_core.py` | `pio run -e nanoatmega328 -e stm32_blackpill_f401cc -e esp32dev`; `python tools/test_metisa_core.py`; `python tools/test_configurator_contract.py`; `python tools/source_contract_test.py`; `python tools/testbench_harness.py` | Alle PlatformIO-Targets bauen fehlerfrei (SUCCESS). C++17 Core-Module (`metisa::MotorControl`, `SafetyManager`, `SecurityManager`) mit abstrakten HAL-Schnittstellen (`hal::IGpio`, `IPwm`, `IAdc`, `INvm`, `IClock`) implementiert. Host-Testbench (13/13 OK). Automatische Hardware- und Firmware-Erkennung via Web Serial mit Master-PIN (210286) Gating bei uninitialisierten Controllern und Update-Freigabe bei bestehender Metisa-Firmware integriert. | Physische Prüfstands-Inbetriebnahme |
-| 2026-10-12 | Zero Plaintext Master-PIN Hardening & Raspberry Pi Pico 2 W / RP2350 & RP2040 Auto-Detect & UF2 Flasher Subsystem | `configurator/app.js`, `configurator/index.html`, `configurator/firmware/*`, `Arduino_Pedelec_Controller/security_auth.cpp`, `Arduino_Pedelec_Controller/Arduino_Pedelec_Controller.ino`, `tools/test_configurator_contract.py` | `python tools/test_configurator_contract.py`; `python tools/source_contract_test.py`; `python tools/validate_project_context.py`; `python tools/testbench_harness.py`; `python tools/test_metisa_core.py`; `pio run -e nanoatmega328 -e pico -e stm32_blackpill_f401cc -e stm32_f407vg -e esp32dev` | 100% Vertragstests (5/5), Quellcode-Vertrag (8/8), Harness (12/12) und Core-Tests (16/16) bestanden. Alle Klartext-PIN-Vorkommen im Frontend restlos eliminiert (ausschließlich Salted SHA-256 Hashprüfung). Honeypot-Trap intakt. Volle automatische Erkennung der Raspberry Pi Pico Familie (Pico 2 W / RP2350 Dual-Core @ 150 MHz [WIFI/BLE] & Pico / RP2040 Dual ARM @ 133 MHz) via USB VID `0x2E8A`, PID-Unterscheidung, 1200 Baud CDC Touch-Reset in BOOTSEL-Modus, WebUSB DFU/UF2 und kompilierte `.uf2` Binaries integriert. Alle 5 Multi-Architektur-Targets bauen erfolgreich (SUCCESS). | Bereitstellung und Benutzerabnahme |
+| 2026-10-12 | Zero Plaintext Master-PIN Hardening & Raspberry Pi Pico 2 W / RP2350 & RP2040 Auto-Detect & UF2 Flasher Subsystem | `configurator/app.js`, `configurator/index.html`, `configurator/firmware/*`, `Arduino_Pedelec_Controller/security_auth.cpp`, `Arduino_Pedelec_Controller/Arduino_Pedelec_Controller.ino`, `tools/test_configurator_contract.py` | `python tools/test_configurator_contract.py`; `python tools/source_contract_test.py`; `python tools/validate_project_context.py`; `python tools/testbench_harness.py`; `python tools/test_metisa_core.py`; `pio run -e nanoatmega328 -e pico -e stm32_blackpill_f401cc -e stm32_f407vg -e esp32dev` | 100% Vertragstests (5/5), Quellcode-Vertrag (8/8), Harness (12/12) und Core-Tests (16/16) bestanden. Alle Klartext-PIN-Vorkommen im Frontend restlos eliminiert (ausschließlich Salted SHA-256 Hash-Prüfung). Honeypot-Trap intakt. Volle automatische Erkennung der Raspberry Pi Pico Familie (Pico 2 W / RP2350 Dual-Core @ 150 MHz [WIFI/BLE] & Pico / RP2040 Dual ARM @ 133 MHz) via USB VID `0x2E8A`, PID-Unterscheidung, 1200 Baud CDC Touch-Reset in BOOTSEL-Modus, WebUSB DFU/UF2 und kompilierte `.uf2` Binaries integriert. Alle 5 Multi-Architektur-Targets bauen erfolgreich (SUCCESS). | Bereitstellung und Benutzerabnahme |
+| 2026-10-13 | WP-09 C++ Kern in Laufzeitpfad eingebunden (boardneutral, beobachtend) | `Arduino_Pedelec_Controller/core/metisa_core_integration.h`, `Arduino_Pedelec_Controller/core/metisa_core_integration.cpp`, `Arduino_Pedelec_Controller/Arduino_Pedelec_Controller.ino`, `Arduino_Pedelec_Controller/CMakeLists.txt`, `platformio.ini`, diese Arbeitsmappe | `python tools/source_contract_test.py`; `python tools/test_metisa_core.py`; `pio run -e nanoatmega328 -e megaatmega2560`; `pio run -e stm32_f407ve -e stm32_f407vg` | C++-Kern (`metisa::MotorController`, `SafetyManager`) war kompiliert, aber nie instanziiert. Neuer Adapter (`metisa_core::`) instanziiert und treibt den Kern zyklisch (10 ms) aus vorhandenen Legacy-Globalen; beobachtend, schreibt keine Hardware, ersetzt den Legacy-Regelpfad nicht. Aktivierung nur via `-DMETISA_CORE_ENABLE` (gesetzt für `stm32_f407ve`, `stm32_f407vg`). Keine Pin-, ADC-, PWM-, FET- oder Reset-Annahmen erfunden; Konfigurationsgrenzen explizit aus Laufzeitvariablen übergeben. Tests 8/8 und 16/16 OK. AVR nanoatmega328 (Flash 96,6%) und megaatmega2560 SUCCESS. STM32F407VE SUCCESS (RAM 8,8% / 11480 B, Flash 12,0% / 63116 B). STM32F407VG SUCCESS (RAM 8,7% / 11392 B, Flash 6,0% / 63292 B). Kein Hardware-/Sicherheitsnachweis. | WP-01 (physische Zielhardware) und WP-04 Freigabe; Kern-Ausgabe gegen Legacy-Regelung im Prüfstand vergleichen (WP-06) |
 
 ## 2. Ausgangslage und verifizierte Befunde
 
@@ -101,8 +102,25 @@ Baseline-Dateien: [MCU-Kompatibilitätsmatrix](platformio-mcu-compatibility.md),
 
 ### WP-01: Zielhardware und Anforderungen
 
-**Status:** IN ARBEIT (Software-Inventar begonnen; physische Zieldefinition offen)  
+**Status:** BLOCKIERT (Software-Inventar abgeschlossen; physische Zieldefinition erfordert Nutzerangabe)  
 **Ziel:** Ein konkretes Prüfboard je gewünschter MCU-Familie und die reale FC-Schnittstelle festlegen.
+
+> **Blockade B-05/B-07:** Ohne physisch vorliegende FC-Platine, Schaltplanrevision und Boardauswahl ist keine sichere Pin-/Spannungs-/Polaritätszuordnung möglich. Die Projektregeln verbieten das Erfinden von Pinbelegung, ADC-Referenz, PWM-Frequenz, FET-Polarität und Reset-Verhalten. Bis zur Nutzerangabe bleiben alle zielspezifischen Felder `OFFEN`.
+
+**Entscheidungsvorlage (durch Nutzer auszufüllen):**
+
+| Feld | Erforderliche Angabe | Status |
+| --- | --- | --- |
+| FC-Hardware-Revision | 1.1 / 1.2 / 1.3-1.5 / 2.x (Rev 20/21/22) | OFFEN |
+| FC-Schaltplanrevision | Dokumentenstand | OFFEN |
+| Primäres Portierungsziel | eine MCU-Familie | OFFEN |
+| Prüfboard | konkretes Boardmodell + Revision | OFFEN |
+| Programmier-/Debuggerät | z. B. ST-Link, USB-CDC | OFFEN |
+| FET-Treiberpolarität | aus Schaltplan bestätigen | OFFEN |
+| ADC-Referenz/Auflösung | aus Boarddatenblatt | OFFEN |
+| Batterie-/Stromsensor-Bereich | Messbereich + Skalierung | OFFEN |
+
+**FET-Polaritätskonflikt:** `globals.h` definiert `FET_ON`/`FET_OFF` abhängig von `HARDWARE_REV` (`<= 5` invertiert). Die reale Platine entscheidet, welche Definition gilt. Ohne Messung darf `safe_outputs_init()` nicht als garantiert fail-off gelten.
 
 - [ ] Konkrete Boardmodelle, Revisionen, MCU-Bestückung, Bootloader und Debug-/Programmiergerät erfassen.
 - [ ] FC 1.x/2.x Hardwarerevision und vollständigen Schaltplan/Pinout bestimmen.
@@ -116,6 +134,31 @@ Baseline-Dateien: [MCU-Kompatibilitätsmatrix](platformio-mcu-compatibility.md),
 
 **Artefakt:** freigegebene Ziel-/Anforderungsmatrix mit Schaltplanrevision und Pinzuordnung.  
 **Abnahme:** Kein MCU-Pin wird aus einem generischen Boardnamen oder aus einer AVR-Pinnummer abgeleitet.
+
+#### FC-Revision zu Controller-Target-Matrix (Stand 2026-10-13)
+
+Diese Zuordnung ist quellbelegt, aber keine elektrische Freigabe. Die FC-Revision wird ausschließlich über den Compiler-Default in [`config.h`](../Arduino_Pedelec_Controller/config.h#L13-L20) bestimmt: `__AVR_ATmega2560__` -> `HARDWARE_REV 20` (FC 2.x), sonstige AVR -> `HARDWARE_REV 5` (FC 1.5), alle 32-Bit-Ziele -> `HARDWARE_REV 30` (generisches Rev-30-Profil, keinem historischen FC zugeordnet). Kein PlatformIO-env setzt `HARDWARE_REV` explizit.
+
+| PlatformIO-env | MCU | Board | FC-Revision (Default) | Quellnachweis | Build-Status |
+| --- | --- | --- | --- | --- | --- |
+| `nanoatmega328` | ATmega328P | nanoatmega328 | FC 1.5 (`HARDWARE_REV 5`) | [`config.h`](../Arduino_Pedelec_Controller/config.h#L17) | build verified (2026-10-13) |
+| `megaatmega2560` | ATmega2560 | megaatmega2560 | FC 2.0 (`HARDWARE_REV 20`) | [`config.h`](../Arduino_Pedelec_Controller/config.h#L15) | build verified (2026-10-13) |
+| `stm32_blackpill_f401cc` | STM32F401CC | blackpill_f401cc | Rev 30 (generisch) | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `stm32_bluepill_f103c8` | STM32F103C8 | bluepill_f103c8 | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `stm32_nucleo_f411re` | STM32F411RE | nucleo_f411re | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `stm32_nucleo_f446re` | STM32F446RE | nucleo_f446re | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `stm32_g4` | STM32G431RB | nucleo_g431rb | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `pico` | RP2040 | pico | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `esp32dev` | ESP32 | esp32dev | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `esp32s2` | ESP32-S2 | esp32-s2-saola-1 | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `esp32s3` | ESP32-S3 | esp32-s3-devkitc-1 | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+| `esp32c3` | ESP32-C3 | esp32-c3-devkitc-02 | Rev 30 | [`config.h`](../Arduino_Pedelec_Controller/config.h#L19) | build verified (2026-10-13) |
+
+**Compile-Pruefung Rev 21/22 (2026-10-13):** `pio run -e megaatmega2560` mit `PLATFORMIO_BUILD_FLAGS=-DHARDWARE_REV=21` -> SUCCESS; mit `-DHARDWARE_REV=22` -> SUCCESS. Nur Compile, kein Flash; keine Hardwarequalifikation. Rev 21 und Rev 22 sind in keinem env voreingestellt und erfordern ein manuelles Build-Flag.
+
+**Offene Zuordnungskonflikte:**
+- Rev 21 vs Rev 20: [`docs/README_breadboard.md`](README_breadboard.md#L5) nennt Rev 21, der Mega-Default ist Rev 20 (B-07, OFFEN).
+- Rev 30 ist ein Architektur-Profil, keine historische FC-Revision: fuer STM32/RP2040/ESP32 existieren getrennte Pin-Bloecke in [`Arduino_Pedelec_Controller.ino`](../Arduino_Pedelec_Controller/Arduino_Pedelec_Controller.ino#L216-L308); der `#else`-Fallback gilt fuer ESP8266, das die Matrix ausschliesst.
 
 #### Vorläufiges FC-Pin-Inventar aus dem Quellcode
 
