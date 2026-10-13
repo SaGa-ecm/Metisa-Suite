@@ -295,6 +295,8 @@ static void handle_command()
                 active_serial_port->print(MY_F("METISA:REV22:STM32:1.43:SN="));
 #elif defined(__AVR_ATmega2560__)
                 active_serial_port->print(MY_F("METISA:REV22:MEGA2560:1.43:SN="));
+#elif defined(ARDUINO_ARCH_RP2350) || defined(PICO_RP2350) || defined(TARGET_RP2350) || defined(__ARM_ARCH_8M_MAIN__)
+                active_serial_port->print(MY_F("METISA:REV22:RP2350:1.43:SN="));
 #elif defined(ARDUINO_ARCH_RP2040)
                 active_serial_port->print(MY_F("METISA:REV22:RP2040:1.43:SN="));
 #else

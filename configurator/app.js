@@ -715,7 +715,9 @@ function generateHardwareSerialNumber(mcuModel) {
   let arch = "NANO";
   if ((mcuModel || "").includes("STM32")) arch = "STM32";
   else if ((mcuModel || "").includes("ESP32")) arch = "ESP32";
-  else if ((mcuModel || "").includes("RP2040")) arch = "RP20";
+  else if ((mcuModel || "").includes("RP2350") || (mcuModel || "").includes("Pico 2")) arch = "RP23";
+  else if ((mcuModel || "").includes("RP2040") || (mcuModel || "").includes("Pico")) arch = "RP20";
+  else if ((mcuModel || "").includes("Mega")) arch = "MEGA";
   
   const entropy = Math.floor(1000 + Math.random() * 9000);
   const hexSum = ((Date.now() ^ entropy) & 0xFFFF).toString(16).toUpperCase().padStart(4, "0");
@@ -792,15 +794,15 @@ function detectControllerHardware(port) {
       return "Raspberry Pi Pico 2 / Pico 2 W [RP2350 BOOTSEL UF2]";
     } else if (pid === 0x0003) {
       return "Raspberry Pi Pico / Pico W [RP2040 BOOTSEL UF2]";
-    } else if (pid === 0x0009) {
-      return "Raspberry Pi Pico 2 W [RP2350 Dual-Core @ 150 MHz]";
+    } else if (pid === 0x0009 || pid === 0x00C1 || pid === 0x00c1 || pid === 0x0115 || pid === 0x8115) {
+      return "Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])";
     } else if (pid === 0x000A || pid === 0x0005 || pid === 0x0004) {
-      if (typeof appState !== "undefined" && (appState.target_mcu === "pico2w" || (typeof detectedMcuModel === "string" && detectedMcuModel.includes("2")))) {
+      if (typeof appState !== "undefined" && (appState.target_mcu === "pico2w" || (typeof detectedMcuModel === "string" && (detectedMcuModel.includes("2") || detectedMcuModel.includes("2350"))))) {
         return "Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])";
       }
-      return "Raspberry Pi Pico [RP2040 / RP2350 USB CDC]";
+      return "Raspberry Pi Pico 2 W / Pico [RP2350 / RP2040 USB CDC]";
     }
-    return "Raspberry Pi Pico Family [RP2350 / RP2040]";
+    return "Raspberry Pi Pico 2 W / Pico [RP2350 / RP2040]";
   }
   return "Arduino Nano (ATmega328P)";
 }
@@ -928,9 +930,10 @@ async function connectSerial() {
     } else if (detectedMcuModel.includes("Mega")) {
       selectFlasherTarget('mega');
       setTargetMcuSelect('avr_mega');
-    } else if (detectedMcuModel.includes("RP2040") || detectedMcuModel.includes("Pico")) {
-      selectFlasherTarget('pico');
-      setTargetMcuSelect('pico');
+    } else if (detectedMcuModel.includes("RP2040") || detectedMcuModel.includes("RP2350") || detectedMcuModel.includes("Pico")) {
+      const isPico2W = detectedMcuModel.includes("Pico 2") || detectedMcuModel.includes("RP2350");
+      selectFlasherTarget(isPico2W ? 'pico2w' : 'pico');
+      setTargetMcuSelect(isPico2W ? 'pico2w' : 'pico');
     } else {
       selectFlasherTarget('nano');
       setTargetMcuSelect('avr_nano');
@@ -1964,6 +1967,7 @@ function selectFlasherTarget(target, subModel = null) {
   const targetNote = document.getElementById("flasherTargetNote");
   const btnFlash = document.getElementById("btnStartFlashSerial");
   const btnDfuFlash = document.getElementById("btnStartDfuFlash");
+  const btnUf2Flash = document.getElementById("btnStartUf2DriveFlash");
   const stm32SelectBox = document.getElementById("stm32ModelSelectContainer");
   const baudRateBox = document.getElementById("baudRateContainer");
   const flashBtnText = document.getElementById("btnStartFlashSerialText");
@@ -1997,6 +2001,7 @@ function selectFlasherTarget(target, subModel = null) {
     if (stm32SelectBox) stm32SelectBox.style.display = "none";
     if (baudRateBox) baudRateBox.style.display = "none";
     if (btnDfuFlash) btnDfuFlash.style.display = "inline-flex";
+    if (btnUf2Flash) btnUf2Flash.style.display = "inline-flex";
     if (btnDown) btnDown.textContent = "DOWNLOAD FIRMWARE (.BIN / .HEX)";
     if (targetNote) {
       if (isConnected && detectedMcuModel && detectedMcuModel !== "Kein Controller" && detectedMcuModel !== "Getrennt") {
@@ -2011,6 +2016,7 @@ function selectFlasherTarget(target, subModel = null) {
     if (stm32SelectBox) stm32SelectBox.style.display = "none";
     if (baudRateBox) baudRateBox.style.display = "flex";
     if (btnDfuFlash) btnDfuFlash.style.display = "none";
+    if (btnUf2Flash) btnUf2Flash.style.display = "none";
     if (btnDown) btnDown.textContent = "DOWNLOAD NANO (.HEX)";
     if (targetNote) targetNote.textContent = "Ziel: Arduino Nano (ATmega328P) via Web Serial STK500v1";
     if (btnFlash) btnFlash.style.display = "inline-flex";
@@ -2019,6 +2025,7 @@ function selectFlasherTarget(target, subModel = null) {
     if (stm32SelectBox) stm32SelectBox.style.display = "flex";
     if (baudRateBox) baudRateBox.style.display = "flex";
     if (btnDfuFlash) btnDfuFlash.style.display = "inline-flex";
+    if (btnUf2Flash) btnUf2Flash.style.display = "none";
     if (btnFlash) btnFlash.style.display = "inline-flex";
     if (flashBtnText) flashBtnText.textContent = "SERIAL BOOTLOADER FLASHEN";
     updateStm32ModelSelection();
@@ -2026,6 +2033,7 @@ function selectFlasherTarget(target, subModel = null) {
     if (stm32SelectBox) stm32SelectBox.style.display = "none";
     if (baudRateBox) baudRateBox.style.display = "flex";
     if (btnDfuFlash) btnDfuFlash.style.display = "none";
+    if (btnUf2Flash) btnUf2Flash.style.display = "none";
     if (btnDown) btnDown.textContent = "DOWNLOAD MEGA (.HEX)";
     if (targetNote) targetNote.textContent = "Ziel: Arduino Mega 2560 (ATmega2560) via Web Serial STK500v2";
     if (btnFlash) btnFlash.style.display = "inline-flex";
@@ -2034,6 +2042,7 @@ function selectFlasherTarget(target, subModel = null) {
     if (stm32SelectBox) stm32SelectBox.style.display = "none";
     if (baudRateBox) baudRateBox.style.display = "none";
     if (btnDfuFlash) btnDfuFlash.style.display = "none";
+    if (btnUf2Flash) btnUf2Flash.style.display = "none";
     if (btnDown) btnDown.textContent = "DOWNLOAD ESP32 (.BIN)";
     if (targetNote) targetNote.textContent = "Ziel: ESP32 DevKit Dual-Core (Xtensa @ 240 MHz) Binary Image";
     if (btnFlash) btnFlash.style.display = "inline-flex";
@@ -2042,6 +2051,7 @@ function selectFlasherTarget(target, subModel = null) {
     if (stm32SelectBox) stm32SelectBox.style.display = "none";
     if (baudRateBox) baudRateBox.style.display = "none";
     if (btnDfuFlash) btnDfuFlash.style.display = "none";
+    if (btnUf2Flash) btnUf2Flash.style.display = "inline-flex";
     const isPico2W = (subModel === 'pico2w' || target === 'pico2w' || (detectedMcuModel && (detectedMcuModel.includes("RP2350") || detectedMcuModel.includes("Pico 2"))));
     if (btnDown) btnDown.textContent = isPico2W ? "DOWNLOAD PICO 2 W (.UF2)" : "DOWNLOAD PICO (.UF2)";
     if (targetNote) targetNote.textContent = isPico2W ? "Ziel: Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])" : "Ziel: Raspberry Pi Pico (RP2040 Dual-Core @ 133 MHz)";
@@ -2279,21 +2289,35 @@ async function startDfuFirmwareFlash() {
     if (navigator.usb.getDevices) {
       try {
         const paired = await navigator.usb.getDevices();
-        usbDevice = paired.find(d => (d.vendorId === 0x0483 && d.productId === 0xDF11) || d.vendorId === 0x0483);
+        usbDevice = paired.find(d => (d.vendorId === 0x0483 || d.vendorId === 0x483) && (d.productId === 0xDF11 || d.productId === 0xdf11));
       } catch (pe) {}
     }
 
     if (!usbDevice) {
       usbDevice = await navigator.usb.requestDevice({
         filters: [
-          { vendorId: 0x0483, productId: 0xDF11 },
-          { vendorId: 0x0483 }
+          { vendorId: 0x0483, productId: 0xDF11 }
         ]
       });
     }
 
     logTerminal(`[USB] Gerät verbunden: ${usbDevice.productName || 'STM32 Bootloader'} (VID 0x${usbDevice.vendorId.toString(16).padStart(4,'0')}, PID 0x${usbDevice.productId.toString(16).padStart(4,'0')})`);
-    await usbDevice.open();
+    try {
+      await usbDevice.open();
+    } catch (openErr) {
+      if (openErr.name === "SecurityError" || (openErr.message && openErr.message.includes("Access denied"))) {
+        logTerminal(`[FEHLER] WebUSB Zugriff verweigert: ${openErr.message}`);
+        logTerminal(`[WINDOWS TREIBER] Unter Windows blockiert der Standardtreiber den direkten WebUSB-Zugriff.`);
+        logTerminal(`[LÖSUNG] 1. Laden Sie das Tool 'Zadig' (https://zadig.akeo.ie) herunter.`);
+        logTerminal(`[LÖSUNG] 2. Wählen Sie in Zadig das Gerät 'STM32 BOOTLOADER' (VID 0483, PID DF11) aus.`);
+        logTerminal(`[LÖSUNG] 3. Ändern Sie den Treiber auf 'WinUSB' und klicken Sie auf 'Install Driver'.`);
+        logTerminal(`[LÖSUNG] 4. Starten Sie das Flashen anschließend erneut.`);
+        showToast("WebUSB WinUSB-Treiber erforderlich (Zadig)", "error");
+        if (pText) pText.textContent = "WINUSB TREIBER FEHLT";
+        return;
+      }
+      throw openErr;
+    }
     if (usbDevice.configuration === null) {
       await usbDevice.selectConfiguration(1);
     }
@@ -2945,6 +2969,56 @@ async function startNanoStk500Flash(baudRateOverride = null) {
   }
 }
 
+// Sends 'df1' over an already opened Web Serial port and evaluates the firmware reply.
+// The firmware only honours the jump when the controller itself is at security level 2;
+// otherwise it answers ERR:DFU_NOT_AUTHORIZED and stays in application mode (USB CDC).
+async function requestStm32DfuJump(logTerminal) {
+  logTerminal("[DFU] Sende DFU-Sprungbefehl (df1) an Controller...");
+  let reply = "";
+  try {
+    await pauseTelemetryStream();
+    reply = await execSerialTransaction("df1", 1200);
+  } catch (e) {
+    reply = "";
+  }
+
+  const printBootHint = () => {
+    logTerminal("[HARDWARE-DFU] Manueller Eintritt in den ST ROM-Bootloader (PID 0xDF11):");
+    logTerminal("  1. USB trennen.");
+    logTerminal("  2. BOOT0-Taste gedrückt halten und USB wieder einstecken (oder RESET kurz drücken).");
+    logTerminal("  3. BOOT0 loslassen und 'WEBUSB DFU FLASHEN' klicken.");
+    logTerminal("[INFO] Im Geräte-Dialog muss 'STM32 BOOTLOADER' erscheinen, nicht der CDC-Port (PID 0x5740).");
+  };
+
+  if (reply.includes("ERR:DFU_NOT_AUTHORIZED")) {
+    logTerminal("[DFU] Controller verweigert Bootloader-Sprung: ERR:DFU_NOT_AUTHORIZED.");
+    logTerminal("[DFU] Software-Sprung erfordert eine am Controller freigegebene Sitzung (Level 2).");
+    printBootHint();
+    resumeTelemetryStream();
+    showToast("DFU-Sprung verweigert: BOOT0-Prozedur nutzen", "warning");
+    return false;
+  }
+
+  if (!reply.includes("OK:DFU_BOOTLOADER_ENTER")) {
+    logTerminal(`[DFU] Keine Bestätigung des Bootloader-Sprungs empfangen${reply ? ` (Antwort: ${reply})` : ""}.`);
+    printBootHint();
+    resumeTelemetryStream();
+    return false;
+  }
+
+  logTerminal("[DFU] Controller bestätigt: OK:DFU_BOOTLOADER_ENTER. USB re-enumeriert als 0483:DF11...");
+  if (serialReader) {
+    try { await serialReader.cancel(); } catch (e) {}
+    serialReader = null;
+  }
+  if (serialPort && serialPort.readable) {
+    try { await serialPort.close(); } catch (e) {}
+  }
+  isConnected = false;
+  await sleep(1200);
+  return true;
+}
+
 async function startAutoDetectFirmwareFlash() {
   const logView = document.getElementById("flashTerminalLog");
   const pBar = document.getElementById("flashProgressBar");
@@ -2968,7 +3042,7 @@ async function startAutoDetectFirmwareFlash() {
       const pairedUsb = await navigator.usb.getDevices();
       const picoDev = pairedUsb.find(d => (d.vendorId === 0x2E8A || d.vendorId === 0x2e8a));
       if (picoDev) {
-        const isPico2W = (picoDev.productId === 0x000F || picoDev.productId === 0x0009);
+        const isPico2W = (picoDev.productId === 0x000F || picoDev.productId === 0x0009 || picoDev.productId === 0x00C1 || picoDev.productId === 0x00c1 || picoDev.productId === 0x0115 || picoDev.productId === 0x8115);
         const desc = isPico2W ? "Raspberry Pi Pico 2 W [RP2350 BOOTSEL UF2]" : "Raspberry Pi Pico [RP2040 BOOTSEL UF2]";
         logTerminal(`[AUTO-DETECT] ${desc} über WebUSB erkannt (VID 0x${picoDev.vendorId.toString(16).padStart(4,'0')}, PID 0x${picoDev.productId.toString(16).padStart(4,'0')})`);
         detectedMcuModel = desc;
@@ -2976,7 +3050,7 @@ async function startAutoDetectFirmwareFlash() {
         selectFlasherTarget(isPico2W ? "pico2w" : "pico");
         return await startPicoFirmwareFlash(isPico2W ? "pico2w" : "pico");
       }
-      const dfuDev = pairedUsb.find(d => (d.vendorId === 0x0483 && d.productId === 0xDF11) || d.vendorId === 0x0483);
+      const dfuDev = pairedUsb.find(d => (d.vendorId === 0x0483 || d.vendorId === 0x483) && (d.productId === 0xDF11 || d.productId === 0xdf11));
       if (dfuDev) {
         logTerminal(`[AUTO-DETECT] STM32 DFU-Bootloader Device über WebUSB erkannt (VID 0x${dfuDev.vendorId.toString(16).padStart(4,'0')}, PID 0x${dfuDev.productId.toString(16).padStart(4,'0')})`);
         return await startDfuFirmwareFlash();
@@ -2999,23 +3073,8 @@ async function startAutoDetectFirmwareFlash() {
       // Bei USB CDC (nativer STM32 USB-Port): DFU-Bootloader-Befehl senden und zu WebUSB DFU wechseln
       if (detectedMcuModel.includes("USB CDC") || detectedMcuModel.includes("CDC")) {
         logTerminal(`[AUTO-DETECT] STM32 Controller über USB CDC verbunden (${sub.toUpperCase()}).`);
-        logTerminal("[AUTO-DETECT] Sende DFU-Bootloader Sprungbefehl (df1) an Controller...");
-        try {
-          await sendSerialCommand("df1");
-          await sleep(250);
-        } catch (e) {}
-
-        if (serialReader) {
-          try { await serialReader.cancel(); } catch (e) {}
-          serialReader = null;
-        }
-        if (serialPort && serialPort.readable) {
-          try { await serialPort.close(); } catch (e) {}
-        }
-        isConnected = false;
-
-        logTerminal("[AUTO-DETECT] Controller wechselt in DFU-Modus. Starte WebUSB DFU 1.1 Flasher...");
-        await sleep(500);
+        const jumped = await requestStm32DfuJump(logTerminal);
+        if (!jumped) return;
         return await startDfuFirmwareFlash();
       }
 
@@ -3054,6 +3113,8 @@ async function startAutoDetectFirmwareFlash() {
       serialPort = await navigator.serial.requestPort();
     } catch (e) {
       logTerminal("[ABBRUCH] Keine USB-Schnittstelle ausgewählt.");
+      logTerminal("[TIPP] Für Raspberry Pi Pico 2 W / Pico: Nutzen Sie 'UF2 LAUFWERK FLASHEN (RPI-RP2)' um das UF2-Laufwerk direkt ohne COM-Port zu flashen.");
+      logTerminal("[TIPP] Für STM32 DFU: Nutzen Sie 'WEBUSB DFU FLASHEN' (BOOT0 beim Anstecken gedrückt halten).");
       return;
     }
   }
@@ -3075,6 +3136,19 @@ async function startAutoDetectFirmwareFlash() {
 
     if (pid === 0xDF11 || pid === 0xdf11) {
       logTerminal("[AUTO-DETECT] Controller befindet sich im USB DFU-Bootloader-Modus.");
+      return await startDfuFirmwareFlash();
+    }
+
+    if (pid === 0x5740) {
+      logTerminal("[AUTO-DETECT] Nativer STM32 USB CDC Port erkannt (PID 0x5740).");
+      try {
+        await serialPort.open({ baudRate: 115200 });
+      } catch (e) {
+        logTerminal(`[FEHLER] COM-Port konnte nicht geöffnet werden: ${e.message}`);
+        return;
+      }
+      const jumped = await requestStm32DfuJump(logTerminal);
+      if (!jumped) return;
       return await startDfuFirmwareFlash();
     }
 
@@ -3312,6 +3386,153 @@ async function startAutoDetectFirmwareFlash() {
   return await startNanoStk500Flash();
 }
 
+async function startUf2DriveFlash(targetSub = null) {
+  if (controllerFirmwareStatus === "BLANK" && !masterUnlockForFlashApproved) {
+    showToast("Erst-Upload gesperrt: Master-Autorisierung erforderlich", "error");
+    const logView = document.getElementById("flashTerminalLog");
+    if (logView) {
+      logView.textContent += `\n[SICHERHEIT] Erst-Upload auf uninitialisierten Controller verweigert. Master-Autorisierung erforderlich.`;
+    }
+    return;
+  }
+
+  const logView = document.getElementById("flashTerminalLog");
+  const pBar = document.getElementById("flashProgressBar");
+  const pText = document.getElementById("flashProgressText");
+
+  function logTerminal(msg) {
+    const time = new Date().toISOString().substring(11, 19);
+    if (logView) {
+      logView.textContent += `\n[${time}] ${msg}`;
+      logView.scrollTop = logView.scrollHeight;
+    }
+  }
+
+  try {
+    logTerminal("[UF2] Starte Raspberry Pi BOOTSEL Laufwerks-Flasher...");
+    if (pBar) pBar.style.width = "10%";
+    if (pText) pText.textContent = "LAUFWERK AUSWÄHLEN [10%]";
+
+    if (!window.showDirectoryPicker) {
+      logTerminal("[INFO] Web File System Access API in diesem Browser nicht verfügbar.");
+      logTerminal("[DOWNLOAD] Lade stattdessen vorkompilierte UF2-Datei herunter...");
+      downloadSelectedFirmwareBinary();
+      logTerminal("[TIPP] Ziehen Sie die heruntergeladene .uf2 Datei per Drag & Drop auf Ihr USB-Laufwerk 'RPI-RP2'.");
+      if (pBar) pBar.style.width = "100%";
+      if (pText) pText.textContent = "UF2 DOWNLOAD ABGESCHLOSSEN [100%]";
+      showToast("UF2 heruntergeladen: Auf RPI-RP2 Laufwerk ziehen", "success");
+      return;
+    }
+
+    logTerminal("[UF2] Bitte im Dateidialog das BOOTSEL-Laufwerk auswählen: 'RP2350' (Pico 2 / Pico 2 W) oder 'RPI-RP2' (Pico / Pico W)...");
+    let dirHandle = null;
+    try {
+      dirHandle = await window.showDirectoryPicker({
+        id: "rpi_rp2_drive",
+        mode: "readwrite"
+      });
+    } catch (pe) {
+      if (pe.name === "AbortError") {
+        logTerminal("[ABBRUCH] Laufwerksauswahl abgebrochen.");
+        return;
+      }
+      throw pe;
+    }
+
+    logTerminal(`[UF2] Ausgewähltes Verzeichnis: ${dirHandle.name}`);
+
+    // Check INFO_UF2.TXT on the drive to determine exact chip (RP2350 vs RP2040)
+    let isRp2350 = false;
+    let isRp2040 = false;
+    let boardId = "";
+    try {
+      const infoHandle = await dirHandle.getFileHandle("INFO_UF2.TXT");
+      const infoFile = await infoHandle.getFile();
+      const infoText = await infoFile.text();
+      logTerminal(`[INFO_UF2] Bootloader-Informationen gelesen.`);
+      if (infoText.includes("RP2350") || infoText.includes("Pico 2")) {
+        isRp2350 = true;
+      } else if (infoText.includes("RP2040")) {
+        isRp2040 = true;
+      }
+      const matchBoard = infoText.match(/Board-ID:\s*([^\r\n]+)/i);
+      if (matchBoard) boardId = matchBoard[1].trim();
+      logTerminal(`[INFO_UF2] Hardware bestätigt: ${isRp2350 ? "RP2350 (Pico 2 / Pico 2 W)" : isRp2040 ? "RP2040 (Pico / Pico W)" : "Raspberry Pi RP2"} [Board: ${boardId || 'RPI-RP2'}]`);
+    } catch (e) {
+      logTerminal(`[HINWEIS] INFO_UF2.TXT nicht direkt lesbar. Fahre mit Zielauswahl fort.`);
+    }
+
+    const sub = isRp2350 ? "pico2w" : isRp2040 ? "pico" : (targetSub || ((detectedMcuModel && (detectedMcuModel.includes("Pico 2") || detectedMcuModel.includes("RP2350"))) ? "pico2w" : "pico"));
+    const isPico2W = (sub === "pico2w");
+    const targetModel = isPico2W ? "Raspberry Pi Pico 2 W (RP2350 Dual-Core @ 150 MHz [WIFI/BLE])" : "Raspberry Pi Pico (RP2040 Dual ARM @ 133 MHz)";
+    detectedMcuModel = targetModel;
+    setTargetMcuSelect(isPico2W ? "pico2w" : "pico");
+    updateHardwareStatusUI("METISA", targetModel);
+
+    // Load UF2 data
+    let uf2Data = null;
+    const customRadio = document.querySelector('input[name="firmwareSourceType"][value="custom"]');
+    if (customRadio && customRadio.checked) {
+      const fileInput = document.getElementById("customFirmwareFileInput");
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        throw new Error("Bitte wählen Sie zuerst eine .uf2 Firmware-Datei aus.");
+      }
+      uf2Data = new Uint8Array(await fileInput.files[0].arrayBuffer());
+    } else {
+      const uf2Url = isPico2W ? "firmware/metisa_pico2w_firmware.uf2" : "firmware/metisa_pico_firmware.uf2";
+      logTerminal(`[FIRMWARE] Lade Vorkompiliertes Image (${uf2Url})...`);
+      const resp = await fetch(uf2Url);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status} beim Laden von ${uf2Url}`);
+      uf2Data = new Uint8Array(await resp.arrayBuffer());
+    }
+
+    // UF2 block validation: magic 0x0A324655 / 0x9E5D5157, family ID at offset 28 (flag 0x00002000)
+    if (uf2Data.length < 512) throw new Error("UF2 Image zu klein (< 512 Bytes).");
+    const dv = new DataView(uf2Data.buffer, uf2Data.byteOffset, uf2Data.byteLength);
+    if (dv.getUint32(0, true) !== 0x0A324655 || dv.getUint32(4, true) !== 0x9E5D5157) {
+      throw new Error("Datei ist kein gültiges UF2 Image (Magic-Header fehlt).");
+    }
+    const UF2_FAMILY = { 0xE48BFF56: "RP2040", 0xE48BFF57: "ABSOLUTE", 0xE48BFF58: "DATA", 0xE48BFF59: "RP2350-ARM-S", 0xE48BFF5A: "RP2350-RISCV", 0xE48BFF5B: "RP2350-ARM-NS" };
+    const uf2Flags = dv.getUint32(8, true);
+    const familyId = (uf2Flags & 0x00002000) ? dv.getUint32(28, true) : 0;
+    const familyName = UF2_FAMILY[familyId] || (familyId ? `0x${familyId.toString(16).toUpperCase()}` : "UNBEKANNT");
+    logTerminal(`[UF2] Image Family-ID: ${familyName}`);
+    if (isRp2350 && familyId === 0xE48BFF56) {
+      logTerminal("[FEHLER] Das Image ist für RP2040 gebaut. Der RP2350-Bootloader des Pico 2 W verwirft RP2040-Blöcke.");
+      logTerminal("[INFO] Ein RP2350-Build der Metisa-Firmware liegt noch nicht vor. Schreibvorgang abgebrochen, Laufwerk unverändert.");
+      showToast("RP2040-Image nicht kompatibel mit RP2350", "error");
+      if (pText) pText.textContent = "IMAGE INKOMPATIBEL [RP2040 != RP2350]";
+      return;
+    }
+    if (isRp2040 && familyId >= 0xE48BFF59 && familyId <= 0xE48BFF5B) {
+      logTerminal("[FEHLER] Das Image ist für RP2350 gebaut und auf RP2040 nicht lauffähig. Schreibvorgang abgebrochen.");
+      if (pText) pText.textContent = "IMAGE INKOMPATIBEL [RP2350 != RP2040]";
+      return;
+    }
+
+    logTerminal(`[PROGRAM] Schreibe ${uf2Data.length} Bytes UF2 Firmware auf ${dirHandle.name}...`);
+    if (pBar) pBar.style.width = "50%";
+    if (pText) pText.textContent = "SCHREIBE UF2 IMAGE [50%]";
+
+    const outHandle = await dirHandle.getFileHandle("metisa_firmware.uf2", { create: true });
+    const writable = await outHandle.createWritable();
+    await writable.write(uf2Data);
+    await writable.close();
+
+    if (pBar) pBar.style.width = "100%";
+    if (pText) pText.textContent = "ERFOLGREICH GEFLASHT [100%]";
+    logTerminal(`[SUCCESS] 100% UF2 Firmware erfolgreich auf das Laufwerk geschrieben!`);
+    logTerminal(`[BOOT] Das RPI-RP2 Laufwerk wird nun automatisch getrennt und der Controller startet mit Metisa Firmware neu.`);
+    showToast(`${isPico2W ? "Pico 2 W" : "Pico"} erfolgreich geflasht [OK]`, "success");
+
+  } catch (err) {
+    console.error("UF2 Flash Error:", err);
+    logTerminal(`[FEHLER] UF2 Flash fehlgeschlagen: ${err.message}`);
+    showToast(`UF2 Flash-Fehler: ${err.message}`, "error");
+    if (pText) pText.textContent = "FEHLER BEIM FLASHEN";
+  }
+}
+
 async function startPicoFirmwareFlash(targetSub = 'pico') {
   const logView = document.getElementById("flashTerminalLog");
   const pBar = document.getElementById("flashProgressBar");
@@ -3352,6 +3573,7 @@ async function startPicoFirmwareFlash(targetSub = 'pico') {
       await serialPort.close();
       isConnected = false;
       logTerminal("[PICO] Controller erfolgreich via 1200 Baud Touch in BOOTSEL-Modus versetzt!");
+      await sleep(500);
     } catch (e) {
       logTerminal(`[PICO] Touch-Reset Information: ${e.message || e}`);
     }
@@ -3359,19 +3581,8 @@ async function startPicoFirmwareFlash(targetSub = 'pico') {
     logTerminal("[PICO] Manueller Modus: Halten Sie beim Einstecken die BOOTSEL-Taste gedrückt.");
   }
 
-  if (pBar) pBar.style.width = "60%";
-  if (pText) pText.textContent = "LADE UF2 FIRMWARE [60%]";
-
-  // 2. Download or serve UF2 binary
-  downloadSelectedFirmwareBinary();
-
-  if (pBar) pBar.style.width = "100%";
-  if (pText) pText.textContent = "UF2 BEREIT ZUM KOPIEREN [100%]";
-
-  logTerminal(`[SUCCESS] Metisa ${isPico2W ? "Pico 2 W" : "Pico"} UF2 Image heruntergeladen.`);
-  logTerminal(`[HINWEIS] Kopieren Sie die heruntergeladene .uf2 Datei direkt auf das USB-Laufwerk 'RPI-RP2'.`);
-  logTerminal(`[INFO] Nach dem Kopieren startet der ${isPico2W ? "Pico 2 W" : "Pico"} in Sekundenbruchteilen automatisch mit der neuen Firmware neu.`);
-  showToast(`${isPico2W ? "Pico 2 W" : "Pico"} UF2 bereit: Auf RPI-RP2 Laufwerk kopieren`, "success");
+  // 2. Direct UF2 drive flashing or download
+  return await startUf2DriveFlash(isPico2W ? 'pico2w' : 'pico');
 }
 
 async function startFirmwareFlash() {
@@ -3540,5 +3751,6 @@ window.copyAssignedSerialToClipboard = copyAssignedSerialToClipboard;
 window.startAutoDetectFirmwareFlash = startAutoDetectFirmwareFlash;
 window.startNanoStk500Flash = startNanoStk500Flash;
 window.startPicoFirmwareFlash = startPicoFirmwareFlash;
+window.startUf2DriveFlash = startUf2DriveFlash;
 
 
