@@ -2,108 +2,421 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <noscript>
-    <meta http-equiv="refresh" content="0; url=configurator/">
-  </noscript>
-  <title>SAGA LABS // METISA SUITE</title>
-  <link rel="stylesheet" href="configurator/style.css">
-  <style>
-    body {
-      background: #08090d;
-      color: #94a3b8;
-      font-family: 'JetBrains Mono', 'SF Mono', monospace;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1.5rem;
-    }
-    .launch-panel {
-      background: #121620;
-      border: 1px solid #1e2638;
-      border-left: 3px solid #ff6200;
-      border-radius: 4px;
-      padding: 2rem;
-      max-width: 540px;
-      width: 100%;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
-    }
-    .launch-title {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #f8fafc;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-    }
-    .launch-desc {
-      font-size: 0.78rem;
-      color: #64748b;
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
-    .launch-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-    .launch-btn {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #151a26;
-      border: 1px solid #273248;
-      color: #f8fafc;
-      padding: 0.75rem 1rem;
-      border-radius: 3px;
-      text-decoration: none;
-      font-size: 0.76rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      transition: all 0.15s ease;
-    }
-    .launch-btn:hover {
-      border-color: #ff6200;
-      background: #1b2232;
-      color: #ff6200;
-    }
-    .launch-btn.primary {
-      background: #ff6200;
-      color: #050608;
-      border-color: #ff6200;
-    }
-    .launch-btn.primary:hover {
-      background: #ff7700;
-      color: #000;
-    }
-  </style>
-  <script>
-    window.location.replace("configurator/" + (window.location.search || ""));
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SAGA LABS | METISA - Universal Motorcontroller &amp; Antriebselektronik</title>
+  <meta name="description" content="METISA ist der weltweit erste adaptiv konfigurierbare Motorcontroller für Pedelec, Lastenrad, E-Scooter und Custom-Bikes.">
+  <link rel="stylesheet" href="orbit-tokens.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="launch-panel">
-    <div class="launch-title">SAGA LABS // METISA SUITE</div>
-    <div class="launch-desc">
-      Universal Drive Control & Power Electronics Calibration Platform. Weiterleitung zum Konfigurator Client...
-    </div>
-    <div class="launch-actions">
-      <a href="configurator/index.html" class="launch-btn primary">
-        <span>CONFIGURATOR CLIENT</span> <span>&rarr;</span>
+
+  <!-- ========================================================================
+       GLOBAL HEADER & NAVIGATION (1:1 NACH VORLAGE)
+       ======================================================================== -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="site-brand" aria-label="SAGA LABS | METISA Startseite">
+        <img src="assets/logo_full.png" alt="SAGA LABS | METISA" class="brand-logo-img">
       </a>
-      <a href="configurator/unlock_portal.html" class="launch-btn">
-        <span>TRACK & DYNO AUTHORIZATION</span> <span>&rarr;</span>
-      </a>
-      <a href="configurator/wiki.html" class="launch-btn">
-        <span>FIELD INTEGRATION MANUAL</span> <span>&rarr;</span>
-      </a>
+
+      <nav class="main-nav" aria-label="Desktop Hauptnavigation">
+        <a href="produkt.html" class="nav-link">Steuergerät</a>
+        <a href="software.html" class="nav-link">Software &amp; App</a>
+        <a href="support.html" class="nav-link">Support</a>
+        <a href="index.html#fahrzeugklassen" class="nav-link">Fahrzeugklassen</a>
+        <a href="shop.html" class="nav-link">Shop</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="shop.html" class="btn-header-order">JETZT BESTELLEN (ab 270 €)</a>
+        <button class="nav-menu-toggle" id="navMenuBtn" aria-label="Menü öffnen" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
     </div>
-    <div style="margin-top: 1.5rem; font-size: 0.65rem; color: #475569; text-align: center; border-top: 1px solid #1e2638; padding-top: 0.75rem;">
-      Copyright &copy; 2026 Benjamin Everts, Bielefeld / SaGa Labs. Alle Rechte vorbehalten. Trademarks: SaGa Labs&reg;, metisa&trade;, Metisa Suite&trade;.
+  </header>
+
+  <!-- Navigation Drawer Backdrop -->
+  <div class="nav-drawer-backdrop" id="navDrawerBackdrop"></div>
+
+  <!-- Navigation Drawer (Sämtliche Navigation nach Benutzer-Vorgabe) -->
+  <aside class="nav-drawer" id="navDrawer" aria-label="Hauptnavigation">
+    <div class="nav-drawer-header">
+      <div class="nav-drawer-brand">
+        <img src="assets/logo_full.png" alt="SAGA LABS | METISA" class="drawer-logo-img">
+      </div>
+      <button class="nav-drawer-close" id="navDrawerClose" aria-label="Menü schließen">&times;</button>
     </div>
-  </div>
+    <div class="nav-drawer-body">
+      <div class="nav-drawer-group-title">// NAVIGATION &amp; SYSTEM</div>
+      <nav class="nav-drawer-links">
+        <a href="index.html" class="drawer-link active">
+          <span class="link-bullet">▸</span>
+          <span>Startseite</span>
+        </a>
+        <a href="produkt.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Steuergerät &amp; Hardware</span>
+        </a>
+        <a href="software.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Software &amp; Cockpit App</span>
+        </a>
+        <a href="support.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Support &amp; Schaltpläne</span>
+        </a>
+        <a href="index.html#fahrzeugklassen" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Fahrzeugklassen &amp; PIN-Levels</span>
+        </a>
+        <a href="shop.html" class="drawer-link highlight-shop">
+          <span class="link-bullet">★</span>
+          <span>Shop &amp; Vorbestellung</span>
+          <span class="drawer-badge">Charge 2026</span>
+        </a>
+      </nav>
+
+      <div class="nav-drawer-group-title" style="margin-top: 24px;">// METISA SUITE (CLOUD &amp; USB)</div>
+      <div class="drawer-suite-card">
+        <div class="drawer-suite-info">
+          <h4>METISA Live Calibration Suite</h4>
+          <p>Browserbasierter Web-Serial Konfigurator für USB, Bluetooth &amp; Wi-Fi.</p>
+        </div>
+        <a href="configurator/index.html" onclick="openLiveSuite(event)" class="btn-drawer-suite">
+          ⚡ SUITE IM NEUEN FENSTER ÖFFNEN ↗
+        </a>
+        <div class="drawer-sublinks">
+          <a href="unlock_portal.html" target="_blank" rel="noopener">Dyno Portal ↗</a>
+          <span>•</span>
+          <a href="wiki.html" target="_blank" rel="noopener">Engineering Wiki ↗</a>
+        </div>
+      </div>
+
+      <div class="nav-drawer-group-title" style="margin-top: 24px;">// HARDWARE STATUS</div>
+      <div class="drawer-status-box">
+        <div class="status-row">
+          <span class="status-label">Lagerbestand:</span>
+          <span class="status-val amber">Vorbestellung aktiv</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Auslieferung:</span>
+          <span class="status-val green">Charge Q4 / 2026</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Käuferschutz:</span>
+          <span class="status-val mono">PayPal Verified</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-drawer-footer">
+      <a href="impressum.html" class="drawer-footer-link">Impressum &amp; Datenschutz</a>
+      <span>&copy; 2026 SaGa Labs®</span>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       HERO SECTION (TYPOGRAFIE & STIL 1:1 NACH VORLAGE, EULE IM HINTERGRUND)
+       OHNE MARKETING HANDY, FAHRRAD UND STEUERGERÄT!
+       ======================================================================== -->
+  <main>
+    <section class="hero-section">
+      <div class="container hero-container">
+        <div class="hero-content">
+          <h1 class="hero-headline">
+            <span class="hero-line-white">EIN GEHIRN.</span>
+            <span class="hero-line-white">JEDE MASCHINE.</span>
+            <span class="hero-line-orange">KEINE GRENZEN.</span>
+          </h1>
+
+          <p class="hero-subtext">
+            METISA ist der weltweit erste adaptiv konfigurierbare Motorcontroller, der dein Fahrzeug vollständig an deine Wünsche anpasst. Egal ob 250W Pedelec, 3000W E-Lastenrad, E-Scooter oder Custom-Bike.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="shop.html" class="btn-hero-primary">
+              <svg class="vector-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2L3 14h7v8l10-12h-7l1-8z"/></svg>
+              <span>STARTE DEINE SAGA</span>
+            </a>
+            <a href="wiki.html" target="_blank" rel="noopener" class="btn-hero-secondary">
+              <svg class="vector-icon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/></svg>
+              <span>Zur Dokumentation</span>
+            </a>
+          </div>
+
+          <div class="hero-price-tag">
+            Premium-Hardware von 270 € bis 350 €
+          </div>
+        </div>
+
+        <div class="hero-visual-wrapper">
+          <img src="assets/hero_visual_composite.png" alt="SAGA LABS METISA Controller, E-Bike &amp; Cockpit App" class="hero-visual-img" width="1090" height="745" loading="eager">
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+       DREI-SPALTEN-VORTEILSBEREICH: „DAS KERNVERSPRECHEN“ (1:1 NACH VORLAGE)
+       ======================================================================== -->
+    <section class="core-promise-section">
+      <div class="container">
+        <div class="section-top-bar">
+          <span class="side-tag">// ÜBERALL DETAILS</span>
+          <div class="center-headings">
+            <span class="sub-label">DREI-SPALTEN-VORTEILSBEREICH</span>
+            <h2 class="main-label">„DAS KERNVERSPRECHEN“</h2>
+          </div>
+          <span class="side-tag">// WE'RE TAKING OVER THE E-MOBILITY WORLD</span>
+        </div>
+
+        <div class="cards-container">
+          <!-- Card 1 -->
+          <a href="produkt.html" class="promise-card promise-card-clickable" title="Details zum Universal Motor- &amp; Akku-Management ansehen">
+            <div class="card-title-bar">
+              <div class="accent-bar"></div>
+              <h3 class="card-title">„UNIVERSAL MOTOR- &amp; AKKU-MANAGEMENT“</h3>
+            </div>
+            <p class="card-lead">Für jeden Motor, Akku, Display, Leistung und Spannung.</p>
+            <p class="card-body">
+              Native Unterstützung für BLDC, PMSM, CAN-Bus und UART. Rekuperation (KERS) und Support für Drehmoment-, Trittfrequenz- und Bremssensoren. Daumengas oder Stufen-Unterstützung frei wählbar.
+            </p>
+            <div class="promise-card-action">
+              <span class="promise-action-link">Hardware Spezifikation &nearr;</span>
+            </div>
+          </a>
+
+          <!-- Card 2 -->
+          <article class="promise-card promise-card-clickable" onclick="openLiveSuite(event)" title="METISA Calibration Suite in neuem Fenster öffnen">
+            <div class="card-title-bar">
+              <div class="accent-bar"></div>
+              <h3 class="card-title">„COCKPIT APP &amp; PC-CONFIGURATOR“</h3>
+            </div>
+            <p class="card-lead">Windows-Software für feinstes Setup &amp; Android-App als vollständig anpassbarer Displayersatz oder Erweiterung.</p>
+            <p class="card-body">
+              Erstelle unbegrenzte Profile (Pendler, Offroad, etc.). Zeige beliebige Werte an, erstelle eigene Funktions-Buttons (u.a. Ein/Aus).
+            </p>
+            <div class="promise-card-action">
+              <span class="promise-action-link">⚡ Live-Suite im neuen Fenster starten &nearr;</span>
+            </div>
+          </article>
+
+          <!-- Card 3 -->
+          <a href="support.html" class="promise-card promise-card-clickable" title="Details zu High-Tech, Alarm &amp; GPS ansehen">
+            <div class="card-title-bar">
+              <div class="accent-bar"></div>
+              <h3 class="card-title">„HIGH-TECH, ALARM &amp; GPS“</h3>
+            </div>
+            <p class="card-lead">Integrierter 3-Achsen-Beschleunigungssensor für Performance, Tracking und scharfschaltbaren Diebstahl-Alarm.</p>
+            <p class="card-body">
+              Einfaches Nachrüsten von E-Schloss und GPS-Überwachung über extra Module. IP67-gepanzertes, hitzebeständiges Gehäuse.
+            </p>
+            <div class="promise-card-action">
+              <span class="promise-action-link">Dokumentation &amp; Module &nearr;</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+       FAHRZEUGKLASSEN & LEVEL-FREISCHALTUNG
+       ======================================================================== -->
+    <section class="classes-section" id="fahrzeugklassen">
+      <div class="container">
+        <div class="classes-header">
+          <span class="sub-label">// DYNAMISCHE LEISTUNGSPROFILE</span>
+          <h2 class="main-label">Unterstützte Fahrzeugklassen</h2>
+          <p class="classes-desc">
+            Vollständige Gesetzeskonformität im Straßenverkehr gepaart mit kompromissloser Leistungsentfaltung auf dem Prüfstand und Privatgelände.
+          </p>
+        </div>
+
+        <div class="classes-grid">
+          <div class="class-card">
+            <div class="class-badge legal">STVZO KONFORM</div>
+            <h3 class="class-title">Pedelec 250 [W]</h3>
+            <p class="class-info">25 [km/h] Motorabschaltung, 250 [W] Nenndauerleistung, Anfahrhilfe bis 6 [km/h], PAS-Pflicht.</p>
+            <div class="class-metric">Level 0 // Werkseinstellung</div>
+          </div>
+
+          <div class="class-card">
+            <div class="class-badge ekfv">EKFV KONFORM</div>
+            <h3 class="class-title">E-Scooter 20 [km/h]</h3>
+            <p class="class-info">500 [W] Maximalleistung, Daumengas-Steuerung, unabhängige Zweikreisbremse mit Rekuperation.</p>
+            <div class="class-metric">Level 0 // Werkseinstellung</div>
+          </div>
+
+          <div class="class-card">
+            <div class="class-badge spedelec">L1e-B ZULASSUNG</div>
+            <h3 class="class-title">S-Pedelec 45 [km/h]</h3>
+            <p class="class-info">500 [W] Nenndauerleistung, Bremslicht- und Hupensteuerung, geschwindigkeitsabhängige Drehmomentkurve.</p>
+            <div class="class-metric">Level 1 // Sport-PIN</div>
+          </div>
+
+          <div class="class-card">
+            <div class="class-badge race">TRACK / DYNO ONLY</div>
+            <h3 class="class-title">Race &amp; Custom 3000 [W]</h3>
+            <p class="class-info">Vollständige Entfesselung aller Drehmoment-, Spannungs- und Strombegrenzer für Prüfstand und Privatgelände.</p>
+            <div class="class-metric">Level 2 // Master-PIN</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+       LIVE CALIBRATION SUITE INTEGRATION
+       ======================================================================== -->
+    <section class="suite-cta-section">
+      <div class="container suite-cta-container">
+        <div class="suite-cta-text">
+          <span class="sub-label">METISA SUITE // ON-BOARD CALIBRATION</span>
+          <h2 class="main-label">Browserbasierter Web-Serial Konfigurator</h2>
+          <p>
+            Keine Treiberinstallation, keine Drittsoftware. Direkte Verbindung zum METISA Steuergerät via USB-Serial, Bluetooth-SPP oder Wi-Fi SoftAP direkt im Webbrowser.
+          </p>
+          <div class="suite-features">
+            <span class="feat-tag">✓ Automatische MCU-Erkennung</span>
+            <span class="feat-tag">✓ Gesalzene PIN-Sicherheit</span>
+            <span class="feat-tag">✓ FOC Live-Telemetrie</span>
+            <span class="feat-tag">✓ EEPROM Seriennummern-Brand</span>
+          </div>
+        </div>
+        <div class="suite-cta-actions">
+          <a href="index.html" target="_blank" rel="noopener" class="btn-hero-primary">
+            <span>METISA SUITE STARTEN &nearr;</span>
+          </a>
+          <a href="unlock_portal.html" target="_blank" rel="noopener" class="btn-hero-secondary">
+            <span>DYNO / TRACK PORTAL &nearr;</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       GLOBAL FOOTER
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col-brand">
+          <img src="assets/logo_full.png" alt="SAGA LABS | METISA" class="footer-logo">
+          <p class="footer-desc">
+            METISA ist eine eingetragene Marke von SaGa Labs Technologies. Universelle Leistungselektronik, FOC-Regelung und modulare Firmware-Architektur für zukunftsfähige Leicht-Elektromobilität.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">NAVIGATION</h4>
+          <ul class="footer-links">
+            <li><a href="produkt.html">Steuergerät &amp; Hardware</a></li>
+            <li><a href="software.html">Software &amp; Cockpit App</a></li>
+            <li><a href="#fahrzeugklassen">Fahrzeugklassen</a></li>
+            <li><a href="support.html">Support &amp; Schaltpläne</a></li>
+            <li><a href="shop.html">Shop &amp; Bezug</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">SYSTEM &amp; SUITE</h4>
+          <ul class="footer-links">
+            <li><a href="index.html" target="_blank" rel="noopener">Metisa Suite [ONLINE]</a></li>
+            <li><a href="unlock_portal.html" target="_blank" rel="noopener">Dyno Entsperr-Portal</a></li>
+            <li><a href="wiki.html" target="_blank" rel="noopener">Engineering Wiki &amp; FAQ</a></li>
+            <li><a href="impressum.html">Impressum &amp; Datenschutz</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-meta">
+        <p>&copy; 2026 Benjamin Everts, Bielefeld (sagaporsche45@gmail.com) / SaGa Labs®. Alle Rechte und geistiges Eigentum vorbehalten.</p>
+        <p class="footer-standard">Standard: SaGa Labs Orbit Architecture</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Standalone Window Suite Launcher & Drawer Interactivity Script -->
+  <script>
+    // Öffnet die METISA Live-Suite garantiert in einem NEUEN EIGENSTÄNDIGEN FENSTER (nicht Tab)
+    function openLiveSuite(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const w = Math.min(1380, Math.floor(window.screen.availWidth * 0.92));
+      const h = Math.min(880, Math.floor(window.screen.availHeight * 0.90));
+      const l = Math.floor((window.screen.availWidth - w) / 2);
+      const t = Math.floor((window.screen.availHeight - h) / 2);
+      const features = `width=${w},height=${h},left=${l},top=${t},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`;
+      window.open('configurator/index.html', 'MetisaLiveSuiteAppWindow', features);
+      return false;
+    }
+
+    // 3-Balken Hauptnavigations-Drawer Logik
+    (function() {
+      const menuBtn = document.getElementById('navMenuBtn');
+      const drawer = document.getElementById('navDrawer');
+      const backdrop = document.getElementById('navDrawerBackdrop');
+      const closeBtn = document.getElementById('navDrawerClose');
+
+      function openMenu() {
+        if (!drawer) return;
+        drawer.classList.add('open');
+        if (backdrop) backdrop.classList.add('open');
+        if (menuBtn) {
+          menuBtn.classList.add('open');
+          menuBtn.setAttribute('aria-expanded', 'true');
+        }
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMenu() {
+        if (!drawer) return;
+        drawer.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+        if (menuBtn) {
+          menuBtn.classList.remove('open');
+          menuBtn.setAttribute('aria-expanded', 'false');
+        }
+        document.body.style.overflow = '';
+      }
+
+      if (menuBtn) {
+        menuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (drawer && drawer.classList.contains('open')) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          closeMenu();
+        });
+      }
+
+      if (backdrop) {
+        backdrop.addEventListener('click', closeMenu);
+      }
+
+      if (drawer) {
+        drawer.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            closeMenu();
+          });
+        });
+      }
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+  </script>
 </body>
 </html>

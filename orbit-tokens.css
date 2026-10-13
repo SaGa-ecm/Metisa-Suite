@@ -1,0 +1,60 @@
+/* ==========================================================================
+   SAGALABS METISA // ORBIT DESIGN TOKENS
+   Standard: SaGa Labs Orbit Engineering Standard
+   Author & Copyright: © 2026 Benjamin Everts, Bielefeld / SaGa Labs®. Alle Rechte vorbehalten.
+   ========================================================================== */
+
+:root {
+  /* Color Palette - Dark Obsidian & Titanium */
+  --bg-canvas: #08090d;
+  --bg-canvas-alt: #0b0e14;
+  --bg-panel: #121620;
+  --bg-panel-elevated: #151a26;
+  --bg-panel-hover: #19202f;
+  --bg-input: #0e121a;
+  
+  /* Hairline Borders */
+  --border-hairline: #1e2638;
+  --border-hairline-bright: #273248;
+  --border-hairline-focus: #ff6200;
+  
+  /* Accentuation - Cyber Orange */
+  --accent-cyber: #ff6200;
+  --accent-cyber-hover: #ff771a;
+  --accent-cyber-glow: rgba(255, 98, 0, 0.35);
+  --accent-cyber-subtle: rgba(255, 98, 0, 0.12);
+  
+  /* Status Indicators (LED Beacons) */
+  --status-green: #10b981;
+  --status-green-glow: rgba(16, 185, 129, 0.4);
+  --status-amber: #f59e0b;
+  --status-amber-glow: rgba(245, 158, 11, 0.4);
+  --status-red: #ef4444;
+  --status-red-glow: rgba(239, 68, 68, 0.4);
+  --status-cyan: #06b6d4;
+  --status-cyan-glow: rgba(6, 182, 212, 0.4);
+  
+  /* Typography Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-dim: #475569;
+  --text-cyber: #ff6200;
+  
+  /* Typography Stacks */
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Roboto Mono', Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: 'JetBrains Mono', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Layout Geometry */
+  --max-content-width: 1440px;
+  --header-height: 72px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

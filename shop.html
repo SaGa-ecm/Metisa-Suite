@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SaGa Labs METISA // Shop &amp; Vorbestellung (Charge 2026-Q4)</title>
+  <meta name="description" content="SaGa Labs METISA Hardware-Shop: Offizielle Vorbestellung der Inverter-Kits für die Kleinserie Charge 2026-Q4 mit sicherem PayPal-Checkout.">
+  <link rel="stylesheet" href="orbit-tokens.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       GLOBAL HEADER & 3-BALKEN-NAVIGATION (NACH BENUTZER-VORGABE)
+       ======================================================================== -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="site-brand" aria-label="SAGA LABS | METISA Startseite">
+        <img src="assets/logo_full.png" alt="SAGA LABS | METISA" class="brand-logo-img">
+      </a>
+
+      <nav class="main-nav" aria-label="Desktop Hauptnavigation">
+        <a href="produkt.html" class="nav-link">Steuergerät</a>
+        <a href="software.html" class="nav-link">Software &amp; App</a>
+        <a href="support.html" class="nav-link">Support</a>
+        <a href="index.html#fahrzeugklassen" class="nav-link">Fahrzeugklassen</a>
+        <a href="shop.html" class="nav-link active">Shop</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="#orderSection" class="btn-header-order">JETZT VORBESTELLEN (ab 270 €)</a>
+        <button class="nav-menu-toggle" id="navMenuBtn" aria-label="Menü öffnen" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Drawer Backdrop -->
+  <div class="nav-drawer-backdrop" id="navDrawerBackdrop"></div>
+
+  <!-- Navigation Drawer (Sämtliche Navigation) -->
+  <aside class="nav-drawer" id="navDrawer" aria-label="Hauptnavigation">
+    <div class="nav-drawer-header">
+      <div class="nav-drawer-brand">
+        <img src="assets/logo_full.png" alt="SAGA LABS | METISA" class="drawer-logo-img">
+      </div>
+      <button class="nav-drawer-close" id="navDrawerClose" aria-label="Menü schließen">&times;</button>
+    </div>
+    <div class="nav-drawer-body">
+      <div class="nav-drawer-group-title">// NAVIGATION &amp; SYSTEM</div>
+      <nav class="nav-drawer-links">
+        <a href="index.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Startseite</span>
+        </a>
+        <a href="produkt.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Steuergerät &amp; Hardware</span>
+        </a>
+        <a href="software.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Software &amp; Cockpit App</span>
+        </a>
+        <a href="support.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Support &amp; Schaltpläne</span>
+        </a>
+        <a href="index.html#fahrzeugklassen" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Fahrzeugklassen &amp; PIN-Levels</span>
+        </a>
+        <a href="shop.html" class="drawer-link active highlight-shop">
+          <span class="link-bullet">★</span>
+          <span>Shop &amp; Vorbestellung</span>
+          <span class="drawer-badge">Charge 2026</span>
+        </a>
+      </nav>
+
+      <div class="nav-drawer-group-title" style="margin-top: 24px;">// METISA SUITE (CLOUD &amp; USB)</div>
+      <div class="drawer-suite-card">
+        <div class="drawer-suite-info">
+          <h4>METISA Live Calibration Suite</h4>
+          <p>Browserbasierter Web-Serial Konfigurator für USB, Bluetooth &amp; Wi-Fi.</p>
+        </div>
+        <a href="configurator/index.html" onclick="openLiveSuite(event)" class="btn-drawer-suite">
+          ⚡ SUITE IM NEUEN FENSTER ÖFFNEN ↗
+        </a>
+        <div class="drawer-sublinks">
+          <a href="unlock_portal.html" target="_blank" rel="noopener">Dyno Portal ↗</a>
+          <span>•</span>
+          <a href="wiki.html" target="_blank" rel="noopener">Engineering Wiki ↗</a>
+        </div>
+      </div>
+
+      <div class="nav-drawer-group-title" style="margin-top: 24px;">// HARDWARE STATUS</div>
+      <div class="drawer-status-box">
+        <div class="status-row">
+          <span class="status-label">Lagerbestand:</span>
+          <span class="status-val amber">Vorbestellung aktiv</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Auslieferung:</span>
+          <span class="status-val green">Charge Q4 / 2026</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Käuferschutz:</span>
+          <span class="status-val mono">PayPal Verified</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-drawer-footer">
+      <a href="impressum.html" class="drawer-footer-link">Impressum &amp; Datenschutz</a>
+      <span>&copy; 2026 SaGa Labs®</span>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       MAIN SHOP CONTENT
+       ======================================================================== -->
+  <main class="container">
+
+    <!-- Order Success / Cancelled Notification Banners -->
+    <div class="order-success-banner" id="orderSuccessBanner">
+      <div class="success-icon">✓</div>
+      <div>
+        <h3>Vorbestellung erfolgreich übermittelt!</h3>
+        <p>
+          Vielen Dank für deine Vorbestellung! Die Zahlungstransaktion via PayPal an <strong>sagaporsche45@gmail.com</strong> wurde registriert. 
+          Dein Platz auf der Fertigungs- und Auslieferungsliste für die <strong>Charge 2026-Q4</strong> ist verbindlich bestätigt. 
+          Eine Bestätigung inklusive aller Daten geht an deine angegebene E-Mail-Adresse.
+        </p>
+      </div>
+    </div>
+
+    <!-- Subpage Hero -->
+    <section class="subpage-hero">
+      <span class="subpage-badge">DIREKTBEZUG // KLEINSERIEN-FERTIGUNG</span>
+      <h1 class="subpage-title">METISA Hardware-Bezug &amp; Vorbestellung</h1>
+      <p class="subpage-desc">
+        Universelle FOC-Motorsteuerung und Leistungselektronik. Alle Baugruppen werden laborgeprüft, mit kalibriertem Shunt-Offset und vorinstalliertem Safety Kernel ausgeliefert.
+      </p>
+    </section>
+
+    <!-- Out of Stock / Preorder Notice Banner -->
+    <div class="shop-notice-banner">
+      <div class="notice-icon-box">⚠️</div>
+      <div class="notice-content">
+        <h3>Produkt momentan nicht auf Lager // Verbindliche Vorbestellung aktiv</h3>
+        <p>
+          Die bisherige Fertigungscharge ist vollständig vergriffen. Aktuell fertigen wir die nächste laborgeprüfte Kleinserie für die <strong>Auslieferungscharge 2026-Q4</strong>. 
+          Mit deiner Vorbestellung sicherst du dir garantiert dein Kontingent. Die Bezahlung erfolgt abgesichert über PayPal mit vollständigem <strong>PayPal-Käuferschutz</strong>.
+        </p>
+        <div class="notice-badges-row">
+          <span class="badge-tag out-of-stock">Status: Nicht auf Lager</span>
+          <span class="badge-tag preorder">Fertigung: Charge 2026-Q4</span>
+          <span class="badge-tag paypal">Zahlung: PayPal Käuferschutz</span>
+          <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399;">PayPal: sagaporsche45@gmail.com</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 1: Kit Selection Grid -->
+    <div style="margin-bottom: 16px;">
+      <span class="sub-label">// SCHRITT 1 VON 3</span>
+      <h2 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff;">Wähle dein Hardware-Kit</h2>
+    </div>
+
+    <div class="shop-kits-grid" id="kitsGrid">
+      <!-- Kit 01 -->
+      <div class="shop-kit-card" data-kit-id="kit1" data-kit-name="METISA Core Inverter Kit" data-kit-price="270">
+        <div class="kit-card-select-radio"></div>
+        <span class="shop-tier-badge">KIT 01 // STANDARD CORE</span>
+        <h3 style="font-size: 19px; font-weight: 800; color: #fff; margin: 6px 0 10px 0;">METISA Core Inverter Kit</h3>
+        <div class="shop-price-tag" style="margin-bottom: 12px;">270,00 <span class="unit">[EUR]</span></div>
+        <p class="kit-lead">
+          Kompakte FOC-Inverter Baugruppe im gefrästen IP67 Aluminiumgehäuse. Perfekt für Pedelecs (250 W) und E-Scooter (bis 1000 W Peak).
+        </p>
+        <ul class="kit-specs-list">
+          <li>36.0 – 52.0 [V] DC Busspannung</li>
+          <li>25.0 [A] Dauerstrom (FOC Vektorregelung)</li>
+          <li>Vorkonfektionierter Hauptkabelbaum</li>
+          <li>KERS Rekuperation &amp; PAS-Sensorik</li>
+          <li>Lizenz für METISA Suite Web-Konfigurator</li>
+        </ul>
+      </div>
+
+      <!-- Kit 02 (Default Active) -->
+      <div class="shop-kit-card active" data-kit-id="kit2" data-kit-name="METISA Pro Telemetry Kit" data-kit-price="350">
+        <div class="kit-card-select-radio"></div>
+        <span class="shop-tier-badge" style="color: var(--accent-cyber); border-color: rgba(0, 240, 255, 0.4);">KIT 02 // TELEMETRY &amp; SECURITY PRO</span>
+        <h3 style="font-size: 19px; font-weight: 800; color: #fff; margin: 6px 0 10px 0;">METISA Pro Telemetry Kit</h3>
+        <div class="shop-price-tag" style="margin-bottom: 12px; color: var(--accent-cyber);">350,00 <span class="unit">[EUR]</span></div>
+        <p class="kit-lead">
+          Die professionelle Ausbaustufe mit Bluetooth-Telemetrie, CAN-Bus und erweitertem Diebstahl-Alarmsystem für anspruchsvolle Builds.
+        </p>
+        <ul class="kit-specs-list">
+          <li>36.0 – 60.0 [V] DC Busspannung</li>
+          <li>35.0 [A] Dauerstrom / 50.0 [A] Peak</li>
+          <li>Galvanisch getrennter CAN 2.0B Transceiver</li>
+          <li>Bluetooth 5.2 Modul für Smartphone App</li>
+          <li>3-Achsen MEMS Diebstahl-Alarm &amp; Neigungssensor</li>
+          <li>High-Side ECE-Lichtsteuerung mit Bremslicht</li>
+        </ul>
+      </div>
+
+      <!-- Kit 03 -->
+      <div class="shop-kit-card" data-kit-id="kit3" data-kit-name="METISA Ultimate Builder Kit" data-kit-price="395">
+        <div class="kit-card-select-radio"></div>
+        <span class="shop-tier-badge" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.4);">KIT 03 // TRACK &amp; DYNO BUILDER</span>
+        <h3 style="font-size: 19px; font-weight: 800; color: #fff; margin: 6px 0 10px 0;">METISA Ultimate Builder Kit</h3>
+        <div class="shop-price-tag" style="margin-bottom: 12px; color: #f59e0b;">395,00 <span class="unit">[EUR]</span></div>
+        <p class="kit-lead">
+          Entfesselte Hochstrom-Hardware für Rennstrecke, Prüfstand und Custom-Lastenräder bis 3000 W mit handselektierten MOSFETs.
+        </p>
+        <ul class="kit-specs-list">
+          <li>36.0 – 72.0 [V] DC Bus (High-Voltage Ready)</li>
+          <li>60.0 [A] Dauerstrom / 100.0 [A] Peak</li>
+          <li>Laborselektierte Ultra-Low-RDS(on) MOSFETs</li>
+          <li>Shunt-Einzelkalibrierung mit Prüfprotokoll</li>
+          <li>Inklusive Master-PIN Entsperr-Token für Dyno/Track</li>
+          <li>Vollausstattung: CAN, BLE, GPS-Header &amp; HIGO-Ports</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Step 2: Optional Peripherals & Addons -->
+    <div style="margin-bottom: 16px;">
+      <span class="sub-label">// SCHRITT 2 VON 3</span>
+      <h2 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff;">Zubehör &amp; Kabelbäume hinzufügen (Optional)</h2>
+    </div>
+
+    <div class="shop-addons-card">
+      <div class="addons-grid">
+        <label class="addon-checkbox-label">
+          <input type="checkbox" id="addonHigo" data-addon-name="HIGO Kabelbaum-Satz (wasserdicht IP67)" data-addon-price="35">
+          <div class="addon-text">
+            <span class="addon-name">HIGO Kabelbaum &amp; Steckersatz</span>
+            <span class="addon-price">+ 35,00 [EUR]</span>
+          </div>
+        </label>
+
+        <label class="addon-checkbox-label">
+          <input type="checkbox" id="addonTorque" data-addon-name="Präzisions-Drehmoment-Tretlager [Nm]" data-addon-price="45">
+          <div class="addon-text">
+            <span class="addon-name">Drehmoment-Tretlagersensor [Nm]</span>
+            <span class="addon-price">+ 45,00 [EUR]</span>
+          </div>
+        </label>
+
+        <label class="addon-checkbox-label">
+          <input type="checkbox" id="addonThrottle" data-addon-name="Daumengas &amp; 3-Tasten Lenkerarmatur" data-addon-price="25">
+          <div class="addon-text">
+            <span class="addon-name">Daumengas &amp; Lenkerarmatur</span>
+            <span class="addon-price">+ 25,00 [EUR]</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Step 3: Checkout Form & PayPal Payment Execution -->
+    <div id="orderSection">
+      <div style="margin-bottom: 16px;">
+        <span class="sub-label">// SCHRITT 3 VON 3</span>
+        <h2 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: #fff;">Bestellangaben &amp; Bezahlung</h2>
+      </div>
+
+      <div class="shop-checkout-card">
+        <div class="checkout-header">
+          <h2>Lieferadresse &amp; Vorbestellungs-Erfassung</h2>
+          <p>Bitte gib deine Kontaktdaten für den versicherten DHL Express Versand der Charge 2026-Q4 an.</p>
+        </div>
+
+        <form id="orderForm" onsubmit="handleOrderSubmit(event)">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="custFirstName">Vorname *</label>
+              <input type="text" id="custFirstName" class="form-control" placeholder="Max" required>
+            </div>
+            <div class="form-group">
+              <label for="custLastName">Nachname *</label>
+              <input type="text" id="custLastName" class="form-control" placeholder="Mustermann" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="custEmail">E-Mail-Adresse (für Auftragsbestätigung) *</label>
+              <input type="email" id="custEmail" class="form-control" placeholder="max.mustermann@beispiel.de" required>
+            </div>
+            <div class="form-group">
+              <label for="custPhone">Telefonnummer (für Rückfragen zur Lieferung)</label>
+              <input type="tel" id="custPhone" class="form-control" placeholder="+49 170 1234567">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="custStreet">Straße &amp; Hausnummer *</label>
+              <input type="text" id="custStreet" class="form-control" placeholder="Musterstraße 42" required>
+            </div>
+            <div class="form-group">
+              <label for="custCity">Postleitzahl &amp; Ort *</label>
+              <input type="text" id="custCity" class="form-control" placeholder="33602 Bielefeld" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="custCountry">Land *</label>
+              <select id="custCountry" class="form-control" required>
+                <option value="DE" selected>Deutschland (DE)</option>
+                <option value="AT">Österreich (AT)</option>
+                <option value="CH">Schweiz (CH)</option>
+                <option value="EU">Übrige Europäische Union (EU)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="custBikeDetails">Fahrzeugmodell / Akkuspannung (Optional)</label>
+              <input type="text" id="custBikeDetails" class="form-control" placeholder="z.B. E-MTB 48V Bafang / E-Scooter 20km/h">
+            </div>
+          </div>
+
+          <!-- Live Order Summary Box -->
+          <div class="order-summary-box">
+            <div style="font-family: var(--font-heading); font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+              ÜBERSICHT DEINER VORBESTELLUNG
+            </div>
+            
+            <div class="summary-row">
+              <span id="summaryKitName">METISA Pro Telemetry Kit</span>
+              <span id="summaryKitPrice" class="mono">350,00 EUR</span>
+            </div>
+
+            <div id="summaryAddonsContainer"></div>
+
+            <div class="summary-row">
+              <span>Versandkosten (Versicherter Expressversand)</span>
+              <span class="mono" style="color: #34d399;">0,00 EUR (Kostenlos)</span>
+            </div>
+
+            <div class="summary-row total-row">
+              <span>Gesamtsumme inkl. MwSt.</span>
+              <span class="total-amount" id="summaryTotal">350,00 EUR</span>
+            </div>
+          </div>
+
+          <!-- Preorder Terms Confirmation -->
+          <div class="terms-group">
+            <label class="terms-label">
+              <input type="checkbox" id="acceptPreorder" required>
+              <span>
+                <strong>Hinweis zur Lieferzeit:</strong> Ich bestätige, dass das Produkt momentan nicht ab Lager verfügbar ist und dies eine verbindliche Vorbestellung für die Kleinserie <strong>Charge 2026-Q4</strong> darstellt. Stornierung bis Produktionsbeginn jederzeit kostenlos möglich.
+              </span>
+            </label>
+            <label class="terms-label">
+              <input type="checkbox" id="acceptPrivacy" required>
+              <span>
+                Ich habe die <a href="impressum.html" target="_blank" style="color: #FF5A00;">Datenschutzerklärung &amp; AGB</a> zur Kenntnis genommen und willige in die Verarbeitung meiner Bestelldaten zur Abwicklung ein.
+              </span>
+            </label>
+          </div>
+
+          <!-- PayPal Actions -->
+          <div class="paypal-action-group">
+            <button type="submit" class="btn-paypal-submit" id="btnSubmitPayPal">
+              <svg class="paypal-svg" viewBox="0 0 100 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4h10c5 0 9 3 8 8-1 6-5 9-10 9h-4l-2 9h-6l4-26z" fill="#003087"/>
+                <path d="M17 10h9c4 0 7 2 6 7-1 5-4 7-8 7h-3l-2 8h-5l3-22z" fill="#0079C1"/>
+                <text x="36" y="22" font-family="Arial, sans-serif" font-weight="bold" font-size="17" fill="#003087">PayPal</text>
+              </svg>
+              <span>JETZT MIT PAYPAL BEZAHLEN (<span id="btnAmount">350,00 €</span>)</span>
+            </button>
+
+            <div class="paypal-me-fallback">
+              <span>Bevorzugst du direkte PayPal.Me Sofortüberweisung?</span>
+              <a id="paypalMeLink" href="https://www.paypal.me/sagaporsche45/350" target="_blank" rel="noopener">
+                paypal.me/sagaporsche45/<span id="paypalMeAmount">350</span> EUR &nearr;
+              </a>
+            </div>
+
+            <div class="secure-badge-row">
+              <span>🔒 256-Bit SSL Verschlüsselung</span>
+              <span>🛡️ Voller PayPal-Käuferschutz</span>
+              <span>✉️ Empfänger: sagaporsche45@gmail.com</span>
+            </div>
+          </div>
+        </form>
+
+        <!-- Hidden PayPal Webscr Native Payment Form -->
+        <form id="hiddenPayPalForm" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="display: none;">
+          <input type="hidden" name="cmd" value="_xclick">
+          <input type="hidden" name="business" value="sagaporsche45@gmail.com">
+          <input type="hidden" name="item_name" id="ppItemName" value="METISA Pro Telemetry Kit (Vorbestellung Charge 2026-Q4)">
+          <input type="hidden" name="item_number" id="ppItemNumber" value="KIT-02-PREORDER">
+          <input type="hidden" name="amount" id="ppAmount" value="350.00">
+          <input type="hidden" name="currency_code" value="EUR">
+          <input type="hidden" name="no_shipping" value="2">
+          <input type="hidden" name="first_name" id="ppFirstName" value="">
+          <input type="hidden" name="last_name" id="ppLastName" value="">
+          <input type="hidden" name="address1" id="ppAddress1" value="">
+          <input type="hidden" name="city" id="ppCity" value="">
+          <input type="hidden" name="zip" id="ppZip" value="">
+          <input type="hidden" name="country" id="ppCountry" value="DE">
+          <input type="hidden" name="email" id="ppEmail" value="">
+          <input type="hidden" name="custom" id="ppCustom" value="">
+          <input type="hidden" name="return" id="ppReturn" value="">
+          <input type="hidden" name="cancel_return" id="ppCancelReturn" value="">
+        </form>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       GLOBAL FOOTER
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container footer-meta-bar">
+      <div>&copy; 2026 Benjamin Everts, Bielefeld (sagaporsche45@gmail.com) / SaGa Labs&reg;. Alle Rechte vorbehalten.</div>
+      <div class="footer-hash">METISA-ORBIT-2.0 // VORBESTELLUNG CHARGE 2026-Q4</div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       INTERACTIVE SHOP ENGINE & PAYPAL LOGIK
+       ======================================================================== -->
+  <script>
+    // Suite Launcher in neuem eigenständigem Fenster
+    function openLiveSuite(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const w = Math.min(1380, Math.floor(window.screen.availWidth * 0.92));
+      const h = Math.min(880, Math.floor(window.screen.availHeight * 0.90));
+      const l = Math.floor((window.screen.availWidth - w) / 2);
+      const t = Math.floor((window.screen.availHeight - h) / 2);
+      window.open('configurator/index.html', 'MetisaLiveSuiteAppWindow',
+        `width=${w},height=${h},left=${l},top=${t},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`);
+      return false;
+    }
+
+    // 3-Balken Hauptnavigations-Drawer Steuerung
+    (function() {
+      const menuBtn = document.getElementById('navMenuBtn');
+      const drawer = document.getElementById('navDrawer');
+      const backdrop = document.getElementById('navDrawerBackdrop');
+      const closeBtn = document.getElementById('navDrawerClose');
+
+      function openMenu() {
+        if (!drawer) return;
+        drawer.classList.add('open');
+        if (backdrop) backdrop.classList.add('open');
+        if (menuBtn) {
+          menuBtn.classList.add('open');
+          menuBtn.setAttribute('aria-expanded', 'true');
+        }
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMenu() {
+        if (!drawer) return;
+        drawer.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+        if (menuBtn) {
+          menuBtn.classList.remove('open');
+          menuBtn.setAttribute('aria-expanded', 'false');
+        }
+        document.body.style.overflow = '';
+      }
+
+      if (menuBtn) {
+        menuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (drawer && drawer.classList.contains('open')) closeMenu();
+          else openMenu();
+        });
+      }
+
+      if (closeBtn) closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeMenu(); });
+      if (backdrop) backdrop.addEventListener('click', closeMenu);
+      if (drawer) {
+        drawer.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', closeMenu);
+        });
+      }
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+
+    // Live-Shop State & PayPal Kalkulator
+    (function() {
+      // Prüfe auf Rückkehr von PayPal (?order=success)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('order') === 'success') {
+        const banner = document.getElementById('orderSuccessBanner');
+        if (banner) {
+          banner.classList.add('active');
+          banner.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+
+      let selectedKit = {
+        id: 'kit2',
+        name: 'METISA Pro Telemetry Kit',
+        price: 350
+      };
+
+      const kitCards = document.querySelectorAll('.shop-kit-card');
+      const addonCheckboxes = document.querySelectorAll('.addon-checkbox-label input[type="checkbox"]');
+
+      function updateCalculation() {
+        let total = selectedKit.price;
+        let addonsList = [];
+
+        addonCheckboxes.forEach(function(cb) {
+          if (cb.checked) {
+            const price = parseFloat(cb.getAttribute('data-addon-price')) || 0;
+            const name = cb.getAttribute('data-addon-name') || '';
+            total += price;
+            addonsList.push({ name: name, price: price });
+          }
+        });
+
+        // UI Aktualisierungen
+        document.getElementById('summaryKitName').textContent = selectedKit.name;
+        document.getElementById('summaryKitPrice').textContent = selectedKit.price.toFixed(2).replace('.', ',') + ' EUR';
+
+        const addonsCont = document.getElementById('summaryAddonsContainer');
+        addonsCont.innerHTML = '';
+        addonsList.forEach(function(addon) {
+          const row = document.createElement('div');
+          row.className = 'summary-row';
+          row.innerHTML = `<span>+ ${addon.name}</span><span class="mono">${addon.price.toFixed(2).replace('.', ',')} EUR</span>`;
+          addonsCont.appendChild(row);
+        });
+
+        const totalFormatted = total.toFixed(2).replace('.', ',') + ' EUR';
+        document.getElementById('summaryTotal').textContent = totalFormatted;
+        document.getElementById('btnAmount').textContent = totalFormatted;
+
+        // PayPal.Me Fallback Link
+        const paypalMeLink = document.getElementById('paypalMeLink');
+        const paypalMeAmount = document.getElementById('paypalMeAmount');
+        if (paypalMeLink && paypalMeAmount) {
+          paypalMeAmount.textContent = Math.round(total);
+          paypalMeLink.href = 'https://www.paypal.me/sagaporsche45/' + Math.round(total);
+        }
+
+        // Hidden Form Sync
+        let fullItemName = selectedKit.name + ' (Vorbestellung Charge 2026-Q4)';
+        if (addonsList.length > 0) {
+          fullItemName += ' inkl. ' + addonsList.map(a => a.name).join(', ');
+        }
+        document.getElementById('ppItemName').value = fullItemName.substring(0, 127);
+        document.getElementById('ppItemNumber').value = selectedKit.id.toUpperCase() + '-PREORDER';
+        document.getElementById('ppAmount').value = total.toFixed(2);
+      }
+
+      // Kit Klick Event Handler
+      kitCards.forEach(function(card) {
+        card.addEventListener('click', function() {
+          kitCards.forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          selectedKit = {
+            id: this.getAttribute('data-kit-id') || 'kit1',
+            name: this.getAttribute('data-kit-name') || '',
+            price: parseFloat(this.getAttribute('data-kit-price')) || 270
+          };
+          updateCalculation();
+        });
+      });
+
+      // Addon Event Handler
+      addonCheckboxes.forEach(function(cb) {
+        cb.addEventListener('change', updateCalculation);
+      });
+
+      // Initiale Berechnung ausführen
+      updateCalculation();
+
+      // Submit Handler für die Bestellung
+      window.handleOrderSubmit = function(e) {
+        e.preventDefault();
+
+        // Validierung
+        const firstName = document.getElementById('custFirstName').value.trim();
+        const lastName = document.getElementById('custLastName').value.trim();
+        const email = document.getElementById('custEmail').value.trim();
+        const street = document.getElementById('custStreet').value.trim();
+        const city = document.getElementById('custCity').value.trim();
+        const country = document.getElementById('custCountry').value;
+        const bike = document.getElementById('custBikeDetails').value.trim();
+        const acceptPre = document.getElementById('acceptPreorder').checked;
+        const acceptPriv = document.getElementById('acceptPrivacy').checked;
+
+        if (!firstName || !lastName || !email || !street || !city || !acceptPre || !acceptPriv) {
+          alert('Bitte fülle alle Pflichtfelder aus und bestätige die Vorbestell-Bedingungen.');
+          return false;
+        }
+
+        // Hidden PayPal Formular mit Kundendaten anreichern
+        const curUrl = window.location.origin + window.location.pathname;
+        document.getElementById('ppFirstName').value = firstName;
+        document.getElementById('ppLastName').value = lastName;
+        document.getElementById('ppAddress1').value = street;
+        document.getElementById('ppCity').value = city;
+        document.getElementById('ppCountry').value = country;
+        document.getElementById('ppEmail').value = email;
+        document.getElementById('ppCustom').value = JSON.stringify({
+          phone: document.getElementById('custPhone').value.trim(),
+          bike: bike
+        }).substring(0, 255);
+        document.getElementById('ppReturn').value = curUrl + '?order=success';
+        document.getElementById('ppCancelReturn').value = curUrl + '?order=cancelled';
+
+        // Bestätigung & Weiterleitung zu PayPal
+        const submitBtn = document.getElementById('btnSubmitPayPal');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Verbindung zu PayPal (sagaporsche45@gmail.com) wird hergestellt...</span>';
+
+        // PayPal Formular absenden
+        document.getElementById('hiddenPayPalForm').submit();
+        return false;
+      };
+    })();
+  </script>
+</body>
+</html>

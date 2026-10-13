@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SaGa Labs METISA // Software Suite &amp; Telemetrie-Architektur</title>
+  <meta name="description" content="SaGa Labs METISA Software Suite: Browserbasierter Konfigurator, FOC Kennfeld-Kalibrierung, Android HMI Cockpit und deterministische Telemetrie.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="site-brand" aria-label="SAGA LABS | METISA Startseite">
+        <img src="assets/logo_full.png" alt="SAGA LABS | METISA" class="brand-logo-img">
+      </a>
+
+      <nav class="main-nav" aria-label="Desktop Hauptnavigation">
+        <a href="produkt.html" class="nav-link">Steuergerät</a>
+        <a href="software.html" class="nav-link active">Software &amp; App</a>
+        <a href="support.html" class="nav-link">Support</a>
+        <a href="index.html#fahrzeugklassen" class="nav-link">Fahrzeugklassen</a>
+        <a href="shop.html" class="nav-link">Shop</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="shop.html" class="btn-header-order">JETZT BESTELLEN (ab 270 €)</a>
+        <button class="nav-menu-toggle" id="navMenuBtn" aria-label="Menü öffnen" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Drawer Backdrop -->
+  <div class="nav-drawer-backdrop" id="navDrawerBackdrop"></div>
+
+  <!-- Navigation Drawer (Sämtliche Navigation) -->
+  <aside class="nav-drawer" id="navDrawer" aria-label="Hauptnavigation">
+    <div class="nav-drawer-header">
+      <div class="nav-drawer-brand">
+        <img src="assets/logo_full.png" alt="SAGA LABS | METISA" class="drawer-logo-img">
+      </div>
+      <button class="nav-drawer-close" id="navDrawerClose" aria-label="Menü schließen">&times;</button>
+    </div>
+    <div class="nav-drawer-body">
+      <div class="nav-drawer-group-title">// NAVIGATION &amp; SYSTEM</div>
+      <nav class="nav-drawer-links">
+        <a href="index.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Startseite</span>
+        </a>
+        <a href="produkt.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Steuergerät &amp; Hardware</span>
+        </a>
+        <a href="software.html" class="drawer-link active">
+          <span class="link-bullet">▸</span>
+          <span>Software &amp; Cockpit App</span>
+        </a>
+        <a href="support.html" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Support &amp; Schaltpläne</span>
+        </a>
+        <a href="index.html#fahrzeugklassen" class="drawer-link">
+          <span class="link-bullet">▸</span>
+          <span>Fahrzeugklassen &amp; PIN-Levels</span>
+        </a>
+        <a href="shop.html" class="drawer-link highlight-shop">
+          <span class="link-bullet">★</span>
+          <span>Shop &amp; Vorbestellung</span>
+          <span class="drawer-badge">Charge 2026</span>
+        </a>
+      </nav>
+
+      <div class="nav-drawer-group-title" style="margin-top: 24px;">// METISA SUITE (CLOUD &amp; USB)</div>
+      <div class="drawer-suite-card">
+        <div class="drawer-suite-info">
+          <h4>METISA Live Calibration Suite</h4>
+          <p>Browserbasierter Web-Serial Konfigurator für USB, Bluetooth &amp; Wi-Fi.</p>
+        </div>
+        <a href="configurator/index.html" onclick="openLiveSuite(event)" class="btn-drawer-suite">
+          ⚡ SUITE IM NEUEN FENSTER ÖFFNEN ↗
+        </a>
+        <div class="drawer-sublinks">
+          <a href="unlock_portal.html" target="_blank" rel="noopener">Dyno Portal ↗</a>
+          <span>•</span>
+          <a href="wiki.html" target="_blank" rel="noopener">Engineering Wiki ↗</a>
+        </div>
+      </div>
+
+      <div class="nav-drawer-group-title" style="margin-top: 24px;">// HARDWARE STATUS</div>
+      <div class="drawer-status-box">
+        <div class="status-row">
+          <span class="status-label">Lagerbestand:</span>
+          <span class="status-val amber">Vorbestellung aktiv</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Auslieferung:</span>
+          <span class="status-val green">Charge Q4 / 2026</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Käuferschutz:</span>
+          <span class="status-val mono">PayPal Verified</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-drawer-footer">
+      <a href="impressum.html" class="drawer-footer-link">Impressum &amp; Datenschutz</a>
+      <span>&copy; 2026 SaGa Labs®</span>
+    </div>
+  </aside>
+
+  <main class="container">
+    <section class="subpage-hero">
+      <span class="subpage-badge">DIGITALE TOOLCHAIN &amp; HMI</span>
+      <h1 class="subpage-title">METISA Software Suite &amp; Telemetrie</h1>
+      <p class="subpage-desc">
+        Umfassendes Ökosystem zur Kalibrierung, Diagnose und Echtzeit-Visualisierung. Plattformübergreifend im Browser, auf dem Prüfstands-Rechner oder mobil via Android HMI.
+      </p>
+    </section>
+
+    <!-- 3 Core Software Pillars -->
+    <div class="subpage-grid">
+      <div class="subpage-box">
+        <h3>
+          <svg class="vector-icon text-cyber" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Web-Konfigurator, Flasher &amp; Sync
+        </h3>
+        <p>
+          Reaktive Browser-Toolchain mit nativer Web Serial USB-Schnittstelle. Ermöglicht das bidirektionale Auslesen und Schreiben der Konfiguration (EEPROM-Sync), das direkte Flashen von Firmware (.hex / .bin via STK500v1) im Browser und den Export von maschinenspezifischen C++ <code>config.h</code> Headern.
+        </p>
+        <div style="margin-top: auto; padding-top: 16px;">
+          <a href="configurator/" target="_blank" rel="noopener" class="btn-primary" style="width: 100%; justify-content: center;">
+            <span>Konfigurator &amp; Flasher öffnen &nearr;</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="subpage-box">
+        <h3>
+          <svg class="vector-icon text-cyber" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Android HMI Cockpit &amp; Telemetrie
+        </h3>
+        <p>
+          Mobilfunk- und BLE-gestützte Dashboard-Anwendung. Dient als vollwertiger Display-Ersatz mit 270°-Tachometer, zyklischer Batteriezustandsüberwachung (SOH/SOC), Fahrstufen-Umschaltung und konfigurierbaren Soft-Keys.
+        </p>
+        <div style="margin-top: auto; padding-top: 16px;">
+          <a href="#cockpit-demo" class="btn-secondary" style="width: 100%; justify-content: center;">
+            <span>HMI Vorschau anzeigen</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="subpage-box">
+        <h3>
+          <svg class="vector-icon text-cyber" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Dual-Mode Autorisierungs-Portal
+        </h3>
+        <p>
+          Zweistufiges regulatorisches Freischaltportal: 1. E-Scooter (eKFV) Klassen-PIN für 20 [km/h] Daumengas ohne PAS-Zwang (<strong>100% Garantie &amp; Gewährleistung intakt</strong>). 2. Master-PIN (<code>210286</code>) für ungedrosselte Prüfstands- &amp; Rennstrecken-Setups (bis 99 [km/h], 3000 [W]) mit digitalem Garantieverzicht.
+        </p>
+        <div style="margin-top: auto; padding-top: 16px;">
+          <a href="unlock_portal.html" target="_blank" rel="noopener" class="btn-secondary" style="width: 100%; justify-content: center;">
+            <span>Freischalt-Portal &nearr;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Simulator -->
+    <section class="section-wrapper" id="cockpit-demo">
+      <div class="section-header">
+        <div class="section-category">LIVE COCKPIT ENGINE</div>
+        <h2 class="section-title">Echtzeit-Telemetrie &amp; Messdaten-Erfassung</h2>
+        <p class="section-subtitle">
+          Hochfrequente UART/BLE-Übertragung im SaGa Labs Orbit Motorsport-Design. Alle Werte mit exakten physikalischen Einheiten.
+        </p>
+      </div>
+
+      <div class="showcase-container">
+        <div class="showcase-pane active" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 32px;">
+          <div class="gauge-visual-wrap">
+            <svg class="gauge-svg" viewBox="0 0 240 240">
+              <circle class="gauge-track" cx="120" cy="120" r="95" stroke-dasharray="447.6 596.9" stroke-dashoffset="0" transform="rotate(135 120 120)"/>
+              <circle class="gauge-active" id="liveArc" cx="120" cy="120" r="95" stroke-dasharray="245 596.9" stroke-dashoffset="0" transform="rotate(135 120 120)"/>
+            </svg>
+            <div class="gauge-inner-center">
+              <div class="gauge-center-val" id="liveSpeed">32.0</div>
+              <div class="gauge-center-unit">[km/h]</div>
+            </div>
+          </div>
+
+          <div class="metrics-quad-grid">
+            <div class="metric-tile">
+              <span class="m-label">DC Bus Spannung</span>
+              <span class="m-value">54.2 <span class="unit">[V]</span></span>
+            </div>
+            <div class="metric-tile">
+              <span class="m-label">Phasenstrom Ist</span>
+              <span class="m-value">18.4 <span class="unit">[A]</span></span>
+            </div>
+            <div class="metric-tile">
+              <span class="m-label">Mechanische Leistung</span>
+              <span class="m-value text-cyber">997 <span class="unit">[W]</span></span>
+            </div>
+            <div class="metric-tile">
+              <span class="m-label">Tretkurbel-Frequenz</span>
+              <span class="m-value">78 <span class="unit">[RPM]</span></span>
+            </div>
+            <div class="metric-tile">
+              <span class="m-label">Drehmoment Tretlager</span>
+              <span class="m-value">48.0 <span class="unit">[Nm]</span></span>
+            </div>
+            <div class="metric-tile">
+              <span class="m-label">Inverter Temperatur</span>
+              <span class="m-value">42.5 <span class="unit">[°C]</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Communication Protocols Table -->
+    <section class="section-wrapper" style="border-bottom: none;">
+      <div class="section-header">
+        <div class="section-category">PROTOKOLL-STACK</div>
+        <h2 class="section-title">Unterstützte Display- &amp; Bus-Protokolle</h2>
+      </div>
+
+      <div class="specs-table-container">
+        <table class="specs-table">
+          <thead>
+            <tr>
+              <th>Protokoll</th>
+              <th>Schnittstelle</th>
+              <th>Baudrate</th>
+              <th style="text-align: right;">Funktionsumfang</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-param">Metisa Orbit Binary Telemetry</td>
+              <td class="col-val">UART / BLE</td>
+              <td class="col-val">115200 Baud</td>
+              <td class="col-unit">Vollständiger Rohdaten-Stream [50 Hz]</td>
+            </tr>
+            <tr>
+              <td class="col-param">King-Meter KM5s / 618U / 901U</td>
+              <td class="col-val">UART</td>
+              <td class="col-val">9600 Baud</td>
+              <td class="col-unit">Fahrstufen, Geschwindigkeit, Licht</td>
+            </tr>
+            <tr>
+              <td class="col-param">Bafang C961 / C965</td>
+              <td class="col-val">UART</td>
+              <td class="col-val">9600 Baud</td>
+              <td class="col-unit">Display-Status &amp; Tasten-Rückmeldung</td>
+            </tr>
+            <tr>
+              <td class="col-param">CAN 2.0B Motorsport Standard</td>
+              <td class="col-val">CAN Transceiver</td>
+              <td class="col-val">500 kbit/s</td>
+              <td class="col-unit">BMS-Telemetrie &amp; Datenlogger-Broadcast</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-meta-bar">
+      <div>&copy; 2026 Benjamin Everts, Bielefeld / SaGa Labs&reg;. Alle Rechte vorbehalten.</div>
+      <div class="footer-hash">METISA-ORBIT-2.0 // SOFTWARE ARCHITECTURE</div>
+    </div>
+  </footer>
+
+  <script>
+    function openLiveSuite(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const w = Math.min(1380, Math.floor(window.screen.availWidth * 0.92));
+      const h = Math.min(880, Math.floor(window.screen.availHeight * 0.90));
+      const l = Math.floor((window.screen.availWidth - w) / 2);
+      const t = Math.floor((window.screen.availHeight - h) / 2);
+      window.open('configurator/index.html', 'MetisaLiveSuiteAppWindow',
+        `width=${w},height=${h},left=${l},top=${t},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`);
+      return false;
+    }
+
+    (function() {
+      const menuBtn = document.getElementById('navMenuBtn');
+      const drawer = document.getElementById('navDrawer');
+      const backdrop = document.getElementById('navDrawerBackdrop');
+      const closeBtn = document.getElementById('navDrawerClose');
+
+      function openMenu() {
+        if (!drawer) return;
+        drawer.classList.add('open');
+        if (backdrop) backdrop.classList.add('open');
+        if (menuBtn) {
+          menuBtn.classList.add('open');
+          menuBtn.setAttribute('aria-expanded', 'true');
+        }
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMenu() {
+        if (!drawer) return;
+        drawer.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+        if (menuBtn) {
+          menuBtn.classList.remove('open');
+          menuBtn.setAttribute('aria-expanded', 'false');
+        }
+        document.body.style.overflow = '';
+      }
+
+      if (menuBtn) {
+        menuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (drawer && drawer.classList.contains('open')) closeMenu();
+          else openMenu();
+        });
+      }
+
+      if (closeBtn) closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeMenu(); });
+      if (backdrop) backdrop.addEventListener('click', closeMenu);
+      if (drawer) {
+        drawer.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', closeMenu);
+        });
+      }
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+  </script>
+</body>
+</html>

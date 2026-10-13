@@ -28,3 +28,8 @@ CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
 Arduino_Pedelec_Controller/Arduino_Pedelec_Controller.pde
+
+# Repository restructure backups and imported source archives
+_backup/
+Homepage/
+*.zip
